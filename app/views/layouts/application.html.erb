@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#2F2F2F" />
+    <meta name="msapplication-TileColor" content="#2F2F2F" />
+    <meta name="apple-mobile-web-app-title" content="Veritas" />
+    <meta name="application-name" content="Veritas" />
+    <meta name="description" content="Central authentication microservice for all phish.directory services." />
+    <meta name="keywords" content="Veritas, phish.directory, phishing, phishing detection, phishing prevention" />
+    <meta name="author" content="phish.directory Team" />
+    <meta name="copyright" content="phish.directory Team" />
+    <%# <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="194x194" href="/favicon-194x194.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="manifest" href="/site.webmanifest" /> %>
+    <%# <meta name="msapplication-TileImage" content="/mstile-144x144.png" /> %>
+    <meta name="theme-color" content="#2F2F2F" />
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+
+    <title><%= content_for(:title) || "Veritas" %></title>
+    <title>
+      <%= yield(:title).concat(" ~") if content_for?(:title) %> Veritas
+    </title>
+
+    <link rel="canonical" href="https://veritas.phish.directory/" />
+
+    <%= yield :head %>
+
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
+    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%# Includes all stylesheet files in app/assets/stylesheets %>
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+    <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@4/dist/fp.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ua-parser-js@1.0.35/dist/ua-parser.min.js"></script>
+    <script src="https://unpkg.com/mapkick@0.2.6/dist/mapkick.bundle.js"></script>
+    <%= Sentry.get_trace_propagation_meta.html_safe %>
+    <script
+      src="https://js.sentry-cdn.com/f3324a4e0fd0f2d0802ab95547336c18.min.js"
+      crossorigin="anonymous"
+    ></script>
+
+    <style>
+    body {
+      background-image: url('<%= asset_path("frame.png") %>');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+    }
+
+
+    #staging-warning {
+  text-align: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 1rem;
+  background-color: #cf3a36;
+  color: white;
+  z-index: 1000;
+}
+
+  </style>
+    <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
+  </head>
+
+  <body>
+
+    <% if Rails.env.staging? %>
+    <%# add big warning to top of page %>
+    <div class="min-w-screen flex items-center justify-center">
+      <div id="staging-warning">
+        <button class="delete" onclick="(this.parentNode.remove())"></button>
+        This is the <b>STAGING</b> environment. Please <b>DO NOT USE for production</b>.
+      </div>
+    </div>
+    <% end %>
+
+    <% if impersonating? %>
+      <div class="bg-orange-500 text-white text-center py-2 px-4 flex items-center justify-between">
+        <div class="flex-1 text-center">
+          <strong>⚠️ IMPERSONATING:</strong> You are impersonating <%= current_user.full_name %> (<%= current_user.pd_id %>)
+          || ADMIN: <%= admin_user.username %>
+        </div>
+        <%= button_to "Stop Impersonating", stop_impersonating_admin_users_path,
+            method: :delete,
+            class: "bg-orange-600 hover:bg-orange-700 text-white px-4 py-1 rounded text-sm",
+            form: { class: "inline" } %>
+      </div>
+    <% end %>
+
+    <%= yield %>
+
+    <!-- Display flash messages -->
+    <%= render 'shared/flash' %>
+
+  </body>
+
+  <script>
+    console.log(`%c
+
+    |\   \\\\__     o
+    | \_/    o \    o
+    > _   (( <_  oo
+    | / \__+___/
+    |/     |/
+
+    Welcome to Veritas — the auth backbone of phish.directory
+
+    🔐 Centralized authentication for all phish.directory services
+
+    🤝 Built for devs, by devs!
+
+    🌱 Want to contribute? Start here:
+
+     → GitHub: https://github.com/phishdotdirectory/veritas
+
+     → Phish Directory Issue Board (all repos): https://issue-board.phish.directory
+    `, 'color: #2F2F2F; font-weight: bold;');
+  </script>
+
+</html>

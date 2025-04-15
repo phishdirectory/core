@@ -1,0 +1,36 @@
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: veritas_${RAILS_ENV}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis-data:/data
+
+  web:
+    image: veritas:local
+    # image: ghcr.io/phishdirectory/veritas:latest
+    environment:
+      RAILS_ENV: ${RAILS_ENV}
+      RAILS_MASTER_KEY: ${RAILS_MASTER_KEY}
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_URL: postgres://${DATABASE_USER}:${DATABASE_PASSWORD}@db:5432/veritas_${RAILS_ENV}
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - db
+      - redis
+    ports:
+      - "80:3000"
+
+volumes:
+  db_data:
+  redis-data:

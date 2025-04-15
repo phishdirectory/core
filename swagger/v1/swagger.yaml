@@ -1,0 +1,79 @@
+---
+openapi: 3.0.1
+info:
+  title: Veritas API
+  version: v1
+paths:
+  "/api/v1/authenticate":
+    post:
+      summary: Authenticate a user
+      tags:
+      - Authentication
+      parameters:
+      - name: X-Api-Key
+        in: header
+        required: true
+        description: API key
+        schema:
+          type: string
+      responses:
+        '200':
+          description: authenticated
+        '400':
+          description: invalid credentials format
+        '401':
+          description: unauthorized
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                credentials:
+                  type: string
+              required:
+              - credentials
+  "/api/v1/health":
+    get:
+      summary: Health check
+      tags:
+      - Health
+      responses:
+        '200':
+          description: ok
+  "/api/v1/users":
+    post:
+      summary: Creates a user
+      tags:
+      - Users
+      parameters:
+      - name: X-Api-Key
+        in: header
+        required: true
+        description: API key
+        schema:
+          type: string
+      responses:
+        '200':
+          description: user created
+        '400':
+          description: invalid or missing hashed data
+        '422':
+          description: email already taken
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                hashed_data:
+                  type: string
+              required:
+              - hashed_data
+servers:
+- description: Production
+  url: https://veritas.phish.directory/api/v1
+- description: Staging
+  url: https://staging.veritas.phish.directory/api/v1
+- description: Development
+  url: http://localhost:3000/api/v1

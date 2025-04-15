@@ -1,0 +1,202 @@
+<!-- app/views/home/index.html.erb -->
+<html lang="en">
+  <head>
+    <title>Veritas Authentication API</title>
+    <style>
+      body, html {
+        margin: 0;
+        padding: 0;
+        overflow: hidden; /* This prevents scrolling */
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        overflow-x: hidden;
+        position: relative;
+      }
+
+      .gradient-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to bottom,
+          rgba(255,255,255,0) 0%,
+          rgba(0,0,0,0.2) 100%);
+        z-index: -1;
+      }
+
+      .card-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+        position: relative;
+      }
+
+      .card {
+        background-color: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 800px;
+        padding: 40px;
+        text-align: center;
+      }
+
+        h1 {
+        font-size: 48px;
+        margin: 0 0 5px 0; /* Reduced bottom margin from 20px to 5px */
+        font-weight: 800;
+        color: #111;
+      }
+
+      h2 {
+        margin: 0 0 20px 0; /* Added top margin of 0 to keep it close to h1 */
+        font-weight: 600;
+        color: #333;
+      }
+
+      .description {
+        font-size: 18px;
+        line-height: 1.6;
+        color: #555;
+        max-width: 700px;
+        margin: 0 auto 40px auto;
+      }
+
+      @media (max-width: 600px) {
+        .card {
+          padding: 30px 20px;
+        }
+
+        h1 {
+          font-size: 32px;
+        }
+
+        h2 {
+          font-size: 20px; /* Added responsive styling for h2 */
+        }
+
+        .description {
+          font-size: 16px;
+        }
+
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+      }
+
+      th {
+        background-color: #f2f2f2;
+      }
+    </style>
+  </head>
+  <body>
+      <% if Flipper.enabled?(:ui, current_user) %>
+
+        <div class="card-container">
+      <div class="card">
+        <p>Hi, and welcome to Veritas! Veritas is the central authentication service for phish.directory.</p>
+
+        <%# display roles %>
+      <table>
+        <thead>
+        <th>Flipper ID</th>
+        <th>Access Level</th>
+        <th>Is Staff</th>
+        <th>Is PD Dev</th>
+        </thead>
+        <tr>
+          <td><%= current_user.flipper_id %></td>
+          <td><%= current_user.access_level %></td>
+          <td><%= current_user.is_staff? ? "✅" : "❌" %></td>
+          <td><%= current_user.is_pd_dev? ? "✅" : "❌" %></td>
+        </tr>
+      </table>
+
+       <% if current_user&.admin? %>
+         <%= link_to "Admin Panel", admin_root_path,
+                     class: "text-white hover:text-gray-200 px-3 py-1.5 rounded-md bg-blue-600 text-sm transition-colors mr-2 inline-block text-decoration-none" %>
+       <% end %>
+
+       <%= link_to "Edit Profile", edit_profile_path,
+                   class: "text-white hover:text-gray-200 px-3 py-1.5 rounded-md bg-green-600 text-sm transition-colors mr-2 inline-block text-decoration-none" %>
+
+       <% if impersonating? %>
+         <%= button_to "Stop Impersonating", stop_impersonating_admin_users_path,
+                        method: :delete,
+                        form_class: "inline-block",
+                        class: "text-white hover:text-gray-200 px-3 py-1.5 rounded-md bg-orange-600 text-sm transition-colors border-0 cursor-pointer" %>
+       <% else %>
+         <%= button_to "Sign Out", logout_path,
+                        method: :delete,
+                        form_class: "inline-block",
+                        class: "text-white hover:text-gray-200 px-3 py-1.5 rounded-md bg-gray-700 text-sm transition-colors border-0 cursor-pointer" %>
+       <% end %>
+
+      </div>
+    </div>
+
+      <% else %>
+         <div class="card-container">
+      <div class="card">
+        <h1>Veritas</h1>
+        <h2>(Authentication API)</h2>
+
+        <p class="description">
+          Veritas is an authentication API service used by the phish.directory microservices. Currently,
+          there is no user interface - just a internal API! If you're a developer who needs help provisioning a service key for use, please reach out to Jasper via slack or email. If you're a user who has ended up here, that's a bit odd! Not to fear, go back to whatever directed you here, and if you keep ending up back here, please email <a href="mailto:support@phish.directory">support@phish.directory</a>
+        </p>
+
+        <%# display signed in user id %>
+        <% if current_user %>
+          <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+            <img src="<%= current_user.public_avatar_url(variant: :medium) %>"
+                 alt="<%= current_user.full_name %>'s avatar"
+                 style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-right: 15px; border: 2px solid #ddd;">
+            <div>
+              <p style="margin: 0; font-weight: bold;"><%= current_user.full_name %></p>
+              <p style="margin: 0; color: #666; font-size: 14px;">ID: <%= current_user.flipper_id %></p>
+            </div>
+          </div>
+
+          <% if current_user.admin? %>
+            <%= link_to "Admin Panel", admin_root_path,
+                        class: "text-white hover:text-gray-200 px-3 py-1.5 rounded-md bg-blue-600 text-sm transition-colors mr-2 inline-block text-decoration-none" %>
+          <% end %>
+
+          <% if Flipper.enabled?(:ui, current_user) %>
+            <%= link_to "Edit Profile", edit_profile_path,
+                        class: "text-white hover:text-gray-200 px-3 py-1.5 rounded-md bg-green-600 text-sm transition-colors mr-2 inline-block text-decoration-none" %>
+          <% end %>
+
+          <% if impersonating? %>
+            <%= button_to "Stop Impersonating", stop_impersonating_admin_users_path,
+                          method: :delete,
+                          form_class: "inline-block",
+                          class: "text-white hover:text-gray-200 px-3 py-1.5 mt-5 rounded-md bg-orange-600 text-sm transition-colors border-0 cursor-pointer" %>
+          <% else %>
+            <%= button_to "Sign Out", logout_path,
+                          method: :delete,
+                          form_class: "inline-block",
+                          class: "text-white hover:text-gray-200 px-3 py-1.5 mt-5 rounded-md bg-orange-600 text-sm transition-colors border-0 cursor-pointer" %>
+          <% end %>
+        <% else %>
+          <%= button_to "Login", login_path,
+                        method: :get,
+                        form_class: "inline-block",
+                        class: "text-white hover:text-gray-200 px-3 py-1.5 mt-5 rounded-md bg-gray-700 text-sm transition-colors border-0 cursor-pointer" %>
+        <% end %>
+      </div>
+    </div>
+      <% end %>
+  </body>
+</html>

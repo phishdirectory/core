@@ -1,0 +1,50 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 7 } %>
+  url: <%= ENV['DATABASE_URL'] %>
+
+development:
+  primary: &primary_development
+    <<: *default
+    database: veritas_development
+  queue:
+    <<: *primary_development
+    database: veritas_development_queue
+    migrations_paths: db/queue_migrate
+
+test:
+  primary: &primary_test
+    <<: *default
+    host: localhost
+    database: veritas_test
+  queue:
+    <<: *primary_test
+    host: localhost
+    database: veritas_test_queue
+    migrations_paths: db/queue_migrate
+
+production:
+  primary: &primary_production
+    <<: *default
+    host: db
+    database: veritas_production
+    username: <%= ENV['DATABASE_USER'] %>
+    password: <%= ENV['DATABASE_PASSWORD'] %>
+  queue:
+    <<: *primary_production
+    database: veritas_production_queue
+    migrations_paths: db/queue_migrate
+
+
+staging:
+  primary: &primary_staging
+    <<: *default
+    host: db
+    database: veritas_staging
+    username: <%= ENV['DATABASE_USER'] %>
+    password: <%= ENV['DATABASE_PASSWORD'] %>
+  queue:
+    <<: *primary_staging
+    database: veritas_staging_queue
+    migrations_paths: db/queue_migrate
