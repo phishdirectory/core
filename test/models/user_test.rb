@@ -6,8 +6,6 @@
 #
 #  id                       :bigint           not null, primary key
 #  access_level             :enum             default("user"), not null
-#  confirmation_sent_at     :datetime
-#  confirmation_token       :string
 #  email                    :string           not null
 #  email_verified           :boolean          default(FALSE)
 #  email_verified_at        :datetime
@@ -15,15 +13,12 @@
 #  last_name                :string           not null
 #  locked_at                :datetime
 #  magic_link_expires_at    :datetime
-#  magic_link_sent_at       :datetime
 #  magic_link_token         :string
+#  magic_link_token_sent_at :datetime
 #  magic_link_used_at       :datetime
-#  password_digest          :string
 #  pd_dev                   :boolean          default(FALSE), not null
 #  pretend_is_not_admin     :boolean          default(FALSE), not null
-#  services_used            :integer          default([]), is an Array
 #  session_duration_seconds :integer          default(2592000), not null
-#  signup_service           :integer
 #  staff                    :boolean          default(FALSE), not null
 #  status                   :enum             default("active"), not null
 #  username                 :string           not null
@@ -33,10 +28,9 @@
 #
 # Indexes
 #
-#  index_users_on_confirmation_token  (confirmation_token) UNIQUE
-#  index_users_on_email               (email) UNIQUE
-#  index_users_on_magic_link_token    (magic_link_token) UNIQUE
-#  index_users_on_pd_id               (pd_id) UNIQUE
+#  index_users_on_email             (email) UNIQUE
+#  index_users_on_magic_link_token  (magic_link_token) UNIQUE
+#  index_users_on_pd_id             (pd_id) UNIQUE
 #
 require "test_helper"
 

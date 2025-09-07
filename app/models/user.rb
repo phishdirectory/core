@@ -6,8 +6,6 @@
 #
 #  id                       :bigint           not null, primary key
 #  access_level             :enum             default("user"), not null
-#  confirmation_sent_at     :datetime
-#  confirmation_token       :string
 #  email                    :string           not null
 #  email_verified           :boolean          default(FALSE)
 #  email_verified_at        :datetime
@@ -15,15 +13,12 @@
 #  last_name                :string           not null
 #  locked_at                :datetime
 #  magic_link_expires_at    :datetime
-#  magic_link_sent_at       :datetime
 #  magic_link_token         :string
+#  magic_link_token_sent_at :datetime
 #  magic_link_used_at       :datetime
-#  password_digest          :string
 #  pd_dev                   :boolean          default(FALSE), not null
 #  pretend_is_not_admin     :boolean          default(FALSE), not null
-#  services_used            :integer          default([]), is an Array
 #  session_duration_seconds :integer          default(2592000), not null
-#  signup_service           :integer
 #  staff                    :boolean          default(FALSE), not null
 #  status                   :enum             default("active"), not null
 #  username                 :string           not null
@@ -33,10 +28,9 @@
 #
 # Indexes
 #
-#  index_users_on_confirmation_token  (confirmation_token) UNIQUE
-#  index_users_on_email               (email) UNIQUE
-#  index_users_on_magic_link_token    (magic_link_token) UNIQUE
-#  index_users_on_pd_id               (pd_id) UNIQUE
+#  index_users_on_email             (email) UNIQUE
+#  index_users_on_magic_link_token  (magic_link_token) UNIQUE
+#  index_users_on_pd_id             (pd_id) UNIQUE
 #
 class User < ApplicationRecord
   include AASM
@@ -64,7 +58,6 @@ class User < ApplicationRecord
 
   before_create :set_username
   after_update :notify_role_changes, if: :saved_change_to_access_level?
-  after_create :send_confirmation_email
 
   scope :verified, -> { where(email_verified: true) }
   scope :unverified, -> { where(email_verified: false) }
@@ -97,7 +90,6 @@ class User < ApplicationRecord
                             size: { less_than: 5.megabytes, message: "must be less than 5MB" }
 
   before_validation :generate_pd_id, on: :create
-  before_create :generate_confirmation_token
 
   # State machine for user status
   aasm column: :status do
@@ -190,28 +182,24 @@ class User < ApplicationRecord
   def verify_email
     self.email_verified = true
     self.email_verified_at = Time.current
-    self.confirmation_token = nil
     save!
   end
 
   def unverify_email
     self.email_verified = false
     self.email_verified_at = nil
-    generate_confirmation_token
     save!
   end
 
   def send_confirmation_email
-    generate_confirmation_token if confirmation_token.blank?
-    self.confirmation_sent_at = Time.current
-    save!
-    EmailConfirmationJob.perform_later(self)
+    # Email verification is now handled via magic links
+    # This method is kept for backward compatibility but does nothing
   end
 
   def generate_magic_link_token
     self.magic_link_token = SecureRandom.urlsafe_base64(32)
     self.magic_link_expires_at = 15.minutes.from_now
-    self.magic_link_sent_at = Time.current
+    self.magic_link_token_sent_at = Time.current
     self.magic_link_used_at = nil
     save!
   end
@@ -237,7 +225,8 @@ class User < ApplicationRecord
   end
 
   def confirmation_period_valid?
-    confirmation_sent_at && confirmation_sent_at > 5.minutes.ago
+    # Email confirmation is no longer used - magic links are used instead
+    false
   end
 
   def full_name
@@ -470,8 +459,5 @@ class User < ApplicationRecord
     self.pd_id ||= "PDU#{numeric_first}#{remaining_chars}"
   end
 
-  def generate_confirmation_token
-    self.confirmation_token = SecureRandom.urlsafe_base64(32)
-  end
 
 end

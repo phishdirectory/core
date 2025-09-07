@@ -16,8 +16,6 @@ puts "Seeding data..."
 User.find_or_create_by!(email: "internal+owner@phish.directory") do |user|
   user.first_name = "Internal"
   user.last_name = "Owner"
-  user.password = Rails.application.credentials.dig(:seedPass, :owner)
-  user.password_confirmation = Rails.application.credentials.dig(:seedPass, :owner)
   user.access_level = "owner"
   user.status = "active"
   user.email_verified = true
@@ -29,8 +27,6 @@ end
 User.find_or_create_by!(email: "jasper.mayone@phish.directory") do |user|
   user.first_name = "Jasper"
   user.last_name = "Mayone"
-  user.password = Rails.application.credentials.dig(:seedPass, :jasper)
-  user.password_confirmation = Rails.application.credentials.dig(:seedPass, :jasper)
   user.access_level = "owner"
   user.status = "active"
   user.email_verified = true
@@ -43,8 +39,6 @@ end
 User.find_or_create_by!(email: "internal+superadmin@phish.directory") do |user|
   user.first_name = "Internal"
   user.last_name = "Superadmin"
-  user.password = Rails.application.credentials.dig(:seedPass, :superadmin)
-  user.password_confirmation = Rails.application.credentials.dig(:seedPass, :superadmin)
   user.access_level = "superadmin"
   user.status = "active"
   user.email_verified = true
@@ -56,8 +50,6 @@ end
 User.find_or_create_by!(email: "internal+admin@phish.directory") do |user|
   user.first_name = "Internal"
   user.last_name = "Admin"
-  user.password = Rails.application.credentials.dig(:seedPass, :admin)
-  user.password_confirmation = Rails.application.credentials.dig(:seedPass, :admin)
   user.access_level = "admin"
   user.status = "active"
   user.email_verified = true
@@ -70,8 +62,6 @@ end
 User.find_or_create_by!(email: "internal+trusted@phish.directory") do |user|
   user.first_name = "Internal"
   user.last_name = "Trusted"
-  user.password = Rails.application.credentials.dig(:seedPass, :trusted)
-  user.password_confirmation = Rails.application.credentials.dig(:seedPass, :trusted)
   user.access_level = "trusted"
   user.status = "active"
   user.email_verified = true
@@ -83,8 +73,6 @@ end
 User.find_or_create_by!(email: "internal+user@phish.directory") do |user|
   user.first_name = "Internal"
   user.last_name = "User"
-  user.password = Rails.application.credentials.dig(:seedPass, :user)
-  user.password_confirmation = Rails.application.credentials.dig(:seedPass, :user)
   user.access_level = "user"
   user.status = "active"
   user.email_verified = true

@@ -6,20 +6,13 @@
   <component name="ChangeListManager">
     <list default="true" id="a2363c8b-6645-4129-807f-9beda4c8f90e" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/controllers/users_controller.rb" beforeDir="false" afterPath="$PROJECT_DIR$/app/controllers/users_controller.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/javascript/controllers/password_controller.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/assets/builds/tailwind.css" beforeDir="false" afterPath="$PROJECT_DIR$/app/assets/builds/tailwind.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/javascript/controllers/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/javascript/controllers/index.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/models/user.rb" beforeDir="false" afterPath="$PROJECT_DIR$/app/models/user.rb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/models/user/seen_at_history.rb" beforeDir="false" afterPath="$PROJECT_DIR$/app/models/user/seen_at_history.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/views/users/_signup_form.html.erb" beforeDir="false" afterPath="$PROJECT_DIR$/app/views/users/_signup_form.html.erb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/routes.rb" beforeDir="false" afterPath="$PROJECT_DIR$/config/routes.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20250503154645_create_users.rb" beforeDir="false" afterPath="$PROJECT_DIR$/db/migrate/20250503154645_create_users.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20250602153223_add_is_staff.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20250603022849_add_user_data.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20250603201640_add_username_to_users.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20250608210947_add_confirmation_token_to_users.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20250615190334_add_magic_link_token_to_users.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20250907213531_remove_password_requirement.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/schema.rb" beforeDir="false" afterPath="$PROJECT_DIR$/db/schema.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/credentials.yml.enc" beforeDir="false" afterPath="$PROJECT_DIR$/config/credentials.yml.enc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/environments/development.rb" beforeDir="false" afterPath="$PROJECT_DIR$/config/environments/development.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/seeds.rb" beforeDir="false" afterPath="$PROJECT_DIR$/db/seeds.rb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/test/fixtures/users.yml" beforeDir="false" afterPath="$PROJECT_DIR$/test/fixtures/users.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/test/models/user_test.rb" beforeDir="false" afterPath="$PROJECT_DIR$/test/models/user_test.rb" afterDir="false" />
     </list>
@@ -163,7 +156,7 @@
       <option name="presentableId" value="Default" />
       <updated>1757279721176</updated>
       <workItem from="1757279722213" duration="4000" />
-      <workItem from="1757280035347" duration="1653000" />
+      <workItem from="1757280035347" duration="3913000" />
     </task>
     <servers />
   </component>
