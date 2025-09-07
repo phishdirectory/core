@@ -6,7 +6,6 @@
 #
 #  id                       :bigint           not null, primary key
 #  access_level             :enum             default("user"), not null
-#  api_access_level         :enum             default("user"), not null
 #  confirmation_sent_at     :datetime
 #  confirmation_token       :string
 #  email                    :string           not null
@@ -61,14 +60,7 @@ class User < ApplicationRecord
 
   # Define enums for all access level fields - using string values to match database native enums
   enum :access_level, ACCESS_LEVELS.index_by(&:itself), scopes: false, default: :user # global access level
-  enum :api_access_level, ACCESS_LEVELS.index_by(&:itself), scopes: false, default: :user, prefix: :api # access level
 
-  # Use virtual attributes to track which fields should be synced with global
-  attr_accessor :api_access_level_synced
-
-  # Callbacks to handle syncing
-  before_create :set_default_access_levels
-  before_save :sync_access_levels
   before_create :set_username
   after_update :notify_role_changes, if: :saved_change_to_access_level?
   after_create :send_confirmation_email
@@ -481,35 +473,6 @@ class User < ApplicationRecord
   def ops_new_user
     NotifyOpsOnNewUserJob.perform_later(self)
   end
-
-  def notify_role_changes
-    old_access_level = saved_change_to_access_level[0] || "user"
-    new_access_level = saved_change_to_access_level[1] || "user"
-
-    WebhookService.notify_user_role_changed(pd_id, new_access_level, old_access_level)
-  end
-
-  def set_default_access_levels
-    # Initialize tracking attributes
-    self.api_access_level_synced = true
-
-    # No need to set access_level_synced since access_level is the primary field
-    # No need to set access_level = access_level as it would be redundant
-
-    # On creation, set API access level to match the primary
-    self.api_access_level = access_level if api_access_level_synced
-  end
-
-  # Sync access levels when primary changes
-  def sync_access_levels
-    return unless access_level_changed?
-
-    # No need to set access_level = access_level as it would be redundant
-
-    # Update API access level if it's synced
-    self.api_access_level = access_level if api_access_level_synced
-  end
-
 
   def generate_pd_id
     # Generates global unique ID for the user

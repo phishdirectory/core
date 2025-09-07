@@ -10,7 +10,6 @@
 #
 #  id                       :bigint           not null, primary key
 #  access_level             :enum             default("user"), not null
-#  api_access_level         :enum             default("user"), not null
 #  confirmation_sent_at     :datetime
 #  confirmation_token       :string
 #  email                    :string           not null
