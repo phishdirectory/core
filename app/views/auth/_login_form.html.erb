@@ -3,7 +3,7 @@
   <div class="w-full max-w-md bg-white/90 backdrop-blur-sm rounded-xl shadow-2xl border border-white/20 m-10">
     <!-- Card Header -->
     <div class="p-10 pb-6">
-      <h2 class="text-3xl font-bold text-gray-900 text-center">Veritas Dashboard</h2>
+      <h2 class="text-3xl font-bold text-gray-900 text-center">Phish Directory</h2>
       <p class="text-gray-600 text-center mt-2">Please sign in to your account.</p>
     </div>
 
@@ -40,7 +40,7 @@
 
       <!-- Dynamic Submit Button -->
       <div>
-        <%= f.submit "Continue", 
+        <%= f.submit "Continue",
             data: { login_form_target: "submitButton" },
             class: "w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer disabled:opacity-50 disabled:transform-none",
             disabled: true %>
@@ -48,7 +48,7 @@
 
       <div class="text-center">
         <p class="text-sm text-gray-600">
-          Don't have an account? 
+          Don't have an account?
           <%= link_to "Sign up", signup_path, class: "text-blue-600 hover:text-blue-800 font-medium" %>
         </p>
       </div>

@@ -7,10 +7,10 @@
     <meta name="mobile-web-app-capable" content="yes">
     <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#2F2F2F" />
     <meta name="msapplication-TileColor" content="#2F2F2F" />
-    <meta name="apple-mobile-web-app-title" content="Veritas" />
-    <meta name="application-name" content="Veritas" />
-    <meta name="description" content="Central authentication microservice for all phish.directory services." />
-    <meta name="keywords" content="Veritas, phish.directory, phishing, phishing detection, phishing prevention" />
+    <meta name="apple-mobile-web-app-title" content="Phish Directory" />
+    <meta name="application-name" content="Phish Directory" />
+    <%# <meta name="description" content="" /> %>
+    <meta name="keywords" content="phish.directory, phishing, phishing detection, phishing prevention" />
     <meta name="author" content="phish.directory Team" />
     <meta name="copyright" content="phish.directory Team" />
     <%# <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
@@ -23,12 +23,12 @@
     <meta name="theme-color" content="#2F2F2F" />
     <meta name="viewport" content="width=device-width,initial-scale=1">
 
-    <title><%= content_for(:title) || "Veritas" %></title>
+    <title><%= content_for(:title) || "Phish Directory" %></title>
     <title>
-      <%= yield(:title).concat(" ~") if content_for?(:title) %> Veritas
+      <%= yield(:title).concat(" ~") if content_for?(:title) %> Phish Directory
     </title>
 
-    <link rel="canonical" href="https://veritas.phish.directory/" />
+    <link rel="canonical" href="https://phish.directory/" />
 
     <%= yield :head %>
 
@@ -121,15 +121,15 @@
     | / \__+___/
     |/     |/
 
-    Welcome to Veritas — the auth backbone of phish.directory
+    Welcome to Phish Directory!
 
-    🔐 Centralized authentication for all phish.directory services
+    🔐 Infrastructure & tooling for phishing and scam protection
 
     🤝 Built for devs, by devs!
 
     🌱 Want to contribute? Start here:
 
-     → GitHub: https://github.com/phishdotdirectory/veritas
+     → GitHub: https://github.com/phishdotdirectory/core
 
      → Phish Directory Issue Board (all repos): https://issue-board.phish.directory
     `, 'color: #2F2F2F; font-weight: bold;');

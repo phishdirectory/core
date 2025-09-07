@@ -3,17 +3,17 @@
   <div class="w-full max-w-md bg-white/90 backdrop-blur-sm rounded-xl shadow-2xl border border-white/20 m-10">
     <!-- Card Header -->
     <div class="p-10 pb-6">
-      <h2 class="text-3xl font-bold text-gray-900 text-center">Veritas Dashboard</h2>
+      <h2 class="text-3xl font-bold text-gray-900 text-center">Phish Directory</h2>
       <p class="text-gray-600 text-center mt-2">Please sign in to your account.</p>
-      
+
       <div class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
         <p class="text-sm text-blue-800 text-center">
           <% if oauth_client_name.present? %>
-            The website you are trying to log in to (<strong><%= oauth_client_name %></strong>) is using the phish.directory authentication system. 
+            The website you are trying to log in to (<strong><%= oauth_client_name %></strong>) is using the phish.directory authentication system.
           <% else %>
-            The website you are trying to log in to is using the phish.directory authentication system. 
+            The website you are trying to log in to is using the phish.directory authentication system.
           <% end %>
-          In this system you create a central account that is used to log into phish.directory services. 
+          In this system you create a central account that is used to log into phish.directory services.
           Once you are logged into this account, you will automatically be logged in to the associated phish.directory services.
         </p>
       </div>
@@ -42,7 +42,7 @@
 
       <div class="text-center">
         <p class="text-sm text-gray-600">
-          Don't have an account? 
+          Don't have an account?
           <%= link_to "Sign up", signup_path, class: "text-blue-600 hover:text-blue-800 font-medium" %>
         </p>
       </div>

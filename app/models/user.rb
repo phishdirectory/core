@@ -47,7 +47,6 @@ class User < ApplicationRecord
   end
 
   has_paper_trail
-  has_secure_password
 
   has_many :visits, class_name: "Ahoy::Visit", dependent: :destroy
   has_many :user_sessions, class_name: "User::Session", dependent: :destroy
@@ -84,12 +83,6 @@ class User < ApplicationRecord
   validates_email_format_of :email
   validates :email, undisposable: { message: "Sorry, but we do not accept disposable email providers." }
   normalizes :email, with: ->(email) { email.strip.downcase }
-  validates :password, presence: true, length: { minimum: 8 }, if: lambda {
-    new_record? || password.present?
-  }
-  validate :password_complexity, if: lambda {
-    new_record? || password.present?
-  }
   validates :pd_id, presence: true, uniqueness: true, length: { is: 11 }, format: {
     # format is PDU{digit}{7 alphanumeric characters}
     with: /\APDU\d[a-zA-Z0-9]{7}\z/,
@@ -183,9 +176,6 @@ class User < ApplicationRecord
     pd_dev
   end
 
-  def password_login_enabled?
-    Flipper.enabled?(:password_login, self)
-  end
 
   def can_authenticate?
     active? && !locked?
@@ -390,11 +380,11 @@ class User < ApplicationRecord
   def url_options
     case Rails.env
     when "development"
-      { host: "localhost", port: 3000, protocol: "http" }
+      { host: "core.pd.local", port: 3000, protocol: "http" }
     when "staging"
-      { host: "staging.veritas.phish.directory", protocol: "https" }
+      { host: "staging.phish.directory", protocol: "https" }
     when "production"
-      { host: "veritas.phish.directory", protocol: "https" }
+      { host: "phish.directory", protocol: "https" }
     else
       { host: "localhost", port: 3000, protocol: "http" }
     end
@@ -453,14 +443,6 @@ class User < ApplicationRecord
 
   private
 
-  def password_complexity
-    return if password.blank?
-
-    errors.add(:password, "must contain at least one uppercase letter") unless password.match(/[A-Z]/)
-    errors.add(:password, "must contain at least one lowercase letter") unless password.match(/[a-z]/)
-    errors.add(:password, "must contain at least one number") unless password.match(/\d/)
-    errors.add(:password, "must contain at least one special character (!@#$%^&*()_+-=[]{}|;:,.<>?)") unless password.match(/[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/)
-  end
 
   def invite_to_slack
     InviteToSlackJob.perform_later(self.email)

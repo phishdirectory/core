@@ -26,7 +26,7 @@ class DeliverWebhookJob < ApplicationJob
         req.headers["Content-Type"] = "application/json"
         req.headers["X-Webhook-Signature"] = signature
         req.headers["X-Webhook-Event"] = payload[:event]
-        req.headers["User-Agent"] = "Veritas-Webhook/#{Veritas::VERSION}"
+        req.headers["User-Agent"] = "PhishDirectory/#{PhishDirectory::VERSION}"
         req.body = payload.to_json
       end
 
