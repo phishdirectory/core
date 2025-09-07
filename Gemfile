@@ -8,7 +8,7 @@ ruby File.read(File.join(File.dirname(__FILE__), ".ruby-version")).strip
 # CORE RAILS AND PRIMARY DEPENDENCIES
 ###############################################################################
 gem "rails", "~> 8.0.2"
-gem "pg", "~> 1.5", ">= 1.5.9"           # PostgreSQL database
+gem "pg", "~> 1.6"                     # PostgreSQL database
 gem "puma", ">= 5.0"                     # Web server
 gem "bootsnap", require: false           # Reduces boot times through caching
 gem "kamal", require: false              # Docker container deployment
