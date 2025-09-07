@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#2F2F2F" />
+    <meta name="msapplication-TileColor" content="#2F2F2F" />
+    <meta name="apple-mobile-web-app-title" content="Veritas Admin" />
+    <meta name="application-name" content="Veritas Admin" />
+    <meta name="description" content="Admin panel for Veritas authentication service." />
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+
+    <title><%= content_for(:title) || "Admin" %> - Veritas</title>
+
+    <%= yield :head %>
+
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+
+    <style>
+      body {
+        background-image: url('<%= asset_path('frame.png') %>');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        min-height: 100vh;
+      }
+
+      .gradient-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+      }
+
+      .admin-container {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 80vh;
+        padding: 10px;
+        position: relative;
+      }
+
+      .admin-card {
+        background: rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        width: 100%;
+        max-width: 1200px;
+        margin-top: 20px;
+        overflow: hidden;
+      }
+
+      .admin-header {
+        background: rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        color: #1f2937;
+        padding: 20px 30px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+      }
+
+      .admin-nav {
+        background: rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        border-bottom: 2px solid rgba(0, 0, 0, 0.15);
+        padding: 0;
+      }
+
+      .admin-nav-list {
+        display: flex;
+        flex-wrap: wrap;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .admin-nav-item {
+        margin: 0;
+        border-right: 2px solid rgba(177, 216, 218, 0.1);
+      }
+
+       .admin-nav-item:nth-child(2) {
+        border-right: 2px solid transparent;
+        border-color: rgba(82, 122, 154, 0.8);
+      }
+
+      .admin-nav-item:nth-child(4) {
+        border-right: 2px solid transparent;
+        border-color: rgba(82, 122, 154, 0.8);
+      }
+
+      .admin-nav-item:last-child {
+        border-right: 2px solid transparent;
+        border-color: rgba(82, 122, 154, 0.8);
+      }
+
+      .admin-nav-link {
+        display: block;
+        padding: 12px 24px;
+        color: #374151;
+        text-decoration: none;
+        border-bottom: 3px solid transparent;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.2);
+        position: relative;
+      }
+
+      .admin-nav-link::after {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: 10%;
+        height: 80%;
+        width: 1px;
+        background: rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease;
+      }
+
+      .admin-nav-item:last-child .admin-nav-link::after {
+        display: none;
+      }
+
+      .admin-nav-link:hover,
+      .admin-nav-link.active {
+        color: white;
+        background: #527a9a;
+        border-bottom-color: transparent;
+        box-shadow: none;
+      }
+
+      .admin-nav-link:hover::after,
+      .admin-nav-link.active::after {
+        background: rgba(0, 0, 0, 0.25);
+        box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .admin-content {
+        padding: 30px;
+        background: rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(3px);
+        -webkit-backdrop-filter: blur(3px);
+        color: #1f2937;
+        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+      }
+
+      /* Make content elements more readable on glass background */
+      .admin-content h1,
+      .admin-content h2,
+      .admin-content h3,
+      .admin-content h4,
+      .admin-content h5,
+      .admin-content h6 {
+        color: #111827;
+        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.7);
+      }
+
+      .admin-content table {
+        background: rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        overflow: hidden;
+      }
+
+      .admin-content th {
+        background: rgba(255, 255, 255, 0.5);
+        color: #111827;
+        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.7);
+        font-weight: 700;
+      }
+
+      .admin-content td {
+        color: #1f2937;
+        border-color: rgba(255, 255, 255, 0.3);
+        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+      }
+
+      .admin-content .text-red-600 {
+        color: #dc2626 !important;
+        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+        font-weight: 600;
+      }
+
+      .admin-content .text-orange-600 {
+        color: #ea580c !important;
+        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+        font-weight: 600;
+      }
+
+      .admin-content .bg-red-100 {
+        background: rgba(239, 68, 68, 0.15) !important;
+        color: #dc2626 !important;
+        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+      }
+
+      .admin-content .bg-green-100 {
+        background: rgba(34, 197, 94, 0.15) !important;
+        color: #059669 !important;
+        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+      }
+
+      /* Improved button styling for glass effect */
+      .glass-button {
+        background: rgba(255, 255, 255, 0.4) !important;
+        backdrop-filter: blur(5px) !important;
+        -webkit-backdrop-filter: blur(5px) !important;
+        border: 2px solid rgba(82, 122, 154, 1) !important;
+        color: #1f2937 !important;
+        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.7) !important;
+        transition: all 0.3s ease !important;
+        position: relative !important;
+        z-index: 10 !important;
+        font-weight: 600 !important;
+      }
+
+      .glass-button:hover {
+        background: rgba(255, 255, 255, 0.6) !important;
+        border-color: rgba(0, 0, 0, 0.5) !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2) !important;
+        color: #111827 !important;
+      }
+
+      .admin-user-info {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 15px;
+      }
+
+      .admin-user-details {
+        flex: 1;
+      }
+
+      .admin-user-name {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0;
+      }
+
+      .admin-user-role {
+        font-size: 14px;
+        opacity: 0.9;
+        margin: 0;
+      }
+
+      @media (max-width: 768px) {
+        .admin-container {
+          padding: 10px;
+        }
+
+        .admin-card {
+          margin-top: 10px;
+        }
+
+        .admin-header {
+          padding: 15px 20px;
+        }
+
+        .admin-content {
+          padding: 20px;
+        }
+
+    </style>
+  </head>
+
+  <body>
+    <div class="gradient-overlay"></div>
+
+    <% if Rails.env.staging? %>
+      <div class="bg-red-600 text-white text-center py-2 fixed top-0 left-0 w-full z-50">
+        <strong>STAGING ENVIRONMENT</strong> - Do not use for production
+      </div>
+    <% end %>
+
+    <% if impersonating? %>
+      <div class="bg-orange-500 text-white text-center py-2 px-4 flex items-center justify-between fixed top-0 left-0 w-full z-40" style="<%= Rails.env.staging? ? 'top: 48px;' : '' %>">
+        <div class="flex-1 text-center">
+          <strong>⚠️ IMPERSONATING:</strong> You are impersonating <%= current_user.full_name %>
+          (logged in as <%= admin_user.full_name %>)
+        </div>
+        <%= button_to "Stop Impersonating", stop_impersonating_admin_users_path,
+            method: :delete,
+            class: "bg-orange-600 hover:bg-orange-700 text-white px-4 py-1 rounded text-sm",
+            form: { class: "inline" } %>
+      </div>
+    <% end %>
+
+    <div class="admin-container" style="<%= (Rails.env.staging? || impersonating?) ? 'padding-top: 60px;' : '' %>">
+      <div class="admin-card">
+        <!-- Header -->
+        <div class="admin-header">
+          <div class="admin-user-info">
+            <div class="admin-user-details">
+              <h1 class="admin-user-name">Veritas Admin</h1>
+              <p class="admin-user-role">Logged in as <%= current_user.full_name %> (<%= current_user.access_level.titleize %>)</p>
+            </div>
+            <div>
+              <% if impersonating? %>
+                <%= button_to "Stop Impersonating", stop_impersonating_admin_users_path,
+                    method: :delete,
+                    class: "glass-button px-4 py-2 rounded text-sm cursor-pointer" %>
+              <% else %>
+                <%= button_to "Sign Out", logout_path,
+                    method: :delete,
+                    form_class: "inline-block",
+                    class: "glass-button px-4 py-2 rounded text-sm cursor-pointer" %>
+              <% end %>
+            </div>
+
+            <%# link back to user pages (home) %>
+            <%= link_to "Back to User Pages", root_path,
+                class: "glass-button px-4 py-2 rounded text-sm cursor-pointer" %>
+
+
+          </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="admin-nav">
+          <ul class="admin-nav-list">
+            <li class="admin-nav-item">
+              <%= link_to admin_root_path,
+                  class: "admin-nav-link #{controller_name == 'dashboard' ? 'active' : ''}" do %>
+                Dashboard
+              <% end %>
+            </li>
+            <li class="admin-nav-item">
+              <%= link_to admin_users_path,
+                  class: "admin-nav-link #{controller_name == 'users' ? 'active' : ''}" do %>
+                Users
+              <% end %>
+            </li>
+            <li class="admin-nav-item">
+              <%= link_to admin_services_path,
+                  class: "admin-nav-link #{controller_name == 'services' ? 'active' : ''}" do %>
+                Services
+              <% end %>
+            </li>
+            <li class="admin-nav-item">
+              <%= link_to admin_oauth_applications_path,
+                  class: "admin-nav-link #{controller_name == 'oauth_applications' ? 'active' : ''}" do %>
+                OAuth Apps
+              <% end %>
+            </li>
+            <li class="admin-nav-item">
+              <%= link_to '/admin/jobs',
+                  class: "admin-nav-link #{controller_name == 'jobs' ? 'active' : ''}" do %>
+                Jobs
+              <% end %>
+            </li>
+            <li class="admin-nav-item">
+              <%= link_to '/admin/flipper',
+                  class: "admin-nav-link #{controller_name == 'flipper' ? 'active' : ''}" do %>
+                Flipper
+              <% end %>
+            </li>
+            <li class="admin-nav-item">
+              <%= link_to '/admin/blazer',
+                  class: "admin-nav-link #{controller_name == 'blazer' ? 'active' : ''}" do %>
+                Blazer
+              <% end %>
+            </li>
+            <li class="admin-nav-item">
+              <%= link_to '/admin/console',
+                  class: "admin-nav-link #{controller_name == 'console' ? 'active' : ''}" do %>
+                Console Audits
+              <% end %>
+            </li>
+
+          </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="admin-content">
+          <%= yield %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flash Messages -->
+    <% flash.each do |type, message| %>
+      <div class="fixed top-4 right-4 z-50 max-w-sm">
+        <div class="bg-white border border-gray-200 rounded-lg shadow-lg p-4">
+          <div class="flex items-center">
+            <div class="flex-1">
+              <p class="text-sm text-gray-900"><%= message %></p>
+            </div>
+            <button onclick="this.parentElement.parentElement.parentElement.remove()"
+                    class="ml-4 text-gray-400 hover:text-gray-600">
+              <span class="sr-only">Close</span>
+              ×
+            </button>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+    <script>
+      // Auto-hide flash messages after 5 seconds
+      document.addEventListener('DOMContentLoaded', () => {
+        const flashMessages = document.querySelectorAll('.fixed.top-4.right-4');
+        flashMessages.forEach(message => {
+          setTimeout(() => {
+            if (message.parentElement) {
+              message.remove();
+            }
+          }, 5000);
+        });
+      });
+    </script>
+  </body>
+</html>
