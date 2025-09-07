@@ -10,15 +10,23 @@ class CreateUsers < ActiveRecord::Migration[8.0]
             t.string :first_name, null: false
             t.string :last_name, null: false
             t.string :pd_id, null: false
+            t.string :username, null: false
 
             t.string :email, null: false
             t.boolean :email_verified, default: false
             t.datetime :email_verified_at
 
-            t.string :password_digest, null: false
+            t.boolean :staff, default: false, null: false
+            t.boolean :pd_dev, default: false, null: false
+
             t.column :access_level, :access_level, default: 'user', null: false
             t.boolean :pretend_is_not_admin, default: false, null: false
             t.integer :session_duration_seconds, default: 2592000, null: false
+
+            t.string :magic_link_token
+            t.datetime :magic_link_token_sent_at
+            t.datetime :magic_link_expires_at
+            t.datetime :magic_link_used_at
 
             t.column :status, :status, null: false, default: 'active'
             t.datetime :locked_at
@@ -27,5 +35,6 @@ class CreateUsers < ActiveRecord::Migration[8.0]
 
         add_index :users, :email, unique: true
         add_index :users, :pd_id, unique: true
+        add_index :users, :magic_link_token, unique: true
     end
 end

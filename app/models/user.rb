@@ -18,7 +18,7 @@
 #  magic_link_sent_at       :datetime
 #  magic_link_token         :string
 #  magic_link_used_at       :datetime
-#  password_digest          :string           not null
+#  password_digest          :string
 #  pd_dev                   :boolean          default(FALSE), not null
 #  pretend_is_not_admin     :boolean          default(FALSE), not null
 #  services_used            :integer          default([]), is an Array
@@ -40,6 +40,8 @@
 #
 class User < ApplicationRecord
   include AASM
+
+  self.ignored_columns += ["password_digest"]
 
   # set flipper id to pd_id
   def flipper_id

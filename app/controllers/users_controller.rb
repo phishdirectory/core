@@ -20,7 +20,9 @@ class UsersController < ApplicationController
     end
 
     if @user.save
-      redirect_to email_confirmation_path, notice: "Account created! Please check your email to verify your account."
+      # Send magic link for first login
+      @user.send_magic_link
+      redirect_to login_path, notice: "Account created! A magic link has been sent to your email to complete setup."
     else
       # Check if this is a username conflict error
       if @user.errors[:base]&.any? { |message| message.include?("snafu") }

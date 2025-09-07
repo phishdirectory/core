@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_07_213531) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_14_234339) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "fuzzystrmatch"
   enable_extension "pg_catalog.plpgsql"
@@ -416,29 +416,23 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_07_213531) do
     t.string "first_name", null: false
     t.string "last_name", null: false
     t.string "pd_id", null: false
+    t.string "username", null: false
     t.string "email", null: false
     t.boolean "email_verified", default: false
     t.datetime "email_verified_at"
-    t.string "password_digest"
+    t.boolean "staff", default: false, null: false
+    t.boolean "pd_dev", default: false, null: false
     t.enum "access_level", default: "user", null: false, enum_type: "access_level"
     t.boolean "pretend_is_not_admin", default: false, null: false
     t.integer "session_duration_seconds", default: 2592000, null: false
+    t.string "magic_link_token"
+    t.datetime "magic_link_token_sent_at"
+    t.datetime "magic_link_expires_at"
+    t.datetime "magic_link_used_at"
     t.enum "status", default: "active", null: false, enum_type: "status"
     t.datetime "locked_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.boolean "staff", default: false, null: false
-    t.boolean "pd_dev", default: false, null: false
-    t.integer "signup_service"
-    t.integer "services_used", default: [], array: true
-    t.string "username", null: false
-    t.string "confirmation_token"
-    t.datetime "confirmation_sent_at"
-    t.string "magic_link_token"
-    t.datetime "magic_link_expires_at"
-    t.datetime "magic_link_sent_at"
-    t.datetime "magic_link_used_at"
-    t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["magic_link_token"], name: "index_users_on_magic_link_token", unique: true
     t.index ["pd_id"], name: "index_users_on_pd_id", unique: true
