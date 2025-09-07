@@ -2,8 +2,8 @@ FROM ruby:3.4.3-slim AS builder
 
 WORKDIR /rails
 
-LABEL org.opencontainers.image.description="Authentication Package for phish.directory"
-LABEL org.opencontainers.image.source="https://github.com/phishdirectory/veritas"
+LABEL org.opencontainers.image.description="phish.directory core services."
+LABEL org.opencontainers.image.source="https://github.com/phishdirectory/core"
 
 # Install essential build dependencies
 RUN apt-get update -qq && \

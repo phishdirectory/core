@@ -9,7 +9,7 @@ require "rails/all"
 Bundler.require(*Rails.groups)
 
 # app name should be InThisCase
-module Veritas
+module PhishDirectory
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 8.0

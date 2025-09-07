@@ -1,8 +1,9 @@
 {
-  "name": "@phishdirectory/veritas",
+  "name": "@phishdirectory/core",
   "private": true,
   "version": "3.0.1",
-  "description": "Central authentication microservice for all phish.directory services.",
+  "description": "Central server for Phish Directory",
+  "license": "GNU AGPLv3",
   "maintainers": [
     {
       "name": "Jasper Mayone",

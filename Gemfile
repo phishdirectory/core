@@ -113,12 +113,6 @@ gem "dotenv-rails"                       # Environment variables
 ###############################################################################
 gem "tzinfo-data", platforms: %i[windows jruby]
 
-##############################################################################
-# API Documentation
-##############################################################################
-gem "rswag"
-gem "rspec-rails"
-
 ###############################################################################
 # DEVELOPMENT & TEST DEPENDENCIES
 ###############################################################################
@@ -142,6 +136,8 @@ group :development, :test do
   # Code Quality
   gem "bullet" # N+1 query detection
 end
+
+gem "rspec-rails"
 
 group :development do
   # Development Tools

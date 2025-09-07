@@ -7,33 +7,33 @@ default: &default
 development:
   primary: &primary_development
     <<: *default
-    database: veritas_development
+    database: pd-core_development
   queue:
     <<: *primary_development
-    database: veritas_development_queue
+    database: pd-core_development_queue
     migrations_paths: db/queue_migrate
 
 test:
   primary: &primary_test
     <<: *default
     host: localhost
-    database: veritas_test
+    database: pd-core_test
   queue:
     <<: *primary_test
     host: localhost
-    database: veritas_test_queue
+    database: pd-core_test_queue
     migrations_paths: db/queue_migrate
 
 production:
   primary: &primary_production
     <<: *default
     host: db
-    database: veritas_production
+    database: pd-core_production
     username: <%= ENV['DATABASE_USER'] %>
     password: <%= ENV['DATABASE_PASSWORD'] %>
   queue:
     <<: *primary_production
-    database: veritas_production_queue
+    database: pd-core_production_queue
     migrations_paths: db/queue_migrate
 
 
@@ -41,10 +41,10 @@ staging:
   primary: &primary_staging
     <<: *default
     host: db
-    database: veritas_staging
+    database: pd-core_staging
     username: <%= ENV['DATABASE_USER'] %>
     password: <%= ENV['DATABASE_PASSWORD'] %>
   queue:
     <<: *primary_staging
-    database: veritas_staging_queue
+    database: pd-core_staging_queue
     migrations_paths: db/queue_migrate

@@ -421,7 +421,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_15_190334) do
     t.datetime "email_verified_at"
     t.string "password_digest", null: false
     t.enum "access_level", default: "user", null: false, enum_type: "access_level"
-    t.enum "api_access_level", default: "user", null: false, enum_type: "access_level"
     t.boolean "pretend_is_not_admin", default: false, null: false
     t.integer "session_duration_seconds", default: 2592000, null: false
     t.enum "status", default: "active", null: false, enum_type: "status"

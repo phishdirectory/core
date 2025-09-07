@@ -103,8 +103,6 @@
 #                                     admin GET    /admin(.:format)                                                                                  redirect(301, /login)
 #                                           GET    /admin/*path(.:format)                                                                            redirect(301, /login)
 #                         letter_opener_web        /letter_opener                                                                                    LetterOpenerWeb::Engine
-#                              api_rswag_ui        /api/docs                                                                                         Rswag::Ui::Engine
-#                             api_rswag_api        /api/docs                                                                                         Rswag::Api::Engine
 #                             api_v1_health GET    /api/v1/health(.:format)                                                                          api/v1/health#index
 #                  api_v1_auth_authenticate POST   /api/v1/auth/authenticate(.:format)                                                               api/v1/auth#authenticate
 #                              api_v1_users POST   /api/v1/users(.:format)                                                                           api/v1/users#create
@@ -216,12 +214,6 @@
 #        letter GET  /:id(/:style)(.:format)          letter_opener_web/letters#show
 # delete_letter POST /:id/delete(.:format)            letter_opener_web/letters#destroy
 #               GET  /:id/attachments/:file(.:format) letter_opener_web/letters#attachment {file: /[^\/]+/}
-#
-# Routes for Rswag::Ui::Engine:
-#
-#
-# Routes for Rswag::Api::Engine:
-#
 #
 # Routes for ActualDbSchema::Engine:
 #              rollback_migration POST /migrations/:id/rollback(.:format)         actual_db_schema/migrations#rollback
@@ -349,9 +341,6 @@ Rails.application.routes.draw do
 
   # API routes
   namespace :api do
-    mount Rswag::Ui::Engine => "/docs"
-    mount Rswag::Api::Engine => "/docs"
-
     namespace :v1 do
       get "health", to: "health#index"
 
@@ -362,15 +351,6 @@ Rails.application.routes.draw do
       get "users/by_email", to: "users#show"
     end
   end
-
-  #  # Admin routes
-  #  namespace :admin do
-  #   resources :users do
-  #     member do
-  #       post :impersonate
-  #     end
-  #   end
-  # end
 
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
