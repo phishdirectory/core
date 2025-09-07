@@ -116,39 +116,6 @@ class UsersController < ApplicationController
     sanitized.truncate(max_length)
   end
 
-  def sanitize_password(password, options = {})
-    return nil if password.nil?
-
-    original_password = password.to_s
-
-    # Check for SQL injection patterns in password
-    sql_injection_patterns = [
-      /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION)\b)/i,
-      /(--|\/\*|\*\/)/,
-      /(\bOR\b|\bAND\b).*[=<>]/i
-    ]
-
-    if sql_injection_patterns.any? { |pattern| original_password.match?(pattern) }
-      notify_security_incident(
-        email: options[:email],
-        input_type: "password",
-        malicious_input: "[REDACTED - PASSWORD FIELD]"
-      )
-      raise SecurityError, "Invalid password format"
-    end
-
-    # Don't modify password content but check length
-    if original_password.length > 255
-      notify_security_incident(
-        email: options[:email],
-        input_type: "password",
-        malicious_input: "[REDACTED - OVERSIZED PASSWORD]"
-      )
-      raise SecurityError, "Password too long"
-    end
-
-    original_password
-  end
 
   def notify_security_incident(email:, input_type:, malicious_input:)
     NotifyOpsOnSecurityIncidentJob.perform_later(
@@ -161,7 +128,7 @@ class UsersController < ApplicationController
   end
 
   def sanitized_user_params
-    permitted_params = params.require(:user).permit(:first_name, :last_name, :email, :password, :password_confirmation, :profile_photo, :cropped_image_data)
+    permitted_params = params.require(:user).permit(:first_name, :last_name, :email, :profile_photo, :cropped_image_data)
     user_email = permitted_params[:email]
 
     begin
@@ -170,12 +137,7 @@ class UsersController < ApplicationController
 
       permitted_params.each do |key, value|
         if value.is_a?(String)
-          case key.to_s
-          when "password", "password_confirmation"
-            sanitized_params[key] = sanitize_password(value, email: user_email)
-          else
-            sanitized_params[key] = sanitize_input(value, email: user_email, field_name: key.to_s)
-          end
+          sanitized_params[key] = sanitize_input(value, email: user_email, field_name: key.to_s)
         else
           # Handle file uploads and other non-string parameters
           sanitized_params[key] = value
@@ -197,7 +159,7 @@ class UsersController < ApplicationController
   end
 
   def user_params
-    params.require(:user).permit(:first_name, :last_name, :email, :password, :password_confirmation)
+    params.require(:user).permit(:first_name, :last_name, :email)
   end
 
   def process_cropped_image(base64_data)

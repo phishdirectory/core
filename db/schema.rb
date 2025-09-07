@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_15_190334) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_07_213531) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "fuzzystrmatch"
   enable_extension "pg_catalog.plpgsql"
@@ -419,7 +419,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_15_190334) do
     t.string "email", null: false
     t.boolean "email_verified", default: false
     t.datetime "email_verified_at"
-    t.string "password_digest", null: false
+    t.string "password_digest"
     t.enum "access_level", default: "user", null: false, enum_type: "access_level"
     t.boolean "pretend_is_not_admin", default: false, null: false
     t.integer "session_duration_seconds", default: 2592000, null: false

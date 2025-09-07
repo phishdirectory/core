@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
-    <list default="true" id="a2363c8b-6645-4129-807f-9beda4c8f90e" name="Changes" comment="" />
+    <list default="true" id="a2363c8b-6645-4129-807f-9beda4c8f90e" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/app/controllers/sessions_controller.rb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/routes.rb" beforeDir="false" afterPath="$PROJECT_DIR$/config/routes.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/migrate/20250907213531_remove_password_requirement.rb" beforeDir="false" afterPath="$PROJECT_DIR$/db/migrate/20250907213531_remove_password_requirement.rb" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -142,7 +149,7 @@
       <option name="presentableId" value="Default" />
       <updated>1757279721176</updated>
       <workItem from="1757279722213" duration="4000" />
-      <workItem from="1757280035347" duration="330000" />
+      <workItem from="1757280035347" duration="933000" />
     </task>
     <servers />
   </component>
