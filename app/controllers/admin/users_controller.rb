@@ -112,7 +112,7 @@ class Admin::UsersController < Admin::BaseController
   end
 
   def set_user
-    @user = User.find(params[:id])
+    @user = User.find_by!(pd_id: params[:pd_id])
   end
 
   def user_params

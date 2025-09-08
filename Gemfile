@@ -31,9 +31,12 @@ gem "jsbundling-rails", "~> 1.0"
 ###############################################################################
 # API DOCUMENTATION
 ###############################################################################
-gem "grape", "~> 2.0"                    # API framework
-gem "grape-swagger", "~> 2.0"            # Generate OpenAPI/Swagger docs from Grape
-gem "grape-swagger-entity", "~> 0.5"     # Entity support for swagger docs
+gem "grape"
+gem "grape-entity" # For Grape::Entity ( https://github.com/ruby-grape/grape-entity )
+gem "grape-kaminari"
+gem "grape-route-helpers"
+gem "grape-swagger"
+gem "grape-swagger-entity", "~> 0.7"
 
 ###############################################################################
 # SECURITY & AUTHENTICATION
@@ -147,6 +150,8 @@ end
 gem "rspec-rails"
 
 group :development do
+  gem "grape-swagger-rails"
+
   # Development Tools
   gem "actual_db_schema"                 # Rolls back phantom migrations
   gem "annotaterb"                       # Annotate models
@@ -180,3 +185,5 @@ gem "breakout-detection" # todo: better utilize this package!
 gem "disco" # todo: better utilize this package!
 gem "chartkick"
 gem "mapkick-rb"
+
+gem "pundit", "~> 2.5"

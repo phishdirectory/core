@@ -99,8 +99,11 @@
     <orderEntry type="library" scope="PROVIDED" name="globalid (v1.2.1, mise: 3.4.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="grape (v2.4.0, mise: 3.4.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="grape-entity (v1.0.1, mise: 3.4.3) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="grape-kaminari (v0.4.5, mise: 3.4.3) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="grape-route-helpers (v2.1.0, mise: 3.4.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="grape-swagger (v2.1.2, mise: 3.4.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="grape-swagger-entity (v0.7.0, mise: 3.4.3) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="grape-swagger-rails (v0.6.0, mise: 3.4.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="groupdate (v6.7.0, mise: 3.4.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="hashid-rails (v1.4.1, mise: 3.4.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="hashids (v1.0.6, mise: 3.4.3) [gem]" level="application" />
@@ -119,6 +122,8 @@
     <orderEntry type="library" scope="PROVIDED" name="json (v2.13.2, mise: 3.4.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="jwt (v2.10.2, mise: 3.4.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="kamal (v2.7.0, mise: 3.4.3) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="kaminari-core (v1.2.2, mise: 3.4.3) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="kaminari-grape (v1.0.1, mise: 3.4.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="kramdown (v2.5.1, mise: 3.4.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="kramdown-parser-gfm (v1.1.0, mise: 3.4.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="language_server-protocol (v3.17.0.5, mise: 3.4.3) [gem]" level="application" />

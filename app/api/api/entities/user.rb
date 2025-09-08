@@ -1,5 +1,6 @@
 # frozen_string_literal: true
-
+#
+module Api
 module Entities
   class User < Base
     expose :id, documentation: { type: "Integer", desc: "User database ID" }
@@ -23,4 +24,5 @@ module Entities
       object.has_profile_photo? ? object.public_avatar_url : nil
     end
   end
+end
 end

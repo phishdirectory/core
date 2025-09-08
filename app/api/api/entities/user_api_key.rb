@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+module Api
 module Entities
   class UserApiKey < Base
     expose :id, documentation: { type: "Integer", desc: "API key database ID" }
@@ -8,9 +9,9 @@ module Entities
     expose :expires_at, format_with: :iso8601, documentation: { type: "String", desc: "Expiration timestamp", allow_blank: true }
     expose :active, documentation: { type: "Boolean", desc: "Whether API key is active" }
     expose :created_at, format_with: :iso8601, documentation: { type: "String", desc: "Creation timestamp" }
-    
+
     # Only expose the raw key when it's just been created
-    expose :key, if: lambda { |instance, options| options[:show_key] == true }, 
+    expose :key, if: lambda { |instance, options| options[:show_key] == true },
            documentation: { type: "String", desc: "API key (only shown at creation)", example: "pd_aBcD..." }
 
     private
@@ -19,4 +20,5 @@ module Entities
       object.raw_key
     end
   end
+end
 end

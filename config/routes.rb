@@ -109,6 +109,7 @@
 #                         letter_opener_web        /letter_opener                                                                                    LetterOpenerWeb::Engine
 #                             api_v1_health GET    /api/v1/health(.:format)                                                                          api/v1/health#index
 #                  api_v1_auth_authenticate POST   /api/v1/auth/authenticate(.:format)                                                               api/v1/auth#authenticate
+#                           api_v1_users_me GET    /api/v1/users/me(.:format)                                                                        api/v1/users#me
 #                              api_v1_users POST   /api/v1/users(.:format)                                                                           api/v1/users#create
 #                               api_v1_user GET    /api/v1/users/:id(.:format)                                                                       api/v1/users#show
 #                     api_v1_users_by_email GET    /api/v1/users/by_email(.:format)                                                                  api/v1/users#show
@@ -311,7 +312,7 @@ Rails.application.routes.draw do
       root to: "dashboard#index"
 
       # Resources and sub-resources
-      resources :users do
+      resources :users, param: :pd_id do
         member do
           post :impersonate
         end
@@ -342,28 +343,21 @@ Rails.application.routes.draw do
   get "admin/*path", to: redirect("/login")
 
 
-
   mount LetterOpenerWeb::Engine, at: "/letter_opener" if Rails.env.development?
 
-
-  # API routes
-  namespace :api do
-    namespace :v1 do
-      # Public endpoints (no authentication required)
-      get "health", to: "health#index"
-      post "auth/authenticate", to: "auth#authenticate"
-
-      # Service key protected endpoints
-      get "users/me", to: "users#me"
-      resources :users, only: [:show, :create]
-      get "users/by_email", to: "users#show"
-
-      # Service management endpoints
-      get "service", to: "services#show"
-      get "service/usage", to: "services#usage_stats"
-      get "service/recent", to: "services#recent_usage"
+  # API documentation
+  namespace :docs do
+    resources :api, only: [] do
+      collection do
+        # This crazy nesting is to get Rails to generate meaningful route helpers
+        get "v1(/*path)", to: "api#v1"
+        get "/", to: redirect("/docs/api/v1")
+      end
     end
   end
+
+  mount Api::V1 => "/"
+
 
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
