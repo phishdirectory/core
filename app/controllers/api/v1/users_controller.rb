@@ -3,6 +3,10 @@
 module Api
   module V1
     class UsersController < BaseController
+      def me
+        render_success(user_data(current_user))
+      end
+
       def show
         user = find_user
         return unless user

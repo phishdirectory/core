@@ -54,6 +54,11 @@
 #            stop_impersonating_admin_users DELETE /admin/users/stop_impersonating(.:format)                                                         admin/users#stop_impersonating
 #                                admin_root GET    /admin(.:format)                                                                                  admin/dashboard#index
 #                    impersonate_admin_user POST   /admin/users/:id/impersonate(.:format)                                                            admin/users#impersonate
+#                  admin_user_user_api_keys GET    /admin/users/:user_id/user_api_keys(.:format)                                                     admin/user_api_keys#index
+#                                           POST   /admin/users/:user_id/user_api_keys(.:format)                                                     admin/user_api_keys#create
+#               new_admin_user_user_api_key GET    /admin/users/:user_id/user_api_keys/new(.:format)                                                 admin/user_api_keys#new
+#                   admin_user_user_api_key GET    /admin/users/:user_id/user_api_keys/:id(.:format)                                                 admin/user_api_keys#show
+#                                           DELETE /admin/users/:user_id/user_api_keys/:id(.:format)                                                 admin/user_api_keys#destroy
 #                               admin_users GET    /admin/users(.:format)                                                                            admin/users#index
 #                                           POST   /admin/users(.:format)                                                                            admin/users#create
 #                            new_admin_user GET    /admin/users/new(.:format)                                                                        admin/users#new
@@ -107,6 +112,9 @@
 #                              api_v1_users POST   /api/v1/users(.:format)                                                                           api/v1/users#create
 #                               api_v1_user GET    /api/v1/users/:id(.:format)                                                                       api/v1/users#show
 #                     api_v1_users_by_email GET    /api/v1/users/by_email(.:format)                                                                  api/v1/users#show
+#                            api_v1_service GET    /api/v1/service(.:format)                                                                         api/v1/services#show
+#                      api_v1_service_usage GET    /api/v1/service/usage(.:format)                                                                   api/v1/services#usage_stats
+#                     api_v1_service_recent GET    /api/v1/service/recent(.:format)                                                                  api/v1/services#recent_usage
 #          turbo_recede_historical_location GET    /recede_historical_location(.:format)                                                             turbo/native/navigation#recede
 #          turbo_resume_historical_location GET    /resume_historical_location(.:format)                                                             turbo/native/navigation#resume
 #         turbo_refresh_historical_location GET    /refresh_historical_location(.:format)                                                            turbo/native/navigation#refresh
@@ -346,6 +354,7 @@ Rails.application.routes.draw do
       post "auth/authenticate", to: "auth#authenticate"
 
       # Service key protected endpoints
+      get "users/me", to: "users#me"
       resources :users, only: [:show, :create]
       get "users/by_email", to: "users#show"
 
