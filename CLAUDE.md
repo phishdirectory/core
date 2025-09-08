@@ -6,3 +6,4 @@
 
 ## HTTP Requests
 - Always use faraday for http requests as opposed to other libraries
+- even tho it seems like the api paths should start with /v1 it's /api/v1 even with the weird mounting thing

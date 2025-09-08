@@ -13,6 +13,36 @@ module Api
       def users
         @users ||= paginate(User.all.order(created_at: :desc))
       end
+
+      def authenticate!
+        api_key_value = extract_api_key
+        error!({ message: "API key required" }, 401) unless api_key_value
+        
+        api_key = UserApiKey.find_by_key(api_key_value)
+        error!({ message: "Invalid API key" }, 401) unless api_key&.api_valid?
+        
+        api_key.touch_last_used!
+        @current_user = api_key.user
+      end
+
+      def current_user
+        @current_user
+      end
+
+      private
+
+      def extract_api_key
+        # Support both X-API-Key header and Authorization: Bearer format
+        headers["X-API-Key"] || bearer_token
+      end
+
+      def bearer_token
+        auth_header&.match(/\ABearer (.+)\z/)&.[](1)
+      end
+
+      def auth_header
+        headers["Authorization"]
+      end
     end
 
     desc "Healthcheck" do
@@ -22,6 +52,21 @@ module Api
     end
     get :healthcheck do
       { status: "ok", timestamp: Time.current.iso8601 }
+    end
+
+    resource :user do
+      desc "Get current user info" do
+        summary "Get information about the authenticated user"
+        tags ["User"]
+        security [{ api_key: [] }]
+        success Entities::User
+        failure [[401, "Unauthorized"]]
+        failure [[403, "Forbidden"]]
+      end
+      get :me do
+        authenticate!
+        present current_user, with: Entities::User
+      end
     end
 
 
@@ -72,6 +117,20 @@ module Api
         { name: "Email", description: "Email-related operations" },
         { name: "User", description: "User management operations" },
       ],
+      security_definitions: {
+        api_key: {
+          type: "apiKey",
+          name: "X-API-Key",
+          in: "header",
+          description: "API key for authentication using X-API-Key header"
+        },
+        bearer_auth: {
+          type: "apiKey",
+          name: "Authorization",
+          in: "header",
+          description: "API key for authentication. Format: Bearer YOUR_API_KEY"
+        }
+      },
     )
 
   end

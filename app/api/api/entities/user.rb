@@ -14,8 +14,8 @@ module Entities
     expose :access_level, documentation: { type: "String", desc: "User access level", values: %w[user trusted admin superadmin owner] }
     expose :staff, documentation: { type: "Boolean", desc: "Whether user is staff" }
     expose :status, documentation: { type: "String", desc: "User account status", values: %w[active suspended deactivated] }
-    expose :created_at, format_with: :iso8601, documentation: { type: "String", desc: "Account creation timestamp" }
-    expose :updated_at, format_with: :iso8601, documentation: { type: "String", desc: "Last update timestamp" }
+    expose :created_at, format_with: :iso_timestamp, documentation: { type: "String", desc: "Account creation timestamp" }
+    expose :updated_at, format_with: :iso_timestamp, documentation: { type: "String", desc: "Last update timestamp" }
     expose :profile_photo_url, documentation: { type: "String", desc: "Profile photo URL", allow_blank: true }
 
     private
