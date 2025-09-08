@@ -1,0 +1,71 @@
+<header style="position: absolute; top: 0; left: 0; right: 0; z-index: 50; pointer-events: none;">
+  <nav style="display: flex; align-items: center; justify-content: space-between; padding: 24px; pointer-events: auto;">
+    <div style="flex: 1;">
+      <a href="/" style="display: inline-block; margin: -6px; padding: 6px; color: white; text-decoration: none;">
+        <span style="position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;">Phish Directory</span>
+        <h2 style="font-size: 24px; font-weight: 700; color: white; margin: 0;">Phish Directory</h2>
+      </a>
+    </div>
+    
+    <!-- Mobile menu button -->
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <div class="lg:hidden">
+        <button type="button" 
+                style="color: #9CA3AF; margin: -10px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 10px; background: none; border: none; cursor: pointer;" 
+                onclick="document.getElementById('mobile-menu').classList.remove('hidden')">
+          <span style="position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;">Open main menu</span>
+          <svg style="height: 24px; width: 24px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+      
+      <!-- Desktop navigation -->
+      <div style="display: none; align-items: center; gap: 32px;" class="lg:flex">
+        <a href="https://api.phish.directory/docs" 
+           style="color: white; font-weight: 600; font-size: 14px; text-decoration: none; transition: color 0.2s ease;"
+           onmouseover="this.style.color='#D1D5DB'"
+           onmouseout="this.style.color='white'">
+          Docs
+        </a>
+        <a href="/login" 
+           style="color: white; font-weight: 600; font-size: 14px; text-decoration: none; padding: 8px 16px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.2); transition: all 0.2s ease;"
+           onmouseover="this.style.backgroundColor='rgba(255, 255, 255, 0.1)'"
+           onmouseout="this.style.backgroundColor='transparent'">
+          Login
+        </a>
+      </div>
+    </div>
+  </nav>
+  
+  <!-- Mobile menu -->
+  <div id="mobile-menu" class="lg:hidden hidden">
+    <div class="fixed inset-0 z-50"></div>
+    <div class="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-gray-900 px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-white/10">
+      <div class="flex items-center justify-between">
+        <a href="/" class="-m-1.5 p-1.5">
+          <span class="sr-only">Phish Directory</span>
+          <h2 class="text-2xl font-bold text-white">Phish Directory</h2>
+        </a>
+        <button type="button" class="text-gray-400 -m-2.5 rounded-md p-2.5" onclick="document.getElementById('mobile-menu').classList.add('hidden')">
+          <span class="sr-only">Close menu</span>
+          <svg aria-hidden="true" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="mt-6 flow-root">
+        <div class="-my-6 divide-y divide-gray-500/25">
+          <div class="space-y-2 py-6">
+            <a href="https://api.phish.directory/docs" class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-white hover:bg-gray-800">
+              Docs
+            </a>
+            <a href="/login" class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-white hover:bg-gray-800">
+              Login
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>

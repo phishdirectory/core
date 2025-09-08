@@ -5,10 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a2363c8b-6645-4129-807f-9beda4c8f90e" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/api/v1.rb" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/api/v1.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/controllers/admin/user_api_keys_controller.rb" beforeDir="false" afterPath="$PROJECT_DIR$/app/controllers/admin/user_api_keys_controller.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/phish/VirusTotal_service.rb" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/phish/VirusTotal_service.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/models/user/seen_at_history.rb" beforeDir="false" afterPath="$PROJECT_DIR$/app/models/user/seen_at_history.rb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -188,7 +185,7 @@
       <workItem from="1757279722213" duration="4000" />
       <workItem from="1757280035347" duration="20925000" />
       <workItem from="1757335824611" duration="452000" />
-      <workItem from="1757336294313" duration="4739000" />
+      <workItem from="1757336294313" duration="5594000" />
     </task>
     <servers />
   </component>

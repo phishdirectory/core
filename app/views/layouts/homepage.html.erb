@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full scroll-smooth bg-white antialiased">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    
+    <!-- PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Phish Directory" />
+    <meta name="application-name" content="Phish Directory" />
+    <meta name="theme-color" content="#2F2F2F" />
+    <meta name="msapplication-TileColor" content="#2F2F2F" />
+    
+    <!-- SEO Meta Tags -->
+    <title><%= content_for(:title) || "Phish Directory" %></title>
+    <meta name="description" content="Stay safe from phishing attacks. Phish Directory is a community-driven database of phishing URLs." />
+    <meta name="keywords" content="phishing, phishing URLs, phishing database, phishing directory, phishing protection, phishing attacks, phishing prevention, phishing detection, phishing threats, phishing scams, phishing awareness, phishing safety, phishing education, phishing resources, phishing community, phishing reporting, phishing analysis, phishing intelligence, phishing research, phishing trends, phishing statistics, phishing news, phishing updates, phishing alerts" />
+    <meta name="author" content="Jasper Mayone" />
+    <meta name="creator" content="Jasper Mayone" />
+    <meta name="publisher" content="phish.directory" />
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://phish.directory/" />
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="Phish Directory" />
+    <meta property="og:description" content="Stay safe from phishing attacks. Phish Directory is a community-driven database of phishing URLs." />
+    <meta property="og:url" content="https://phish.directory" />
+    <meta property="og:site_name" content="Phish Directory" />
+    
+    <!-- Robots -->
+    <meta name="robots" content="index, follow" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=2">
+    <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png?v=2">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=2">
+    <link rel="shortcut icon" href="/favicon.ico?v=2">
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-touch-icon-57x57.png?v=2">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-touch-icon-60x60.png?v=2">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-touch-icon-72x72.png?v=2">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon-76x76.png?v=2">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png?v=2">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png?v=2">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png?v=2">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png?v=2">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png?v=2">
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="/site.webmanifest?v=2">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#2F2F2F" />
+
+    <%= yield :head %>
+
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+    
+    <style>
+      @layer utilities {
+        .text-balance {
+          text-wrap: balance;
+        }
+      }
+    </style>
+    
+    <!-- Analytics -->
+    <script defer src="https://umami.hogwarts.dev/script.js" data-website-id="edb8204a-3c17-4b8e-93c2-cf991c41bd52"></script>
+    
+    <!-- Third-party Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@4/dist/fp.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ua-parser-js@1.0.35/dist/ua-parser.min.js"></script>
+    <script src="https://unpkg.com/mapkick@0.2.6/dist/mapkick.bundle.js"></script>
+    
+    <!-- Sentry -->
+    <%= Sentry.get_trace_propagation_meta.html_safe %>
+    <script src="https://js.sentry-cdn.com/f3324a4e0fd0f2d0802ab95547336c18.min.js" crossorigin="anonymous"></script>
+
+    <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
+  </head>
+
+  <body class="flex min-h-full flex-col">
+
+    <% if Rails.env.staging? %>
+    <div class="min-w-screen flex items-center justify-center">
+      <div style="text-align: center; position: fixed; top: 0; left: 0; width: 100%; padding: 1rem; background-color: #cf3a36; color: white; z-index: 1000;">
+        <button class="delete" onclick="(this.parentNode.remove())"></button>
+        This is the <b>STAGING</b> environment. Please <b>DO NOT USE for production</b>.
+      </div>
+    </div>
+    <% end %>
+
+    <% if impersonating? %>
+      <div class="bg-orange-500 text-white text-center py-2 px-4 flex items-center justify-between">
+        <div class="flex-1 text-center">
+          <strong>⚠️ IMPERSONATING:</strong> You are impersonating <%= current_user.full_name %> (<%= current_user.pd_id %>)
+          || ADMIN: <%= admin_user.username %>
+        </div>
+        <%= button_to "Stop Impersonating", stop_impersonating_admin_users_path,
+            method: :delete,
+            class: "bg-orange-600 hover:bg-orange-700 text-white px-4 py-1 rounded text-sm",
+            form: { class: "inline" } %>
+      </div>
+    <% end %>
+
+    <%= render 'shared/header' %>
+    <%= yield %>
+    <%= render 'shared/footer' %>
+
+    <!-- Display flash messages -->
+    <%= render 'shared/flash' %>
+
+  </body>
+
+  <script>
+    console.log(`%c
+
+    |\   \\__     o
+    | \_/    o \    o
+    > _   (( <_  oo
+    | / \__+___/
+    |/     |/
+
+    Welcome to Phish Directory!
+
+    🔐 Infrastructure & tooling for phishing and scam protection
+
+    🤝 Built for devs, by devs!
+
+    🌱 Want to contribute? Start here:
+
+     → GitHub: https://github.com/phishdotdirectory/core
+
+     → Phish Directory Issue Board (all repos): https://issue-board.phish.directory
+    `, 'color: #2F2F2F; font-weight: bold;');
+  </script>
+
+</html>

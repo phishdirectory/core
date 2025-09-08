@@ -1,0 +1,78 @@
+<section style="background-color: #030712; padding: 96px 0;">
+  <div style="max-width: 1200px; margin: 0 auto; padding: 0 24px;">
+    <div style="display: grid; grid-template-columns: 1fr; gap: 64px; align-items: center;">
+      
+      <!-- Text Content -->
+      <div>
+        <h2 style="color: #60A5FA; font-size: 16px; font-weight: 600; margin-bottom: 16px;">
+          Deploy faster
+        </h2>
+        <h3 style="color: white; font-size: 36px; font-weight: 700; line-height: 1.2; margin-bottom: 24px;">
+          A better way to protect against phishing
+        </h3>
+        <p style="color: #D1D5DB; font-size: 18px; line-height: 1.6; margin-bottom: 48px;">
+          Our comprehensive phishing database provides the tools you need to keep your users safe from malicious links and fraudulent websites.
+        </p>
+        
+        <!-- Features List -->
+        <div style="display: flex; flex-direction: column; gap: 32px;">
+          <div style="display: flex; align-items: flex-start;">
+            <div style="flex-shrink: 0; margin-right: 16px; margin-top: 4px;">
+              <svg style="width: 20px; height: 20px; color: #3B82F6;" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <div>
+              <h4 style="color: white; font-weight: 600; margin-bottom: 4px;">Real-time protection.</h4>
+              <p style="color: #D1D5DB; line-height: 1.5;">Access our constantly updated database of phishing URLs to protect your users in real-time.</p>
+            </div>
+          </div>
+          
+          <div style="display: flex; align-items: flex-start;">
+            <div style="flex-shrink: 0; margin-right: 16px; margin-top: 4px;">
+              <svg style="width: 20px; height: 20px; color: #3B82F6;" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <div>
+              <h4 style="color: white; font-weight: 600; margin-bottom: 4px;">Secure API.</h4>
+              <p style="color: #D1D5DB; line-height: 1.5;">Our API uses industry-standard security practices to keep your integration safe and reliable.</p>
+            </div>
+          </div>
+          
+          <div style="display: flex; align-items: flex-start;">
+            <div style="flex-shrink: 0; margin-right: 16px; margin-top: 4px;">
+              <svg style="width: 20px; height: 20px; color: #3B82F6;" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm3.293 1.293a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 01-1.414-1.414L7.586 10 5.293 7.707a1 1 0 010-1.414zM11 12a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <div>
+              <h4 style="color: white; font-weight: 600; margin-bottom: 4px;">Community-driven.</h4>
+              <p style="color: #D1D5DB; line-height: 1.5;">Powered by security researchers and developers worldwide contributing to a safer internet.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Image -->
+      <div style="display: flex; justify-content: center;">
+        <%= image_tag "phishdirectory.jpeg", 
+            alt: "Product screenshot", 
+            style: "width: 100%; max-width: 600px; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); border: 1px solid rgba(255, 255, 255, 0.1);" %>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+<style>
+@media (min-width: 1024px) {
+  section > div > div {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  
+  section h3 {
+    font-size: 48px !important;
+  }
+}
+</style>

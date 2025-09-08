@@ -1,0 +1,64 @@
+<section style="background-color: #111827; min-height: 100vh; display: flex; align-items: center; position: relative; overflow: hidden;">
+  <!-- Background Image -->
+  <%= image_tag "hero.jpeg", 
+      alt: "Background Image", 
+      style: "position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -10;",
+      loading: :eager %>
+  
+  <!-- Dark Overlay -->
+  <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(17, 24, 39, 0.75); z-index: -9;"></div>
+  
+  <!-- Content Container -->
+  <div style="position: relative; z-index: 1; width: 100%; max-width: 1200px; margin: 0 auto; padding: 64px 24px; text-align: center;">
+    
+    <!-- Announcement Badge -->
+    <div style="margin-bottom: 32px;">
+      <div style="display: inline-flex; align-items: center; padding: 8px 16px; border-radius: 999px; background-color: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: #9CA3AF; font-size: 14px;">
+        Community-driven security 
+        <a href="https://api.phish.directory/docs" style="color: white; font-weight: 600; margin-left: 8px; text-decoration: none;">
+          Read our docs →
+        </a>
+      </div>
+    </div>
+    
+    <!-- Main Heading -->
+    <h1 style="color: white; font-size: 48px; font-weight: 700; line-height: 1.1; margin-bottom: 24px; letter-spacing: -0.02em;">
+      Stay safe from phishing attacks
+    </h1>
+    
+    <!-- Description -->
+    <p style="color: #D1D5DB; font-size: 20px; line-height: 1.6; margin-bottom: 48px; max-width: 600px; margin-left: auto; margin-right: auto;">
+      Phish Directory is a community-driven database of phishing URLs. Protect yourself and others by reporting and checking suspicious links.
+    </p>
+    
+    <!-- CTA Buttons -->
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
+      <a href="/signup" 
+         style="display: inline-flex; align-items: center; justify-content: center; padding: 12px 32px; background-color: #2563EB; color: white; font-weight: 600; border-radius: 6px; text-decoration: none; font-size: 16px; transition: background-color 0.2s ease; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);"
+         onmouseover="this.style.backgroundColor='#1D4ED8'"
+         onmouseout="this.style.backgroundColor='#2563EB'">
+        Get started
+      </a>
+      <a href="https://api.phish.directory/docs" 
+         style="color: white; font-weight: 600; text-decoration: none; font-size: 16px; transition: color 0.2s ease;"
+         onmouseover="this.style.color='#D1D5DB'"
+         onmouseout="this.style.color='white'">
+        Learn more →
+      </a>
+    </div>
+    
+  </div>
+</section>
+
+<style>
+@media (min-width: 640px) {
+  section h1 {
+    font-size: 72px !important;
+  }
+  
+  section > div > div:last-child {
+    flex-direction: row !important;
+    gap: 24px !important;
+  }
+}
+</style>
