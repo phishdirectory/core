@@ -6,7 +6,7 @@ module Phish
       # Debug: Check if API key is present
       Rails.logger.debug "API Key present: #{!Rails.application.credentials.dig(:virustotal, :api_key).nil?}"
       Rails.logger.debug "Headers: #{@conn.headers}"
-      
+
       response = @conn.get("/api/v3/domains/#{to_check}")
 
       if response.success?

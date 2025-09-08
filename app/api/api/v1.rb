@@ -69,6 +69,40 @@ module Api
       end
     end
 
+    resource :domain do
+      desc "Check domain" do
+        summary "Check a domain for phishing indicators"
+        tags ["Domain"]
+        security [{ api_key: [] }]
+        success Entities::Domain
+        failure [[400, "Bad Request"]]
+        failure [[401, "Unauthorized"]]
+        failure [[403, "Forbidden"]]
+      end
+      params do
+        requires :domain, type: String, desc: "Domain to check"
+      end
+      get :check do
+        authenticate!
+
+        domain_name = params[:domain].to_s.strip.downcase
+        error!({ message: "Domain parameter is required" }, 400) if domain_name.blank?
+
+        walshy_service = Phish::WalshyService.new
+        res = walshy_service.check(domain_name)
+
+        if res.nil?
+          error!({ message: "Error checking domain" }, 500)
+        elsif res["badDomain"] == true
+          { malicious: true }
+        elsif res["badDomain"] == false
+          { malicious: false }
+        else
+          error!({ message: "Unexpected response format" }, 500)
+        end
+      end
+    end
+
 
     # Handle validation errors
     rescue_from Grape::Exceptions::ValidationErrors do |e|

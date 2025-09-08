@@ -41,7 +41,7 @@ class Admin::UserApiKeysController < Admin::BaseController
   private
 
   def set_user
-    @user = User.find(params[:user_id])
+    @user = User.find(params[:user_pd_id])
   end
 
   def set_api_key

@@ -5,47 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a2363c8b-6645-4129-807f-9beda4c8f90e" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/app/api/api/entities/domain.rb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/api/api/entities/url.rb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/phish/AbuseCh_service.rb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/phish/FishFish_service.rb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/phish/FishObserver_service.rb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/phish/GoogleWebRisk_service.rb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/phish/IpQualityScore_service.rb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/phish/IpQuery_service.rb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/phish/PhishReport_service.rb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/phish/SafeBrowsing_service.rb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/phish/SecurityTrails_service.rb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/phish/UrlScan_service.rb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/phish/VirusTotal_service.rb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/phish/Walshy_service.rb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/initializers/generators.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/core.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/core.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules/.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.mise.toml" beforeDir="false" afterPath="$PROJECT_DIR$/.mise.toml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/api/api/v1.rb" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/api/v1.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/api_metrics_service.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/webhook_service.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/brakeman" beforeDir="false" afterPath="$PROJECT_DIR$/bin/brakeman" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/bundle" beforeDir="false" afterPath="$PROJECT_DIR$/bin/bundle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/dev" beforeDir="false" afterPath="$PROJECT_DIR$/bin/dev" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/rails" beforeDir="false" afterPath="$PROJECT_DIR$/bin/rails" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/rake" beforeDir="false" afterPath="$PROJECT_DIR$/bin/rake" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/rubocop" beforeDir="false" afterPath="$PROJECT_DIR$/bin/rubocop" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/setup" beforeDir="false" afterPath="$PROJECT_DIR$/bin/setup" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/thrust" beforeDir="false" afterPath="$PROJECT_DIR$/bin/thrust" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/credentials.yml.enc" beforeDir="false" afterPath="$PROJECT_DIR$/config/credentials.yml.enc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20250503154645_create_users.rb" beforeDir="false" afterPath="$PROJECT_DIR$/db/migrate/20250503154645_create_users.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20250503171629_create_user_sessions.rb" beforeDir="false" afterPath="$PROJECT_DIR$/db/migrate/20250503171629_create_user_sessions.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20250503190052_create_user_seen_at_histories.rb" beforeDir="false" afterPath="$PROJECT_DIR$/db/migrate/20250503190052_create_user_seen_at_histories.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20250602135445_create_sessions.rb" beforeDir="false" afterPath="$PROJECT_DIR$/db/migrate/20250602135445_create_sessions.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20250609015045_create_rollups.rb" beforeDir="false" afterPath="$PROJECT_DIR$/db/migrate/20250609015045_create_rollups.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20250614170132_create_doorkeeper_tables.rb" beforeDir="false" afterPath="$PROJECT_DIR$/db/migrate/20250614170132_create_doorkeeper_tables.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20250907232241_create_user_api_keys.rb" beforeDir="false" afterPath="$PROJECT_DIR$/db/migrate/20250907232241_create_user_api_keys.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/schema.rb" beforeDir="false" afterPath="$PROJECT_DIR$/db/schema.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/controllers/admin/user_api_keys_controller.rb" beforeDir="false" afterPath="$PROJECT_DIR$/app/controllers/admin/user_api_keys_controller.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/services/phish/VirusTotal_service.rb" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/phish/VirusTotal_service.rb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -225,7 +188,7 @@
       <workItem from="1757279722213" duration="4000" />
       <workItem from="1757280035347" duration="20925000" />
       <workItem from="1757335824611" duration="452000" />
-      <workItem from="1757336294313" duration="3009000" />
+      <workItem from="1757336294313" duration="4739000" />
     </task>
     <servers />
   </component>
