@@ -191,3 +191,7 @@ gem "pundit", "~> 2.5"
 # Pagination
 gem "kaminari"
 gem "api-pagination"
+
+gem "dockerfile-rails", ">= 1.7", group: :development
+
+gem "aws-sdk-s3", "~> 1.198", require: false

@@ -31,10 +31,12 @@ production:
     database: pd-core_production
     username: <%= ENV['DATABASE_USER'] %>
     password: <%= ENV['DATABASE_PASSWORD'] %>
+    url: <%= ENV["DATABASE_URL"] %>
   queue:
     <<: *primary_production
     database: pd-core_production_queue
     migrations_paths: db/queue_migrate
+    url: <%= URI.parse(ENV["DATABASE_URL"]).tap { |url| url.path += "_queue" } if ENV["DATABASE_URL"] %>
 
 
 staging:

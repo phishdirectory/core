@@ -1,0 +1,45 @@
+# fly.toml app configuration file generated for core-billowing-darkness-3234 on 2025-09-08T15:45:04-04:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'core-billowing-darkness-3234'
+primary_region = 'bos'
+console_command = '/rails/bin/rails console'
+
+[build]
+
+[deploy]
+  release_command = "./bin/rails db:prepare"
+
+[env]
+  PORT = '8080'
+
+[processes]
+  app = "./bin/rails server"
+  solidq = "bundle exec rake solid_queue:start"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
+
+  [[http_service.checks]]
+    interval = '10s'
+    timeout = '2s'
+    grace_period = '5s'
+    method = 'GET'
+    path = '/up'
+    protocol = 'http'
+    tls_skip_verify = false
+
+    [http_service.checks.headers]
+      X-Forwarded-Proto = 'https'
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
