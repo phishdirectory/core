@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_14_234339) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_07_232241) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "fuzzystrmatch"
   enable_extension "pg_catalog.plpgsql"
@@ -18,8 +18,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_14_234339) do
   # Custom types defined in this database.
   # Note that some types may not work with other database engines. Be careful if changing database.
   create_enum "access_level", ["owner", "superadmin", "admin", "trusted", "user"]
-  create_enum "service_key_status", ["active", "deprecated", "revoked"]
-  create_enum "service_status", ["active", "suspended", "decommissioned"]
   create_enum "status", ["active", "suspended", "deactivated"]
 
   create_table "active_storage_attachments", force: :cascade do |t|
@@ -323,59 +321,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_14_234339) do
     t.index ["name", "interval", "time", "dimensions"], name: "index_rollups_on_name_and_interval_and_time_and_dimensions", unique: true
   end
 
-  create_table "service_key_usages", force: :cascade do |t|
-    t.bigint "key_id", null: false
-    t.string "request_path"
-    t.string "request_method"
-    t.string "ip_address"
-    t.integer "response_code"
-    t.datetime "requested_at"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.text "user_agent"
-    t.text "request_headers"
-    t.text "request_body"
-    t.text "response_body"
-    t.text "response_headers"
-    t.integer "duration_ms"
-    t.bigint "user_id"
-    t.index ["duration_ms"], name: "index_service_key_usages_on_duration_ms"
-    t.index ["key_id"], name: "index_service_key_usages_on_key_id"
-    t.index ["requested_at"], name: "index_service_key_usages_on_requested_at"
-    t.index ["user_id"], name: "index_service_key_usages_on_user_id"
-  end
-
-  create_table "service_keys", force: :cascade do |t|
-    t.bigint "service_id", null: false
-    t.string "api_key", null: false
-    t.string "hash_key", null: false
-    t.enum "status", default: "active", null: false, enum_type: "service_key_status"
-    t.text "notes"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["api_key"], name: "index_service_keys_on_api_key", unique: true
-    t.index ["service_id"], name: "index_service_keys_on_service_id"
-  end
-
-  create_table "service_webhooks", force: :cascade do |t|
-    t.bigint "service_id", null: false
-    t.string "url", null: false
-    t.string "secret", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["service_id"], name: "index_service_webhooks_on_service_id"
-    t.index ["url"], name: "index_service_webhooks_on_url", unique: true
-  end
-
-  create_table "services", force: :cascade do |t|
-    t.string "name", null: false
-    t.enum "status", default: "active", null: false, enum_type: "service_status"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.integer "keys_count", default: 0, null: false
-    t.index ["name"], name: "index_services_on_name", unique: true
-  end
-
   create_table "sessions", force: :cascade do |t|
     t.string "session_id", null: false
     t.text "data"
@@ -383,6 +328,21 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_14_234339) do
     t.datetime "updated_at", null: false
     t.index ["session_id"], name: "index_sessions_on_session_id", unique: true
     t.index ["updated_at"], name: "index_sessions_on_updated_at"
+  end
+
+  create_table "user_api_keys", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "name", null: false
+    t.string "key_digest", null: false
+    t.datetime "last_used_at"
+    t.datetime "expires_at"
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["expires_at"], name: "index_user_api_keys_on_expires_at"
+    t.index ["key_digest"], name: "index_user_api_keys_on_key_digest", unique: true
+    t.index ["user_id", "active"], name: "index_user_api_keys_on_user_id_and_active"
+    t.index ["user_id"], name: "index_user_api_keys_on_user_id"
   end
 
   create_table "user_seen_at_histories", force: :cascade do |t|
@@ -448,28 +408,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_14_234339) do
     t.index ["item_type", "item_id"], name: "index_versions_on_item_type_and_item_id"
   end
 
-  create_table "webhook_deliveries", force: :cascade do |t|
-    t.string "url"
-    t.string "event"
-    t.text "payload"
-    t.string "status"
-    t.integer "attempts"
-    t.datetime "last_attempt_at"
-    t.jsonb "response"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "oauth_access_grants", "oauth_applications", column: "application_id"
   add_foreign_key "oauth_access_grants", "users", column: "resource_owner_id"
   add_foreign_key "oauth_access_tokens", "oauth_applications", column: "application_id"
   add_foreign_key "oauth_access_tokens", "users", column: "resource_owner_id"
-  add_foreign_key "service_key_usages", "service_keys", column: "key_id"
-  add_foreign_key "service_key_usages", "users", on_delete: :nullify, validate: false
-  add_foreign_key "service_keys", "services"
-  add_foreign_key "service_webhooks", "services"
+  add_foreign_key "user_api_keys", "users"
   add_foreign_key "user_sessions", "users"
   add_foreign_key "user_sessions", "users", column: "impersonated_by_id"
 end

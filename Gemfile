@@ -29,6 +29,13 @@ gem "jbuilder"                           # Build JSON APIs
 gem "jsbundling-rails", "~> 1.0"
 
 ###############################################################################
+# API DOCUMENTATION
+###############################################################################
+gem "grape", "~> 2.0"                    # API framework
+gem "grape-swagger", "~> 2.0"            # Generate OpenAPI/Swagger docs from Grape
+gem "grape-swagger-entity", "~> 0.5"     # Entity support for swagger docs
+
+###############################################################################
 # SECURITY & AUTHENTICATION
 ###############################################################################
 gem "bcrypt", "~> 3.1.7"                 # Secure password hashing

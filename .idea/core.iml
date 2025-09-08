@@ -93,6 +93,10 @@
     <orderEntry type="library" scope="PROVIDED" name="dotenv (v3.1.8, mise: 3.4.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="dotenv-rails (v3.1.8, mise: 3.4.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="drb (v2.2.3, mise: 3.4.3) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="dry-core (v1.1.0, mise: 3.4.3) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="dry-inflector (v1.2.0, mise: 3.4.3) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="dry-logic (v1.6.0, mise: 3.4.3) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="dry-types (v1.8.3, mise: 3.4.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="ed25519 (v1.4.0, mise: 3.4.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="email_reply_parser (v0.5.11, mise: 3.4.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="erb (v5.0.2, mise: 3.4.3) [gem]" level="application" />
@@ -110,6 +114,10 @@
     <orderEntry type="library" scope="PROVIDED" name="fugit (v1.11.2, mise: 3.4.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="geocoder (v1.8.5, mise: 3.4.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="globalid (v1.2.1, mise: 3.4.3) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="grape (v2.4.0, mise: 3.4.3) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="grape-entity (v1.0.1, mise: 3.4.3) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="grape-swagger (v2.1.2, mise: 3.4.3) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="grape-swagger-entity (v0.7.0, mise: 3.4.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="groupdate (v6.7.0, mise: 3.4.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="hashid-rails (v1.4.1, mise: 3.4.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="hashids (v1.0.6, mise: 3.4.3) [gem]" level="application" />
@@ -149,6 +157,9 @@
     <orderEntry type="library" scope="PROVIDED" name="minitest (v5.25.5, mise: 3.4.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="mission_control-jobs (v1.1.0, mise: 3.4.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="msgpack (v1.8.0, mise: 3.4.3) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="multi_json (v1.17.0, mise: 3.4.3) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="mustermann (v3.0.4, mise: 3.4.3) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="mustermann-grape (v1.1.0, mise: 3.4.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="net-http (v0.6.0, mise: 3.4.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="net-imap (v0.5.10, mise: 3.4.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="net-pop (v0.1.2, mise: 3.4.3) [gem]" level="application" />
@@ -234,6 +245,7 @@
     <orderEntry type="library" scope="PROVIDED" name="rubocop-rspec_rails (v2.31.0, mise: 3.4.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="ruby-progressbar (v1.13.0, mise: 3.4.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="ruby-vips (v2.2.5, mise: 3.4.3) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="ruby2_keywords (v0.0.5, mise: 3.4.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="rubyzip (v3.1.0, mise: 3.4.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="safely_block (v0.5.0, mise: 3.4.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="safety_net_attestation (v0.4.0, mise: 3.4.3) [gem]" level="application" />

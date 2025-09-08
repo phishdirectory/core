@@ -307,6 +307,7 @@ Rails.application.routes.draw do
         member do
           post :impersonate
         end
+        resources :user_api_keys, only: [:index, :show, :new, :create, :destroy]
       end
 
       resources :services do
@@ -340,13 +341,18 @@ Rails.application.routes.draw do
   # API routes
   namespace :api do
     namespace :v1 do
+      # Public endpoints (no authentication required)
       get "health", to: "health#index"
-
       post "auth/authenticate", to: "auth#authenticate"
 
       # Service key protected endpoints
       resources :users, only: [:show, :create]
       get "users/by_email", to: "users#show"
+
+      # Service management endpoints
+      get "service", to: "services#show"
+      get "service/usage", to: "services#usage_stats"
+      get "service/recent", to: "services#recent_usage"
     end
   end
 

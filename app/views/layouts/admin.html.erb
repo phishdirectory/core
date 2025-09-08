@@ -357,12 +357,6 @@
               <% end %>
             </li>
             <li class="admin-nav-item">
-              <%= link_to admin_services_path,
-                  class: "admin-nav-link #{controller_name == 'services' ? 'active' : ''}" do %>
-                Services
-              <% end %>
-            </li>
-            <li class="admin-nav-item">
               <%= link_to admin_oauth_applications_path,
                   class: "admin-nav-link #{controller_name == 'oauth_applications' ? 'active' : ''}" do %>
                 OAuth Apps

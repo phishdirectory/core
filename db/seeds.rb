@@ -81,15 +81,4 @@ User.find_or_create_by!(email: "internal+user@phish.directory") do |user|
   user.pd_dev = false
 end
 
-services = [
-  {id: 1, name: "Core API", webhook_url: "https://api.phish.directory/veritas"},
-  {id:  2, name: "Momento", webhook_url: "https://momento.phish.directory/veritas"},
-  {id:  3, name: "Atrium", webhook_url: "https://atrium.phish.directory/veritas"}
-]
-
-services.each do |service|
-  # Create the service first
-  Service.create_with_attributes(service[:name], webhook_url: service[:webhook_url])
-end
-
 puts "Seed data successfully created!"

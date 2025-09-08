@@ -1,0 +1,135 @@
+<% content_for :title, "API Key Created" %>
+
+<div class="space-y-6">
+  <!-- Header -->
+  <div>
+    <h1 class="text-2xl font-semibold text-gray-900">API Key Created Successfully</h1>
+    <p class="mt-1 text-sm text-gray-500">
+      New API key created for <%= @user.full_name %> (<%= @user.email %>)
+    </p>
+  </div>
+
+  <!-- Success Alert with API Key -->
+  <div class="rounded-md bg-green-50 p-4">
+    <div class="flex">
+      <div class="flex-shrink-0">
+        <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+        </svg>
+      </div>
+      <div class="ml-3">
+        <h3 class="text-sm font-medium text-green-800">API Key Created</h3>
+        <div class="mt-2 text-sm text-green-700">
+          <p>Your API key has been created successfully. Copy it now - you won't be able to see it again!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- API Key Display -->
+  <div class="bg-white shadow sm:rounded-lg">
+    <div class="px-4 py-5 sm:p-6">
+      <h3 class="text-lg leading-6 font-medium text-gray-900">Your New API Key</h3>
+      <div class="mt-2 max-w-xl text-sm text-gray-500">
+        <p>Copy this API key and store it securely. For security reasons, you won't be able to view it again.</p>
+      </div>
+      
+      <div class="mt-5">
+        <div class="rounded-md bg-gray-50 px-3 py-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <code class="text-sm font-mono text-gray-900 break-all"><%= @raw_key %></code>
+            </div>
+            <button type="button" 
+                    onclick="copyToClipboard('<%= @raw_key %>')"
+                    class="ml-3 inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50">
+              <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              Copy
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Usage Instructions -->
+      <div class="mt-6">
+        <h4 class="text-sm font-medium text-gray-900">Usage Instructions</h4>
+        <div class="mt-2 text-sm text-gray-600">
+          <p>Include this API key in your requests using the <code class="bg-gray-100 px-1 rounded">X-API-Key</code> header:</p>
+          <div class="mt-2 bg-gray-900 text-green-400 p-3 rounded text-sm font-mono overflow-x-auto">
+            curl -H "X-API-Key: <%= @raw_key %>" <%= request.base_url %>/api/v1/health
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Details -->
+  <div class="bg-white shadow sm:rounded-lg">
+    <div class="px-4 py-5 sm:p-6">
+      <h3 class="text-lg leading-6 font-medium text-gray-900">Key Details</h3>
+      
+      <dl class="mt-5 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Name</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @api_key.name %></dd>
+        </div>
+        
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Status</dt>
+          <dd class="mt-1">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Active</span>
+          </dd>
+        </div>
+        
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Created</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @api_key.created_at.strftime("%B %d, %Y at %I:%M %p") %></dd>
+        </div>
+        
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Expires</dt>
+          <dd class="mt-1 text-sm text-gray-900">
+            <% if @api_key.expires_at %>
+              <%= @api_key.expires_at.strftime("%B %d, %Y at %I:%M %p") %>
+            <% else %>
+              Never
+            <% end %>
+          </dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="flex justify-end space-x-3">
+    <%= link_to "View All API Keys", admin_user_user_api_keys_path(@user), class: "bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50" %>
+    <%= link_to "Back to User", admin_user_path(@user), class: "inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700" %>
+  </div>
+</div>
+
+<script>
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).then(function() {
+    // Show success feedback
+    const button = event.target.closest('button');
+    const originalText = button.innerHTML;
+    button.innerHTML = `
+      <svg class="h-4 w-4 mr-1 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+      </svg>
+      Copied!
+    `;
+    button.classList.add('text-green-600');
+    
+    setTimeout(() => {
+      button.innerHTML = originalText;
+      button.classList.remove('text-green-600');
+    }, 2000);
+  }).catch(function(err) {
+    console.error('Could not copy text: ', err);
+    alert('Failed to copy to clipboard. Please copy manually.');
+  });
+}
+</script>

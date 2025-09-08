@@ -1,0 +1,90 @@
+<% content_for :title, "Create API Key" %>
+
+<div class="space-y-6">
+  <!-- Header -->
+  <div>
+    <div class="flex items-center space-x-2 text-sm text-gray-500">
+      <%= link_to "API Keys", admin_user_user_api_keys_path(@user), class: "hover:text-gray-700" %>
+      <span>›</span>
+      <span>Create New Key</span>
+    </div>
+    <h1 class="mt-2 text-2xl font-semibold text-gray-900">Create API Key</h1>
+    <p class="mt-1 text-sm text-gray-500">
+      Create a new API key for <%= @user.full_name %> (<%= @user.email %>)
+    </p>
+  </div>
+
+  <!-- Form -->
+  <div class="bg-white shadow sm:rounded-lg">
+    <div class="px-4 py-5 sm:p-6">
+      <%= form_with model: [@user, @api_key], url: admin_user_user_api_keys_path(@user), local: true, data: { turbo: false } do |form| %>
+        <% if @api_key.errors.any? %>
+          <div class="rounded-md bg-red-50 p-4 mb-6">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <div class="ml-3">
+                <h3 class="text-sm font-medium text-red-800">There were errors with your submission:</h3>
+                <div class="mt-2 text-sm text-red-700">
+                  <ul class="list-disc pl-5 space-y-1">
+                    <% @api_key.errors.full_messages.each do |message| %>
+                      <li><%= message %></li>
+                    <% end %>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+
+        <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+          <div class="sm:col-span-4">
+            <%= form.label :name, class: "block text-sm font-medium text-gray-700" %>
+            <div class="mt-1">
+              <%= form.text_field :name, 
+                  class: "shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md",
+                  placeholder: "e.g., Production API, Mobile App, Third-party Integration" %>
+            </div>
+            <p class="mt-2 text-sm text-gray-500">Give this API key a descriptive name to help identify its purpose.</p>
+          </div>
+
+          <div class="sm:col-span-3">
+            <%= label_tag :expires_in_days, "Expires in (days)", class: "block text-sm font-medium text-gray-700" %>
+            <div class="mt-1">
+              <%= number_field_tag :expires_in_days, nil, 
+                  class: "shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md",
+                  placeholder: "365",
+                  min: 1 %>
+            </div>
+            <p class="mt-2 text-sm text-gray-500">Leave empty for no expiration. Recommended: 365 days or less.</p>
+          </div>
+        </div>
+
+        <!-- Warning Box -->
+        <div class="mt-6 rounded-md bg-yellow-50 p-4">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <div class="ml-3">
+              <h3 class="text-sm font-medium text-yellow-800">Important Security Notice</h3>
+              <div class="mt-2 text-sm text-yellow-700">
+                <p>The API key will only be displayed once after creation. Make sure to copy and store it securely.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 flex justify-end space-x-3">
+          <%= link_to "Cancel", admin_user_user_api_keys_path(@user), class: "bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+          <%= form.submit "Create API Key", class: "inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

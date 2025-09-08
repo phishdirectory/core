@@ -105,6 +105,76 @@
     </div>
   </div>
 
+  <!-- API Keys Section -->
+  <div class="mt-8 bg-white shadow rounded-lg">
+    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+      <div>
+        <h2 class="text-lg font-medium text-gray-900">API Keys</h2>
+        <p class="text-sm text-gray-500">Manage API keys for this user</p>
+      </div>
+      <%= link_to "Create API Key", new_admin_user_user_api_key_path(@user), 
+          class: "inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700" %>
+    </div>
+    <div class="px-6 py-4">
+      <% if @user.user_api_keys.any? %>
+        <div class="space-y-3">
+          <% @user.user_api_keys.order(created_at: :desc).limit(5).each do |api_key| %>
+            <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+              <div>
+                <div class="flex items-center space-x-2">
+                  <h3 class="text-sm font-medium text-gray-900"><%= api_key.name %></h3>
+                  <% if api_key.active? %>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">Active</span>
+                  <% else %>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">Inactive</span>
+                  <% end %>
+                  <% if api_key.expired? %>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">Expired</span>
+                  <% end %>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">
+                  Created <%= api_key.created_at.strftime("%B %d, %Y") %>
+                  <% if api_key.last_used_at %>
+                    • Last used <%= time_ago_in_words(api_key.last_used_at) %> ago
+                  <% else %>
+                    • Never used
+                  <% end %>
+                </p>
+              </div>
+              <div class="flex items-center space-x-2">
+                <%= link_to "View", admin_user_user_api_key_path(@user, api_key), 
+                    class: "text-blue-600 hover:text-blue-800 text-sm" %>
+                <%= link_to "Delete", admin_user_user_api_key_path(@user, api_key), 
+                    method: :delete,
+                    data: { 
+                      turbo_method: :delete,
+                      turbo_confirm: "Are you sure you want to delete this API key?" 
+                    },
+                    class: "text-red-600 hover:text-red-800 text-sm" %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+        
+        <% if @user.user_api_keys.count > 5 %>
+          <div class="mt-4 text-center">
+            <%= link_to "View All API Keys (#{@user.user_api_keys.count})", admin_user_user_api_keys_path(@user),
+                class: "text-blue-600 hover:text-blue-800 text-sm" %>
+          </div>
+        <% end %>
+      <% else %>
+        <div class="text-center py-8">
+          <svg class="mx-auto h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-3a1 1 0 011-1h2.586l6.414-6.414a6 6 0 012-3.586z" />
+          </svg>
+          <p class="mt-2 text-sm text-gray-500">No API keys created yet</p>
+          <%= link_to "Create First API Key", new_admin_user_user_api_key_path(@user),
+              class: "mt-2 inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
   <!-- Session Locations Map -->
   <% session_map_data = @user.user_sessions.filter_map(&:map_data) %>
   <% if session_map_data.any? %>
