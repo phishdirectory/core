@@ -53,20 +53,20 @@
 #                               ok_computer        /ok                                                                                               OkComputer::Engine
 #            stop_impersonating_admin_users DELETE /admin/users/stop_impersonating(.:format)                                                         admin/users#stop_impersonating
 #                                admin_root GET    /admin(.:format)                                                                                  admin/dashboard#index
-#                    impersonate_admin_user POST   /admin/users/:id/impersonate(.:format)                                                            admin/users#impersonate
-#                  admin_user_user_api_keys GET    /admin/users/:user_id/user_api_keys(.:format)                                                     admin/user_api_keys#index
-#                                           POST   /admin/users/:user_id/user_api_keys(.:format)                                                     admin/user_api_keys#create
-#               new_admin_user_user_api_key GET    /admin/users/:user_id/user_api_keys/new(.:format)                                                 admin/user_api_keys#new
-#                   admin_user_user_api_key GET    /admin/users/:user_id/user_api_keys/:id(.:format)                                                 admin/user_api_keys#show
-#                                           DELETE /admin/users/:user_id/user_api_keys/:id(.:format)                                                 admin/user_api_keys#destroy
+#                    impersonate_admin_user POST   /admin/users/:pd_id/impersonate(.:format)                                                         admin/users#impersonate
+#                  admin_user_user_api_keys GET    /admin/users/:user_pd_id/user_api_keys(.:format)                                                  admin/user_api_keys#index
+#                                           POST   /admin/users/:user_pd_id/user_api_keys(.:format)                                                  admin/user_api_keys#create
+#               new_admin_user_user_api_key GET    /admin/users/:user_pd_id/user_api_keys/new(.:format)                                              admin/user_api_keys#new
+#                   admin_user_user_api_key GET    /admin/users/:user_pd_id/user_api_keys/:id(.:format)                                              admin/user_api_keys#show
+#                                           DELETE /admin/users/:user_pd_id/user_api_keys/:id(.:format)                                              admin/user_api_keys#destroy
 #                               admin_users GET    /admin/users(.:format)                                                                            admin/users#index
 #                                           POST   /admin/users(.:format)                                                                            admin/users#create
 #                            new_admin_user GET    /admin/users/new(.:format)                                                                        admin/users#new
-#                           edit_admin_user GET    /admin/users/:id/edit(.:format)                                                                   admin/users#edit
-#                                admin_user GET    /admin/users/:id(.:format)                                                                        admin/users#show
-#                                           PATCH  /admin/users/:id(.:format)                                                                        admin/users#update
-#                                           PUT    /admin/users/:id(.:format)                                                                        admin/users#update
-#                                           DELETE /admin/users/:id(.:format)                                                                        admin/users#destroy
+#                           edit_admin_user GET    /admin/users/:pd_id/edit(.:format)                                                                admin/users#edit
+#                                admin_user GET    /admin/users/:pd_id(.:format)                                                                     admin/users#show
+#                                           PATCH  /admin/users/:pd_id(.:format)                                                                     admin/users#update
+#                                           PUT    /admin/users/:pd_id(.:format)                                                                     admin/users#update
+#                                           DELETE /admin/users/:pd_id(.:format)                                                                     admin/users#destroy
 #                        admin_service_keys GET    /admin/services/:service_id/keys(.:format)                                                        admin/service_keys#index
 #                                           POST   /admin/services/:service_id/keys(.:format)                                                        admin/service_keys#create
 #                     new_admin_service_key GET    /admin/services/:service_id/keys/new(.:format)                                                    admin/service_keys#new
@@ -107,15 +107,9 @@
 #                                     admin GET    /admin(.:format)                                                                                  redirect(301, /login)
 #                                           GET    /admin/*path(.:format)                                                                            redirect(301, /login)
 #                         letter_opener_web        /letter_opener                                                                                    LetterOpenerWeb::Engine
-#                             api_v1_health GET    /api/v1/health(.:format)                                                                          api/v1/health#index
-#                  api_v1_auth_authenticate POST   /api/v1/auth/authenticate(.:format)                                                               api/v1/auth#authenticate
-#                           api_v1_users_me GET    /api/v1/users/me(.:format)                                                                        api/v1/users#me
-#                              api_v1_users POST   /api/v1/users(.:format)                                                                           api/v1/users#create
-#                               api_v1_user GET    /api/v1/users/:id(.:format)                                                                       api/v1/users#show
-#                     api_v1_users_by_email GET    /api/v1/users/by_email(.:format)                                                                  api/v1/users#show
-#                            api_v1_service GET    /api/v1/service(.:format)                                                                         api/v1/services#show
-#                      api_v1_service_usage GET    /api/v1/service/usage(.:format)                                                                   api/v1/services#usage_stats
-#                     api_v1_service_recent GET    /api/v1/service/recent(.:format)                                                                  api/v1/services#recent_usage
+#                                           GET    /docs/api/v1(/*path)(.:format)                                                                    docs/api#v1
+#                            docs_api_index GET    /docs/api(.:format)                                                                               redirect(301, /docs/api/v1)
+#                                    api_v1        /                                                                                                 Api::V1
 #          turbo_recede_historical_location GET    /recede_historical_location(.:format)                                                             turbo/native/navigation#recede
 #          turbo_resume_historical_location GET    /resume_historical_location(.:format)                                                             turbo/native/navigation#resume
 #         turbo_refresh_historical_location GET    /refresh_historical_location(.:format)                                                            turbo/native/navigation#refresh

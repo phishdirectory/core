@@ -2,8 +2,6 @@
 
 module Api
   class V1 < Grape::API
-    include Grape::Kaminari
-
     version "v1", using: :path
     prefix :api
     format :json

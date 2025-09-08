@@ -5,33 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a2363c8b-6645-4129-807f-9beda4c8f90e" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/app/api/api/entities/api_error.rb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/api/api/v1.rb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/controllers/docs/api_controller.rb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/views/docs/api/v1.html.erb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/core.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/core.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules/.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Gemfile" beforeDir="false" afterPath="$PROJECT_DIR$/Gemfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Gemfile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/Gemfile.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/api/base.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/api/v1/auth.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/api/v1/base.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/api/v1/health.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/api/v1/users.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/entities/base.rb" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/api/entities/base.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/entities/error.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/entities/user.rb" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/api/entities/user.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/entities/user_api_key.rb" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/api/entities/user_api_key.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/controllers/admin/users_controller.rb" beforeDir="false" afterPath="$PROJECT_DIR$/app/controllers/admin/users_controller.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/controllers/api/base_controller.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/controllers/api/v1/auth_controller.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/controllers/api/v1/base_controller.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/controllers/api/v1/docs_controller.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/controllers/api/v1/health_controller.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/controllers/api/v1/users_controller.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/views/admin/user_api_keys/show.html.erb" beforeDir="false" afterPath="$PROJECT_DIR$/app/views/admin/user_api_keys/show.html.erb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/views/admin/users/index.html.erb" beforeDir="false" afterPath="$PROJECT_DIR$/app/views/admin/users/index.html.erb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/views/admin/users/show.html.erb" beforeDir="false" afterPath="$PROJECT_DIR$/app/views/admin/users/show.html.erb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config/routes.rb" beforeDir="false" afterPath="$PROJECT_DIR$/config/routes.rb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -180,7 +154,7 @@
       <option name="presentableId" value="Default" />
       <updated>1757279721176</updated>
       <workItem from="1757279722213" duration="4000" />
-      <workItem from="1757280035347" duration="12713000" />
+      <workItem from="1757280035347" duration="13125000" />
     </task>
     <servers />
   </component>

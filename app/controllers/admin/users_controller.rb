@@ -23,6 +23,7 @@ class Admin::UsersController < Admin::BaseController
   end
 
   def show
+    @user_sessions = @user.user_sessions.includes(:impersonated_by).order(created_at: :desc)
   end
 
   def new
