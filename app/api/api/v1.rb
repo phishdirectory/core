@@ -2,22 +2,27 @@
 
 module Api
   class V1 < Grape::API
+    include Grape::Kaminari
+
     version "v1", using: :path
     prefix :api
     format :json
     default_format :json
 
+    helpers do
+      def users
+        @users ||= paginate(User.all.order(created_at: :desc))
+      end
+    end
 
-    # desc "Flavor text!" do
-    #   summary "Flavor text!"
-    #   failure [[404]]
-    #   hidden true
-    # end
-    # get :flavor do
-    #   {
-    #     flavor: FlavorTextService.new.generate
-    #   }
-    # end
+    desc "Healthcheck" do
+      summary "Helthcheck endpoint"
+      failure [[404]]
+      hidden false
+    end
+    get :healthcheck do
+      { status: "ok", timestamp: Time.current.iso8601 }
+    end
 
 
     # Handle validation errors
