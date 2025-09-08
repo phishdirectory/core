@@ -1,6 +1,6 @@
 class CreateRollups < ActiveRecord::Migration[8.0]
   def change
-    create_table :rollups do |t|
+    create_table :rollups, id: :uuid do |t|
       t.string :name, null: false
       t.string :interval, null: false
       t.datetime :time, null: false

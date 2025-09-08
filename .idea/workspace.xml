@@ -5,8 +5,47 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a2363c8b-6645-4129-807f-9beda4c8f90e" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/app/api/api/entities/domain.rb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/api/api/entities/url.rb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/services/phish/AbuseCh_service.rb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/services/phish/FishFish_service.rb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/services/phish/FishObserver_service.rb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/services/phish/GoogleWebRisk_service.rb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/services/phish/IpQualityScore_service.rb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/services/phish/IpQuery_service.rb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/services/phish/PhishReport_service.rb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/services/phish/SafeBrowsing_service.rb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/services/phish/SecurityTrails_service.rb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/services/phish/UrlScan_service.rb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/services/phish/VirusTotal_service.rb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/services/phish/Walshy_service.rb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config/initializers/generators.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/core.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/core.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules/.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules/.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.mise.toml" beforeDir="false" afterPath="$PROJECT_DIR$/.mise.toml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/api/api/v1.rb" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/api/v1.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/services/api_metrics_service.rb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/services/webhook_service.rb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/brakeman" beforeDir="false" afterPath="$PROJECT_DIR$/bin/brakeman" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/bundle" beforeDir="false" afterPath="$PROJECT_DIR$/bin/bundle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/dev" beforeDir="false" afterPath="$PROJECT_DIR$/bin/dev" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/rails" beforeDir="false" afterPath="$PROJECT_DIR$/bin/rails" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/rake" beforeDir="false" afterPath="$PROJECT_DIR$/bin/rake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/rubocop" beforeDir="false" afterPath="$PROJECT_DIR$/bin/rubocop" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/setup" beforeDir="false" afterPath="$PROJECT_DIR$/bin/setup" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/thrust" beforeDir="false" afterPath="$PROJECT_DIR$/bin/thrust" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/credentials.yml.enc" beforeDir="false" afterPath="$PROJECT_DIR$/config/credentials.yml.enc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/migrate/20250503154645_create_users.rb" beforeDir="false" afterPath="$PROJECT_DIR$/db/migrate/20250503154645_create_users.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/migrate/20250503171629_create_user_sessions.rb" beforeDir="false" afterPath="$PROJECT_DIR$/db/migrate/20250503171629_create_user_sessions.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/migrate/20250503190052_create_user_seen_at_histories.rb" beforeDir="false" afterPath="$PROJECT_DIR$/db/migrate/20250503190052_create_user_seen_at_histories.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/migrate/20250602135445_create_sessions.rb" beforeDir="false" afterPath="$PROJECT_DIR$/db/migrate/20250602135445_create_sessions.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/migrate/20250609015045_create_rollups.rb" beforeDir="false" afterPath="$PROJECT_DIR$/db/migrate/20250609015045_create_rollups.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/migrate/20250614170132_create_doorkeeper_tables.rb" beforeDir="false" afterPath="$PROJECT_DIR$/db/migrate/20250614170132_create_doorkeeper_tables.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/migrate/20250907232241_create_user_api_keys.rb" beforeDir="false" afterPath="$PROJECT_DIR$/db/migrate/20250907232241_create_user_api_keys.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/schema.rb" beforeDir="false" afterPath="$PROJECT_DIR$/db/schema.rb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,17 +80,19 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Ruby Console.Rails console: core.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "com.intellij.lang.ruby.rbs.tools.collection.workspace.sync.RbsCollectionUpdateProjectActivity#LAST_UPDATE_TIMESTAMP": "1757280094320",
+    "com.intellij.lang.ruby.rbs.tools.collection.workspace.sync.RbsCollectionUpdateProjectActivity#LAST_UPDATE_TIMESTAMP": "1757336353288",
     "git-widget-placeholder": "main",
+    "last_opened_file_path": "/Users/jsp/dev/projects/phishdirectory/core",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "yarn",
     "ruby.structure.view.model.defaults.configured": "true",
-    "settings.editor.selected.configurable": "file.status.colors",
+    "settings.editor.selected.configurable": "org.jetbrains.plugins.ruby.settings.RubyActiveModuleSdkConfigurable",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -61,7 +102,29 @@
       <recent name="$PROJECT_DIR$/app/controllers/api/dep" />
     </key>
   </component>
-  <component name="RunManager" selected="Rails.core">
+  <component name="RunManager" selected="Ruby Console.Rails console: core">
+    <configuration name="Rails console: core" type="IrbRunConfigurationType" factoryName="IRB console" temporary="true">
+      <module name="core" />
+      <IRB_RUN_CONFIG NAME="RUBY_ARGS" VALUE="" />
+      <IRB_RUN_CONFIG NAME="WORK DIR" VALUE="$MODULE_DIR$" />
+      <IRB_RUN_CONFIG NAME="SHOULD_USE_SDK" VALUE="false" />
+      <IRB_RUN_CONFIG NAME="ALTERN_SDK_NAME" VALUE="" />
+      <IRB_RUN_CONFIG NAME="myPassParentEnvs" VALUE="true" />
+      <envs>
+        <env name="TERM" value="dumb" />
+      </envs>
+      <EXTENSION ID="BundlerRunConfigurationExtension" BUNDLE_MODE="AUTO" bundleExecEnabled="true" />
+      <EXTENSION ID="RubyCoverageRunConfigurationExtension" track_test_folders="true" runner="rcov" ENABLE_BRANCH_COVERAGE="true" ENABLE_FORKED_COVERAGE="true">
+        <COVERAGE_PATTERN ENABLED="true">
+          <PATTERN REGEXPS="/.rvm/" INCLUDED="false" />
+        </COVERAGE_PATTERN>
+      </EXTENSION>
+      <EXTENSION ID="org.jetbrains.plugins.ruby.rails.run.RailsRunConfigurationExtension" SCRATCH_USE_RAILS_RUNNER="false" />
+      <IRB_RUN_CONFIG NAME="SCRIPT_PATH" VALUE="$MODULE_DIR$/bin/rails" />
+      <IRB_RUN_CONFIG NAME="SCRIPT_ARGS" VALUE="console" />
+      <IRB_RUN_CONFIG NAME="CONSOLE_TYPE" VALUE="RAILS" />
+      <method v="2" />
+    </configuration>
     <configuration name="core" type="RailsRunConfigurationType" factoryName="Rails">
       <module name="core" />
       <predefined_log_file enabled="true" id="RUBY_RAILS_SERVER" />
@@ -137,11 +200,17 @@
       <RAKE_RUN_CONFIG_SETTINGS_ID NAME="RAKE_TASK_OPTION_TESTOPTS" VALUE="" />
       <method v="2" />
     </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Ruby Console.Rails console: core" />
+        <item itemvalue="Ruby Console.Rails console: core" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-09060db00ec0-JavaScript-RM-251.28293.23" />
+        <option value="bundled-js-predefined-d6986cc7102b-09060db00ec0-JavaScript-RM-251.28293.42" />
       </set>
     </attachedChunks>
   </component>
@@ -154,17 +223,33 @@
       <option name="presentableId" value="Default" />
       <updated>1757279721176</updated>
       <workItem from="1757279722213" duration="4000" />
-      <workItem from="1757280035347" duration="14831000" />
+      <workItem from="1757280035347" duration="20925000" />
+      <workItem from="1757335824611" duration="452000" />
+      <workItem from="1757336294313" duration="3009000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="VcsManagerConfiguration">
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/core@Rails_console__core.rcov" NAME="Rails console: core Coverage Results" MODIFIED="1757336651230" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="rcov" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" MODULE_NAME="core" />
   </component>
 </project>

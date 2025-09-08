@@ -1,8 +1,8 @@
 class CreateUserSessions < ActiveRecord::Migration[8.0]
   def change
-    create_table :user_sessions do |t|
-      t.references :user, null: false, foreign_key: true
-      t.references :impersonated_by, foreign_key: { to_table: :users }, null: true
+    create_table :user_sessions, id: :uuid do |t|
+      t.references :user, null: false, foreign_key: true, type: :uuid
+      t.references :impersonated_by, foreign_key: { to_table: :users }, type: :uuid, null: true
       t.string :session_token_ciphertext
       t.string :session_token_bidx
       t.string :fingerprint

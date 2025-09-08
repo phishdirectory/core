@@ -17,10 +17,10 @@ module Api
       def authenticate!
         api_key_value = extract_api_key
         error!({ message: "API key required" }, 401) unless api_key_value
-        
+
         api_key = UserApiKey.find_by_key(api_key_value)
         error!({ message: "Invalid API key" }, 401) unless api_key&.api_valid?
-        
+
         api_key.touch_last_used!
         @current_user = api_key.user
       end
@@ -109,7 +109,9 @@ module Api
       },
       doc_version: "1.0.0",
       models: [
-        Entities::User
+        Entities::User,
+        Entities::Domain,
+        Entities::Url
       ],
       array_use_braces: true,
       tags: [

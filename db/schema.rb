@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_07_232241) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_08_024255) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "fuzzystrmatch"
   enable_extension "pg_catalog.plpgsql"
@@ -20,17 +20,17 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_07_232241) do
   create_enum "access_level", ["owner", "superadmin", "admin", "trusted", "user"]
   create_enum "status", ["active", "suspended", "deactivated"]
 
-  create_table "active_storage_attachments", force: :cascade do |t|
+  create_table "active_storage_attachments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
-    t.bigint "record_id", null: false
-    t.bigint "blob_id", null: false
+    t.uuid "record_id", null: false
+    t.uuid "blob_id", null: false
     t.datetime "created_at", null: false
     t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
     t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
   end
 
-  create_table "active_storage_blobs", force: :cascade do |t|
+  create_table "active_storage_blobs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "key", null: false
     t.string "filename", null: false
     t.string "content_type"
@@ -42,8 +42,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_07_232241) do
     t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
   end
 
-  create_table "active_storage_variant_records", force: :cascade do |t|
-    t.bigint "blob_id", null: false
+  create_table "active_storage_variant_records", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
@@ -261,9 +261,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_07_232241) do
     t.index ["viewer_type", "viewer_id"], name: "index_lockbox_audits_on_viewer"
   end
 
-  create_table "oauth_access_grants", force: :cascade do |t|
-    t.bigint "resource_owner_id", null: false
-    t.bigint "application_id", null: false
+  create_table "oauth_access_grants", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "resource_owner_id", null: false
+    t.uuid "application_id", null: false
     t.string "token", null: false
     t.integer "expires_in", null: false
     t.text "redirect_uri", null: false
@@ -275,9 +275,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_07_232241) do
     t.index ["token"], name: "index_oauth_access_grants_on_token", unique: true
   end
 
-  create_table "oauth_access_tokens", force: :cascade do |t|
-    t.bigint "resource_owner_id"
-    t.bigint "application_id", null: false
+  create_table "oauth_access_tokens", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "resource_owner_id"
+    t.uuid "application_id", null: false
     t.string "token", null: false
     t.string "refresh_token"
     t.integer "expires_in"
@@ -291,7 +291,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_07_232241) do
     t.index ["token"], name: "index_oauth_access_tokens_on_token", unique: true
   end
 
-  create_table "oauth_applications", force: :cascade do |t|
+  create_table "oauth_applications", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name", null: false
     t.string "uid", null: false
     t.string "secret", null: false
@@ -312,7 +312,25 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_07_232241) do
     t.index ["searchable_type", "searchable_id"], name: "index_pg_search_documents_on_searchable"
   end
 
-  create_table "rollups", force: :cascade do |t|
+  create_table "phish_domains", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "domain"
+    t.datetime "last_checked_at"
+    t.uuid "verdict_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["verdict_id"], name: "index_phish_domains_on_verdict_id"
+  end
+
+  create_table "phish_urls", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "url"
+    t.datetime "last_checked_at"
+    t.uuid "verdict_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["verdict_id"], name: "index_phish_urls_on_verdict_id"
+  end
+
+  create_table "rollups", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name", null: false
     t.string "interval", null: false
     t.datetime "time", null: false
@@ -321,7 +339,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_07_232241) do
     t.index ["name", "interval", "time", "dimensions"], name: "index_rollups_on_name_and_interval_and_time_and_dimensions", unique: true
   end
 
-  create_table "sessions", force: :cascade do |t|
+  create_table "sessions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "session_id", null: false
     t.text "data"
     t.datetime "created_at", null: false
@@ -330,8 +348,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_07_232241) do
     t.index ["updated_at"], name: "index_sessions_on_updated_at"
   end
 
-  create_table "user_api_keys", force: :cascade do |t|
-    t.bigint "user_id", null: false
+  create_table "user_api_keys", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "user_id", null: false
     t.string "name", null: false
     t.string "key_digest", null: false
     t.datetime "last_used_at"
@@ -345,14 +363,14 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_07_232241) do
     t.index ["user_id"], name: "index_user_api_keys_on_user_id"
   end
 
-  create_table "user_seen_at_histories", force: :cascade do |t|
+  create_table "user_seen_at_histories", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
-  create_table "user_sessions", force: :cascade do |t|
-    t.bigint "user_id", null: false
-    t.bigint "impersonated_by_id"
+  create_table "user_sessions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "user_id", null: false
+    t.uuid "impersonated_by_id"
     t.string "session_token_ciphertext"
     t.string "session_token_bidx"
     t.string "fingerprint"
@@ -372,7 +390,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_07_232241) do
     t.index ["user_id"], name: "index_user_sessions_on_user_id"
   end
 
-  create_table "users", force: :cascade do |t|
+  create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "first_name", null: false
     t.string "last_name", null: false
     t.string "pd_id", null: false
@@ -398,6 +416,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_07_232241) do
     t.index ["pd_id"], name: "index_users_on_pd_id", unique: true
   end
 
+  create_table "verdicts", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "versions", force: :cascade do |t|
     t.string "whodunnit"
     t.datetime "created_at"
@@ -414,6 +437,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_07_232241) do
   add_foreign_key "oauth_access_grants", "users", column: "resource_owner_id"
   add_foreign_key "oauth_access_tokens", "oauth_applications", column: "application_id"
   add_foreign_key "oauth_access_tokens", "users", column: "resource_owner_id"
+  add_foreign_key "phish_domains", "verdicts"
+  add_foreign_key "phish_urls", "verdicts"
   add_foreign_key "user_api_keys", "users"
   add_foreign_key "user_sessions", "users"
   add_foreign_key "user_sessions", "users", column: "impersonated_by_id"

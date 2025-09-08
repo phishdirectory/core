@@ -6,7 +6,7 @@ class CreateUsers < ActiveRecord::Migration[8.0]
 
       create_enum 'status', %w[active suspended deactivated]
 
-        create_table :users do |t|
+        create_table :users, id: :uuid do |t|
             t.string :first_name, null: false
             t.string :last_name, null: false
             t.string :pd_id, null: false

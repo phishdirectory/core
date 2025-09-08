@@ -1,6 +1,6 @@
 class CreateSessions < ActiveRecord::Migration[8.0]
   def change
-    create_table :sessions do |t|
+    create_table :sessions, id: :uuid do |t|
       t.string :session_id, null: false
       t.text :data
       t.timestamps
