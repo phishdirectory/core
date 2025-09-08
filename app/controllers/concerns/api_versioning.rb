@@ -10,17 +10,18 @@ module ApiVersioning
   private
 
   def set_api_version_headers
-    response.headers['X-API-Version'] = api_version
-    response.headers['X-API-Deprecated'] = deprecated_version? ? 'true' : 'false'
-    
-    if deprecated_version?
-      response.headers['X-API-Sunset'] = sunset_date if sunset_date
-      response.headers['Link'] = next_version_link if next_version_link
-    end
+    response.headers["X-API-Version"] = api_version
+    response.headers["X-API-Deprecated"] = deprecated_version? ? "true" : "false"
+
+    return unless deprecated_version?
+
+    response.headers["X-API-Sunset"] = sunset_date if sunset_date
+    response.headers["Link"] = next_version_link if next_version_link
+
   end
 
   def api_version
-    'v1'
+    "v1"
   end
 
   def deprecated_version?

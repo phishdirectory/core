@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Phish
   class SecurityTrailsService
     include Faraday

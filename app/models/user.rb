@@ -4,7 +4,7 @@
 #
 # Table name: users
 #
-#  id                       :bigint           not null, primary key
+#  id                       :uuid             not null, primary key
 #  access_level             :enum             default("user"), not null
 #  email                    :string           not null
 #  email_verified           :boolean          default(FALSE)

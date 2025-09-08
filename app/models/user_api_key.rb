@@ -4,7 +4,7 @@
 #
 # Table name: user_api_keys
 #
-#  id           :bigint           not null, primary key
+#  id           :uuid             not null, primary key
 #  active       :boolean          default(TRUE), not null
 #  expires_at   :datetime
 #  key_digest   :string           not null
@@ -12,7 +12,7 @@
 #  name         :string           not null
 #  created_at   :datetime         not null
 #  updated_at   :datetime         not null
-#  user_id      :bigint           not null
+#  user_id      :uuid             not null
 #
 # Indexes
 #

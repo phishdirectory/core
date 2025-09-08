@@ -5,8 +5,9 @@ module Api
     class Url < Base
       expose :url
       expose :last_checked_at do |domain|
-        domain.last_checked_at ? domain.last_checked_at.iso8601 : nil
+        domain.last_checked_at&.iso8601
       end
+
     end
   end
 end

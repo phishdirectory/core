@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Phish
   class BaseService
     include Faraday
@@ -17,7 +19,7 @@ module Phish
 
     def base_headers
       {
-        "Referer" => "https://phish.directory",
+        "Referer"    => "https://phish.directory",
         "User-Agent" => "internal-server@phish.directory",
         "X-Identity" => "internal-server@phish.directory",
       }
@@ -26,5 +28,6 @@ module Phish
     def service_headers
       {}
     end
+
   end
 end

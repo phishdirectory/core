@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Api
   module Entities
     # The `ApiError` Entity inherits from Grape::Entity rather than our custom

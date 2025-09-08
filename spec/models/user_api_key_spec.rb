@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 # == Schema Information
 #
 # Table name: user_api_keys
 #
-#  id           :bigint           not null, primary key
+#  id           :uuid             not null, primary key
 #  active       :boolean          default(TRUE), not null
 #  expires_at   :datetime
 #  key_digest   :string           not null
@@ -10,7 +12,7 @@
 #  name         :string           not null
 #  created_at   :datetime         not null
 #  updated_at   :datetime         not null
-#  user_id      :bigint           not null
+#  user_id      :uuid             not null
 #
 # Indexes
 #
@@ -23,7 +25,7 @@
 #
 #  fk_rails_...  (user_id => users.id)
 #
-require 'rails_helper'
+require "rails_helper"
 
 RSpec.describe UserApiKey, type: :model do
   pending "add some examples to (or delete) #{__FILE__}"

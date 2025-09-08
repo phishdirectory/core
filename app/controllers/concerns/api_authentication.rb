@@ -12,12 +12,12 @@ module ApiAuthentication
   def authenticate_api_key
     return render_api_unauthorized unless api_key_present?
 
-    @current_api_key = UserApiKey.find_by_key(api_key_from_header)
+    @current_api_key = UserApiKey.find_by(key: api_key_from_header)
     return render_api_unauthorized unless @current_api_key&.api_valid?
 
     # Update last used timestamp
     @current_api_key.touch_last_used!
-    
+
     # Set current user from the API key
     @current_user = @current_api_key.user
   end
@@ -27,7 +27,7 @@ module ApiAuthentication
   end
 
   def api_key_from_header
-    request.headers['X-API-Key'] || request.headers['HTTP_X_API_KEY']
+    request.headers["X-API-Key"] || request.headers["HTTP_X_API_KEY"]
   end
 
   def current_api_key

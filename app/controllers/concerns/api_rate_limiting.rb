@@ -36,7 +36,7 @@ module ApiRateLimiting
 
   def should_rate_limit?
     # Skip rate limiting for health checks
-    !(controller_name == 'health' && action_name == 'index')
+    !(controller_name == "health" && action_name == "index")
   end
 
   def rate_limit_identifier

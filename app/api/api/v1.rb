@@ -18,7 +18,7 @@ module Api
         api_key_value = extract_api_key
         error!({ message: "API key required" }, 401) unless api_key_value
 
-        api_key = UserApiKey.find_by_key(api_key_value)
+        api_key = UserApiKey.find_by(key: api_key_value)
         error!({ message: "Invalid API key" }, 401) unless api_key&.api_valid?
 
         api_key.touch_last_used!

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Phish
   class VirusTotalService < BaseService
     BASE_URL = "https://www.virustotal.com"
@@ -32,5 +34,6 @@ module Phish
         "x-apikey" => Rails.application.credentials.dig(:virustotal, :api_key)
       }
     end
+
   end
 end
