@@ -5,13 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a2363c8b-6645-4129-807f-9beda4c8f90e" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.github/workflows/fly-deploy.yml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/models/user/seen_at_history.rb" beforeDir="false" afterPath="$PROJECT_DIR$/app/models/user/seen_at_history.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/jobs" beforeDir="false" afterPath="$PROJECT_DIR$/bin/jobs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/queue.yml" beforeDir="false" afterPath="$PROJECT_DIR$/config/queue.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/recurring.yml" beforeDir="false" afterPath="$PROJECT_DIR$/config/recurring.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fly.toml" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/Procfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -191,7 +186,7 @@
       <workItem from="1757279722213" duration="4000" />
       <workItem from="1757280035347" duration="20925000" />
       <workItem from="1757335824611" duration="452000" />
-      <workItem from="1757336294313" duration="15205000" />
+      <workItem from="1757336294313" duration="15815000" />
     </task>
     <servers />
   </component>

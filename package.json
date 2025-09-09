@@ -27,5 +27,9 @@
     "@rollup/plugin-node-resolve": "^16.0.1",
     "rollup": "^4.42.0"
   },
+"engines": {
+  "node": ">=21.0.0",
+  "bun": ">=1.2.8"
+},
   "packageManager": "yarn@1.22.22"
 }
