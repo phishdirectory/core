@@ -5,14 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a2363c8b-6645-4129-807f-9beda4c8f90e" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Gemfile" beforeDir="false" afterPath="$PROJECT_DIR$/Gemfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/database.yml" beforeDir="false" afterPath="$PROJECT_DIR$/config/database.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/initializers/api_metrics_scheduler.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/initializers/grape_swagger_rails.rb" beforeDir="false" afterPath="$PROJECT_DIR$/config/initializers/grape_swagger_rails.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/controllers/dashboard/api_keys_controller.rb" beforeDir="false" afterPath="$PROJECT_DIR$/app/controllers/dashboard/api_keys_controller.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/controllers/dashboard_controller.rb" beforeDir="false" afterPath="$PROJECT_DIR$/app/controllers/dashboard_controller.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/controllers/home_controller.rb" beforeDir="false" afterPath="$PROJECT_DIR$/app/controllers/home_controller.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/models/user/seen_at_history.rb" beforeDir="false" afterPath="$PROJECT_DIR$/app/models/user/seen_at_history.rb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config/routes.rb" beforeDir="false" afterPath="$PROJECT_DIR$/config/routes.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fly.toml" beforeDir="false" afterPath="$PROJECT_DIR$/fly.toml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -192,7 +189,7 @@
       <workItem from="1757279722213" duration="4000" />
       <workItem from="1757280035347" duration="20925000" />
       <workItem from="1757335824611" duration="452000" />
-      <workItem from="1757336294313" duration="12547000" />
+      <workItem from="1757336294313" duration="12949000" />
     </task>
     <servers />
   </component>

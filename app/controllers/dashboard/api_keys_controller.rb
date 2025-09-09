@@ -29,6 +29,10 @@ class Dashboard::ApiKeysController < ApplicationController
     end
   end
 
+  def show
+    # Display API key details (without showing the actual key)
+  end
+
   def destroy
     @api_key.destroy!
     redirect_to dashboard_path, notice: "API key '#{@api_key.name}' has been deleted."
@@ -43,4 +47,5 @@ class Dashboard::ApiKeysController < ApplicationController
   def api_key_params
     params.require(:user_api_key).permit(:name)
   end
+
 end

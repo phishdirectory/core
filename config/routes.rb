@@ -40,6 +40,12 @@
 #                          profile_sessions GET    /profile/sessions(.:format)                                                                       users#sessions
 #                            update_profile PATCH  /profile(.:format)                                                                                users#update
 #                     destroy_profile_photo DELETE /profile/photo(.:format)                                                                          users#destroy_profile_photo
+#                                 dashboard GET    /dashboard(.:format)                                                                              dashboard#index
+#            show_new_key_dashboard_api_key GET    /dashboard/api_keys/:id/show_new_key(.:format)                                                    dashboard/api_keys#show_new_key
+#                        dashboard_api_keys GET    /dashboard/api_keys(.:format)                                                                     dashboard/api_keys#index
+#                                           POST   /dashboard/api_keys(.:format)                                                                     dashboard/api_keys#create
+#                     new_dashboard_api_key GET    /dashboard/api_keys/new(.:format)                                                                 dashboard/api_keys#new
+#                         dashboard_api_key DELETE /dashboard/api_keys/:id(.:format)                                                                 dashboard/api_keys#destroy
 #                        email_confirmation GET    /email_confirmation(.:format)                                                                     email_confirmations#show
 #                             confirm_email GET    /confirm_email/:token(.:format)                                                                   email_confirmations#confirm
 #                 resend_email_confirmation POST   /email_confirmation/resend(.:format)                                                              email_confirmations#resend

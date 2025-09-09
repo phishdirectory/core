@@ -9,4 +9,5 @@ class DashboardController < ApplicationController
     @active_keys = @api_keys.active.count
     @expired_keys = @api_keys.expired.count
   end
+
 end
