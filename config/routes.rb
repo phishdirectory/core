@@ -271,6 +271,16 @@ Rails.application.routes.draw do
   patch "/profile", to: "users#update", as: :update_profile
   delete "/profile/photo", to: "users#destroy_profile_photo", as: :destroy_profile_photo
 
+  # Dashboard routes (requires authentication)
+  get "/dashboard", to: "dashboard#index", as: :dashboard
+  namespace :dashboard do
+    resources :api_keys, only: [:index, :new, :create, :destroy] do
+      member do
+        get :show_new_key
+      end
+    end
+  end
+
   # Email confirmation routes
   get "/email_confirmation", to: "email_confirmations#show", as: :email_confirmation
   get "/confirm_email/:token", to: "email_confirmations#confirm", as: :confirm_email

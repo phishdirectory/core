@@ -13,14 +13,15 @@ console_command = '/rails/bin/rails console'
   release_command = "./bin/rails db:prepare"
 
 [env]
-  PORT = '8080'
+  PORT = '80'
+  RAILS_SERVE_STATIC_FILES = 'true'
 
 [processes]
-  app = "./bin/rails server"
+  app = "./bin/thrust ./bin/rails server -b 0.0.0.0 -p 80"
   solidq = "bundle exec rake solid_queue:start"
 
 [http_service]
-  internal_port = 3000
+  internal_port = 80
   force_https = true
   auto_stop_machines = 'stop'
   auto_start_machines = true
@@ -29,8 +30,8 @@ console_command = '/rails/bin/rails console'
 
   [[http_service.checks]]
     interval = '10s'
-    timeout = '2s'
-    grace_period = '5s'
+    timeout = '5s'
+    grace_period = '15s'
     method = 'GET'
     path = '/up'
     protocol = 'http'

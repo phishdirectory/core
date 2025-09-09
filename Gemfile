@@ -37,6 +37,7 @@ gem "grape-kaminari"
 gem "grape-route-helpers"
 gem "grape-swagger"
 gem "grape-swagger-entity", "~> 0.7"
+gem "grape-swagger-rails"
 
 ###############################################################################
 # SECURITY & AUTHENTICATION
@@ -150,7 +151,6 @@ end
 gem "rspec-rails"
 
 group :development do
-  gem "grape-swagger-rails"
 
   # Development Tools
   gem "actual_db_schema"                 # Rolls back phantom migrations
