@@ -1,0 +1,95 @@
+source "https://rubygems.org"
+
+# Core Rails
+gem "rails", "~> 8.1.1"
+gem "pg", "~> 1.1"
+gem "puma", ">= 5.0"
+
+# Windows timezone data
+gem "tzinfo-data", platforms: %i[windows jruby]
+
+# Rails 8 Solid gems
+gem "solid_cache"
+gem "solid_queue"
+gem "solid_cable"
+
+# Performance
+gem "bootsnap", require: false
+gem "thruster", require: false
+
+# Asset Pipeline (required for admin UIs: mission_control, flipper-ui, blazer)
+gem "sprockets-rails"
+
+# Active Storage
+gem "image_processing", "~> 1.2"
+gem "active_storage_validations"
+
+# ============================================
+# Authentication & Security
+# ============================================
+gem "doorkeeper"                    # OAuth 2.0 provider
+gem "lockbox"                       # Encryption
+gem "blind_index"                   # Searchable encrypted fields
+gem "rack-attack"                   # Rate limiting
+gem "rack-cors"                     # CORS handling
+gem "geocoder"                      # IP geolocation for sessions
+
+# ============================================
+# Database & Models
+# ============================================
+gem "paper_trail"                   # Audit trail / versioning
+gem "friendly_id"                   # Human-readable slugs
+gem "hashid-rails"                  # Obfuscated public IDs
+gem "pg_search"                     # Full-text search
+gem "strong_migrations"             # Safe migrations
+gem "aasm"                          # State machines
+gem "kaminari"                      # Pagination
+gem "validates_email_format_of"     # Email format validation
+gem "valid_email2"                  # Disposable email checking
+
+# ============================================
+# API & HTTP
+# ============================================
+gem "faraday"                       # HTTP client (per CLAUDE.md)
+gem "faraday-retry"                 # Retry middleware
+
+# ============================================
+# Background Jobs
+# ============================================
+gem "mission_control-jobs"          # Job dashboard
+
+# ============================================
+# Monitoring & Analytics
+# ============================================
+gem "ahoy_matey"                    # Analytics tracking
+gem "blazer"                        # BI dashboards
+gem "flipper"                       # Feature flags
+gem "flipper-active_record"         # Flipper ActiveRecord adapter
+gem "flipper-ui"                    # Flipper web UI
+gem "sentry-ruby"                   # Error tracking
+gem "sentry-rails"                  # Rails integration for Sentry
+gem "statsd-instrument"             # Metrics collection
+gem "okcomputer"                    # Health checks
+gem "rollup"                        # Time-series rollups
+
+# ============================================
+# Console Auditing (Production Security)
+# ============================================
+gem "console1984"                   # Console session auditing
+gem "audits1984"                    # Console audit management UI
+
+# ============================================
+# Development & Test
+# ============================================
+group :development, :test do
+  gem "debug", platforms: %i[mri windows], require: "debug/prelude"
+  gem "bundler-audit", require: false
+  gem "brakeman", require: false
+  gem "rubocop-rails-omakase", require: false
+  gem "dotenv-rails"                # Environment variables
+end
+
+group :development do
+  gem "letter_opener_web"           # Preview emails in browser
+  gem "annotaterb"                  # Annotate models with schema
+end

@@ -1,0 +1,78 @@
+# frozen_string_literal: true
+
+class Phish::Domain < ApplicationRecord
+  self.table_name = "phish_domains"
+
+  # Associations
+  belongs_to :verdict, optional: true
+
+  # Validations
+  validates :domain, presence: true, uniqueness: true
+  validates :domain, format: {
+    with: /\A[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,}\z/i,
+    message: "must be a valid domain format"
+  }
+
+  # Normalizations
+  normalizes :domain, with: ->(domain) { domain.strip.downcase }
+
+  # Scopes
+  scope :checked, -> { where.not(last_checked_at: nil) }
+  scope :unchecked, -> { where(last_checked_at: nil) }
+  scope :stale, ->(threshold = 24.hours) { where("last_checked_at < ?", threshold.ago) }
+  scope :needs_check, -> { unchecked.or(stale) }
+  scope :with_verdict, -> { where.not(verdict_id: nil) }
+  scope :phishing, -> { joins(:verdict).where(verdicts: { classification: "phishing" }) }
+  scope :suspicious, -> { joins(:verdict).where(verdicts: { classification: "suspicious" }) }
+  scope :clean, -> { joins(:verdict).where(verdicts: { classification: "clean" }) }
+
+  # Delegations
+  delegate :classification, :confidence_score, :phishing?, :suspicious?, :clean?, :dangerous?, :safe?,
+           to: :verdict, allow_nil: true
+
+  # ===========================================
+  # Check status helpers
+  # ===========================================
+
+  def checked?
+    last_checked_at.present?
+  end
+
+  def stale?(threshold = 24.hours)
+    last_checked_at.nil? || last_checked_at < threshold.ago
+  end
+
+  def needs_check?(threshold = 24.hours)
+    !checked? || stale?(threshold)
+  end
+
+  # ===========================================
+  # Verdict management
+  # ===========================================
+
+  def update_verdict!(new_verdict)
+    update!(verdict: new_verdict, last_checked_at: Time.current)
+  end
+
+  def mark_checked!
+    update!(last_checked_at: Time.current)
+  end
+
+  # ===========================================
+  # Class methods
+  # ===========================================
+
+  class << self
+    def find_or_create_for_check(domain_string)
+      find_or_create_by!(domain: domain_string.strip.downcase)
+    end
+
+    def extract_domain(url_or_domain)
+      return url_or_domain if url_or_domain !~ %r{://}
+
+      URI.parse(url_or_domain).host
+    rescue URI::InvalidURIError
+      url_or_domain
+    end
+  end
+end
