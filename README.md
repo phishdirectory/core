@@ -265,10 +265,6 @@ Verify webhook signatures using the secret provided during registration.
 - **Rate Limiting**: Rack::Attack for abuse prevention
 - **Audit Logging**: Paper Trail for all model changes
 
-## License
-
-MIT License - see [LICENSE](LICENSE) for details.
-
 ## Contributing
 
 1. Fork the repository
