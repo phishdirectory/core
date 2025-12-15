@@ -1,0 +1,13 @@
+[phish.directory Ops] New User Signup
+======================================
+
+A new user has signed up for phish.directory.
+
+User ID:    <%= @user.pd_id %>
+Name:       <%= @user.full_name %>
+Email:      <%= @user.email %>
+Username:   @<%= @user.username %>
+Signed Up:  <%= @user.created_at.strftime("%Y-%m-%d %H:%M:%S UTC") %>
+
+---
+This is an automated notification from phish.directory ops.

@@ -143,7 +143,7 @@ module Phish
     private
 
     def user_agent
-      "PhishDirectory/#{ENV.fetch('RELEASE_VERSION', '1.0.0')} (https://phish.directory)"
+      "@phishdirectory/core/#{ENV.fetch('RELEASE_VERSION', '1.0.0')} (https://phish.directory)"
     end
 
     def log_error(message, error)

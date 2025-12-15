@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= content_for?(:title) ? "#{yield(:title)} | phish.directory" : "phish.directory" %></title>
+  <meta name="description" content="<%= content_for?(:description) ? yield(:description) : "Real-time phishing detection API. Protect your users from malicious domains and URLs." %>">
+
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+
+  <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+  <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+</head>
+<body class="bg-pd-primary text-slate-100 font-sans min-h-screen antialiased">
+  <% if flash[:notice] %>
+    <div class="fixed top-4 right-4 z-50 bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 px-5 py-3 rounded-xl text-sm font-medium flex items-center gap-2 animate-slide-down">
+      <span>&#10003;</span>
+      <%= flash[:notice] %>
+    </div>
+  <% end %>
+  <% if flash[:alert] %>
+    <div class="fixed top-4 right-4 z-50 bg-red-500/15 border border-red-500/30 text-red-400 px-5 py-3 rounded-xl text-sm font-medium flex items-center gap-2 animate-slide-down">
+      <span>!</span>
+      <%= flash[:alert] %>
+    </div>
+  <% end %>
+
+  <%= yield %>
+</body>
+</html>

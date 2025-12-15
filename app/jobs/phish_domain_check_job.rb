@@ -14,12 +14,14 @@ class PhishDomainCheckJob < ApplicationJob
     result = service.check_domain(domain.domain)
 
     # Update or create verdict
-    verdict = domain.verdict || domain.build_verdict
+    verdict = domain.verdict || Verdict.new
     verdict.update!(
-      verdict: result[:verdict],
-      confidence: result[:confidence],
-      details: result[:details]
+      classification: result[:verdict],
+      confidence_score: result[:confidence],
+      sources: result[:details]&.dig(:service_results) || [],
+      metadata: result[:details] || {}
     )
+    domain.update!(verdict: verdict) unless domain.verdict_id == verdict.id
 
     # Update last_checked_at
     domain.update!(last_checked_at: Time.current)

@@ -20,10 +20,10 @@ class Ahoy::Message < ApplicationRecord
   # ===========================================
 
   def self.find_by_email(email)
-    find_by(to_bidx: blind_index_value(:to, email))
+    find_by(to_bidx: generate_to_bidx(email))
   end
 
   def self.for_email(email)
-    where(to_bidx: blind_index_value(:to, email))
+    where(to_bidx: generate_to_bidx(email))
   end
 end

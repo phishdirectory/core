@@ -1,0 +1,14 @@
+[phish.directory Ops] Username Conflict - Action Required
+==========================================================
+
+A user signup failed because all username variants were taken.
+
+Email:             <%= @email %>
+Desired Username:  @<%= @desired_username %>
+Timestamp:         <%= @timestamp.strftime("%Y-%m-%d %H:%M:%S UTC") %>
+
+ACTION REQUIRED:
+Please manually create a username for this user and reach out to them within 24 hours.
+
+---
+This is an automated notification from phish.directory ops.

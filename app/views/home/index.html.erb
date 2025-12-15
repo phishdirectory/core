@@ -1,0 +1,88 @@
+<% content_for :title, "Real-time Phishing Detection API" %>
+<% content_for :description, "Protect your users from phishing attacks. Real-time domain and URL verification API trusted by security teams worldwide." %>
+
+<%# Navigation %>
+<nav class="fixed top-0 left-0 right-0 px-10 py-5 flex items-center justify-between z-50 bg-gradient-to-b from-pd-primary to-transparent">
+  <a href="<%= root_path %>" class="flex items-center gap-3 text-slate-100 font-bold text-lg no-underline">
+    <span class="w-10 h-10 bg-gradient-to-br from-cyan-accent to-cyan-dark rounded-xl flex items-center justify-center text-lg font-extrabold text-pd-primary shadow-[0_0_30px_rgba(63,196,224,0.4)]">PD</span>
+    <span>phish.directory</span>
+  </a>
+  <div class="flex items-center gap-6">
+    <a href="https://docs.phish.directory" class="text-slate-400 font-medium text-sm hover:text-slate-100 transition-colors">Docs</a>
+    <% if user_signed_in? %>
+      <%= link_to "Dashboard", dashboard_root_path, class: "px-5 py-2.5 bg-cyan-accent text-pd-primary font-semibold rounded-xl hover:shadow-[0_0_20px_rgba(63,196,224,0.4)] transition-all" %>
+    <% else %>
+      <%= link_to "Sign in", login_path, class: "text-slate-400 font-medium text-sm hover:text-slate-100 transition-colors" %>
+      <%= link_to "Get Started", signup_path, class: "px-5 py-2.5 bg-cyan-accent text-pd-primary font-semibold rounded-xl hover:shadow-[0_0_20px_rgba(63,196,224,0.4)] transition-all" %>
+    <% end %>
+  </div>
+</nav>
+
+<%# Hero Section %>
+<section class="min-h-screen flex flex-col justify-center items-center text-center px-10 pt-32 pb-20 relative overflow-hidden">
+  <%# Background image %>
+  <div class="absolute inset-0 bg-cover bg-center opacity-25 pointer-events-none" style="background-image: url('<%= image_path("bg.JPG") %>');"></div>
+  <%# Gradient overlay %>
+  <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center_top,transparent_0%,#0a1210_70%)] pointer-events-none"></div>
+
+  <%# Content %>
+  <div class="relative z-10">
+    <div class="inline-flex items-center gap-2 px-4 py-2 bg-pd-secondary border border-slate-700/30 rounded-full text-sm text-slate-400 mb-8 animate-fade-up">
+      <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse-dot"></span>
+      <span>API Status: Operational</span>
+    </div>
+
+    <h1 class="text-5xl md:text-7xl font-extrabold leading-tight mb-6 animate-fade-up-delay-1">
+      Stop phishing<br>
+      <span class="bg-gradient-to-r from-cyan-accent to-cyan-dark bg-clip-text text-transparent">before it starts</span>
+    </h1>
+
+    <p class="text-xl text-slate-400 max-w-xl mx-auto mb-10 leading-relaxed animate-fade-up-delay-2">
+      Real-time domain and URL verification API. Aggregate intelligence from multiple threat feeds to protect your users from malicious content.
+    </p>
+
+    <div class="flex flex-col sm:flex-row gap-4 justify-center animate-fade-up-delay-3">
+      <% if user_signed_in? %>
+        <%= link_to "Go to Dashboard", dashboard_root_path, class: "px-8 py-4 bg-cyan-accent text-pd-primary font-semibold rounded-xl hover:shadow-[0_0_20px_rgba(63,196,224,0.4)] hover:-translate-y-0.5 transition-all" %>
+      <% else %>
+        <%= link_to "Start for free", signup_path, class: "px-8 py-4 bg-cyan-accent text-pd-primary font-semibold rounded-xl hover:shadow-[0_0_20px_rgba(63,196,224,0.4)] hover:-translate-y-0.5 transition-all" %>
+        <%= link_to "View documentation", "https://phish.directory/docs", class: "px-8 py-4 bg-pd-elevated text-slate-100 font-semibold rounded-xl border border-slate-700/40 hover:bg-pd-hover hover:border-slate-600/50 transition-all" %>
+      <% end %>
+    </div>
+  </div>
+</section>
+
+<%# Demo Terminal Section %>
+<section class="py-20 px-10 max-w-4xl mx-auto">
+  <div class="bg-pd-secondary border border-slate-700/30 rounded-2xl overflow-hidden shadow-2xl">
+    <%# Terminal header %>
+    <div class="px-4 py-3 bg-pd-tertiary border-b border-slate-700/20 flex items-center gap-2">
+      <span class="w-3 h-3 rounded-full bg-red-500"></span>
+      <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+      <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+      <span class="flex-1 text-center font-mono text-xs text-slate-500">Terminal</span>
+    </div>
+    <%# Terminal body %>
+    <div class="p-6 font-mono text-sm leading-loose">
+      <div class="mb-2">
+        <span class="text-cyan-accent">$</span>
+        <span class="text-slate-100"> curl -X POST https://api.phish.directory/v1/domain/check \</span>
+      </div>
+      <div class="pl-5 text-slate-400 mb-2">-H "Authorization: Bearer pdat_xxx" \</div>
+      <div class="pl-5 text-slate-400 mb-4">-d '{"domain": "suspicious-site.com"}'</div>
+      <div class="text-slate-400">
+        <div>{</div>
+        <div class="pl-4">"domain": "suspicious-site.com",</div>
+        <div class="pl-4">"verdict": <span class="text-red-400">"malicious"</span>,</div>
+        <div class="pl-4">"confidence": 0.94,</div>
+        <div class="pl-4">"sources": ["google_safe_browsing", "phishtank"]</div>
+        <div>}</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%# Footer %>
+<footer class="py-10 px-10 border-t border-slate-700/20 text-center text-slate-500 text-sm">
+  <p>&copy; <%= Date.current.year %> phish.directory. Protecting the internet, one domain at a time.</p>
+</footer>

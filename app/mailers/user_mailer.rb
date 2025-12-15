@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
 class UserMailer < ApplicationMailer
-  default from: email_address_with_name("no-reply@transactional.phish.directory", "Phish Directory"),
+  default from: email_address_with_name("no-reply@transactional.phish.directory", "phish.directory"),
           reply_to: email_address_with_name("support@phish.directory", "phish.directory Support")
 
   def welcome
     @user = params[:user]
     mail(
       to: email_address_with_name(@user.email, @user.full_name),
-      from: email_address_with_name("welcome@transactional.phish.directory", "Phish Directory"),
-      subject: env_subject("Welcome to Phish Directory!")
+      from: email_address_with_name("welcome@transactional.phish.directory", "phish.directory"),
+      subject: env_subject("Welcome to phish.directory!")
     )
   end
 
@@ -20,8 +20,8 @@ class UserMailer < ApplicationMailer
 
     mail(
       to: email_address_with_name(@user.email, @user.full_name),
-      from: email_address_with_name("login@transactional.phish.directory", "Phish Directory"),
-      subject: env_subject("Your login link for Phish Directory")
+      from: email_address_with_name("login@transactional.phish.directory", "phish.directory"),
+      subject: env_subject("Your login link for phish.directory")
     )
   end
 
@@ -34,8 +34,8 @@ class UserMailer < ApplicationMailer
 
     mail(
       to: email_address_with_name(@user.email, @user.full_name),
-      from: email_address_with_name("logins@transactional.phish.directory", "Phish Directory Logins"),
-      subject: env_subject("New Sign-in Detected - Phish Directory")
+      from: email_address_with_name("logins@transactional.phish.directory", "phish.directory"),
+      subject: env_subject("New Sign-in Detected - phish.directory")
     )
   end
 
@@ -45,7 +45,7 @@ class UserMailer < ApplicationMailer
 
     mail(
       to: email_address_with_name(@user.email, @user.full_name),
-      from: email_address_with_name("confirm@transactional.phish.directory", "Phish Directory"),
+      from: email_address_with_name("confirm@transactional.phish.directory", "phish.directory"),
       subject: env_subject("Please confirm your email address")
     )
   end

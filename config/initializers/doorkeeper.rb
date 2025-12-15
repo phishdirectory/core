@@ -34,7 +34,7 @@ Doorkeeper.configure do
   force_ssl_in_redirect_uri !Rails.env.development?
 
   # WWW-Authenticate Realm
-  realm "PhishDirectory"
+  realm "phish.directory"
 
   # Token expiration
   access_token_expires_in 2.hours

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1a1a1a; margin: 0; padding: 0; background-color: #f5f5f5;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="560" cellpadding="0" cellspacing="0" style="background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);">
+          <!-- Header -->
+          <tr>
+            <td style="background: #0a1210; padding: 28px 32px; text-align: center;">
+              <span style="font-size: 22px; font-weight: 700; color: #3FC4E0;">phish.directory</span>
+            </td>
+          </tr>
+
+          <!-- Content -->
+          <tr>
+            <td style="padding: 40px 32px;">
+              <h1 style="margin: 0 0 20px; font-size: 24px; font-weight: 600; color: #1a1a1a;">Welcome to phish.directory!</h1>
+
+              <p style="margin: 0 0 16px; color: #4a4a4a; font-size: 15px;">Hi <%= @user.first_name %>,</p>
+
+              <p style="margin: 0 0 24px; color: #4a4a4a; font-size: 15px;">Thanks for joining phish.directory! Your account is now active and ready to use.</p>
+
+              <!-- Feature list -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="background: #f8f9fa; border-radius: 8px; margin: 0 0 24px;">
+                <tr>
+                  <td style="padding: 20px 24px;">
+                    <p style="margin: 0 0 12px; font-size: 13px; font-weight: 600; color: #1a1a1a; text-transform: uppercase; letter-spacing: 0.05em;">What you can do</p>
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="padding: 8px 0; color: #4a4a4a; font-size: 14px; border-bottom: 1px solid #eee;">
+                          <span style="color: #10b981; margin-right: 10px;">&#10003;</span> Check domains and URLs for phishing threats
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #4a4a4a; font-size: 14px; border-bottom: 1px solid #eee;">
+                          <span style="color: #10b981; margin-right: 10px;">&#10003;</span> Access multi-source threat intelligence
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #4a4a4a; font-size: 14px; border-bottom: 1px solid #eee;">
+                          <span style="color: #10b981; margin-right: 10px;">&#10003;</span> Create API keys for your applications
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #4a4a4a; font-size: 14px;">
+                          <span style="color: #10b981; margin-right: 10px;">&#10003;</span> Monitor your API usage and analytics
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin: 0 0 24px; color: #4a4a4a; font-size: 15px;">Ready to get started? Sign in to your dashboard and create your first API key.</p>
+
+              <!-- Button -->
+              <table cellpadding="0" cellspacing="0" style="margin: 0 0 28px;">
+                <tr>
+                  <td style="background: #3FC4E0; border-radius: 8px;">
+                    <a href="<%= dashboard_root_url %>" style="display: inline-block; padding: 14px 32px; color: #000000; text-decoration: none; font-weight: 600; font-size: 15px;">Go to Dashboard</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 24px 32px; background: #f8f9fa; border-top: 1px solid #eee; text-align: center;">
+              <p style="margin: 0 0 8px; font-size: 13px; color: #888888;">Need help? Reply to this email or visit our documentation.</p>
+              <p style="margin: 0; font-size: 13px; color: #888888;">&copy; <%= Date.current.year %> phish.directory</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

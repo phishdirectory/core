@@ -1,6 +1,6 @@
-# PhishDirectory
+# @phishdirectory/core
 
-Phishing detection API and dashboard, merged from `core` and `veritas` applications.
+The core phishing detection API and dashboard, merged from the original `core` and `veritas` applications.
 
 ## Architecture
 
@@ -148,3 +148,4 @@ bin/rails console
 - Prefer Faraday for HTTP clients (per CLAUDE.md convention)
 - Use AASM for state machines
 - Use Paper Trail for audit logging
+- use tailwind for css

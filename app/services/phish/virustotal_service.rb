@@ -4,7 +4,7 @@ module Phish
   # VirusTotal API v3
   # https://developers.virustotal.com/reference
   class VirustotalService < BaseService
-    BASE_URL = "https://www.virustotal.com/api/v3"
+    BASE_URL = "https://www.virustotal.com/api/v3/"
 
     # Threshold for considering a domain/URL as phishing
     MALICIOUS_THRESHOLD = 3
@@ -14,7 +14,7 @@ module Phish
       log_info("Checking domain: #{normalized}")
 
       conn = authenticated_connection
-      response = get(conn, "/domains/#{normalized}")
+      response = get(conn, "domains/#{normalized}")
 
       parse_domain_response(response, normalized)
     end
@@ -27,7 +27,7 @@ module Phish
       url_id = Base64.urlsafe_encode64(normalized, padding: false)
 
       conn = authenticated_connection
-      response = get(conn, "/urls/#{url_id}")
+      response = get(conn, "urls/#{url_id}")
 
       parse_url_response(response, normalized)
     rescue Faraday::ResourceNotFound
@@ -40,7 +40,7 @@ module Phish
       log_info("Submitting URL for analysis: #{normalized}")
 
       conn = authenticated_connection
-      response = post(conn, "/urls", { url: normalized })
+      response = post(conn, "urls", { url: normalized })
 
       build_result(
         verdict: "pending",
@@ -70,6 +70,7 @@ module Phish
     end
 
     def parse_domain_response(response, domain)
+      response = ensure_hash_response(response)
       stats = response.dig("data", "attributes", "last_analysis_stats") || {}
       malicious = stats["malicious"].to_i + stats["suspicious"].to_i
       total = stats.values.sum
@@ -95,6 +96,7 @@ module Phish
     end
 
     def parse_url_response(response, url)
+      response = ensure_hash_response(response)
       stats = response.dig("data", "attributes", "last_analysis_stats") || {}
       malicious = stats["malicious"].to_i + stats["suspicious"].to_i
       total = stats.values.sum
@@ -113,6 +115,17 @@ module Phish
           source: "virustotal"
         }
       )
+    end
+
+    def ensure_hash_response(response)
+      return response if response.is_a?(Hash)
+
+      begin
+        JSON.parse(response.to_s)
+      rescue JSON::ParserError
+        log_error("Failed to parse response as JSON", StandardError.new(response.to_s.truncate(200)))
+        {}
+      end
     end
   end
 end

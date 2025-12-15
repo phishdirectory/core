@@ -2,6 +2,7 @@ source "https://rubygems.org"
 
 # Core Rails
 gem "rails", "~> 8.1.1"
+gem "logger"                        # Required for Ruby 3.4+ (bundled gem)
 gem "pg", "~> 1.1"
 gem "puma", ">= 5.0"
 
@@ -90,6 +91,9 @@ group :development, :test do
 end
 
 group :development do
-  gem "letter_opener_web"           # Preview emails in browser
+  gem "letter_opener"               # Preview emails in development
+  gem "letter_opener_web"           # Web UI for letter_opener
   gem "annotaterb"                  # Annotate models with schema
 end
+
+gem "tailwindcss-rails", "~> 4.4"

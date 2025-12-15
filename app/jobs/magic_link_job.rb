@@ -4,7 +4,7 @@ class MagicLinkJob < ApplicationJob
   queue_as :default
 
   def perform(user)
-    # TODO: Implement magic link email sending
     Rails.logger.info "[MagicLinkJob] Sending magic link to #{user.email}"
+    UserMailer.with(user: user).magic_link.deliver_now
   end
 end

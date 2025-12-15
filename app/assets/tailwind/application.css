@@ -1,0 +1,83 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+/* Custom theme for phish.directory */
+@theme {
+  /* Deep emerald with electric cyan - extracted from bg.JPG */
+  --color-pd-primary: #0a1210;
+  --color-pd-secondary: #101c18;
+  --color-pd-tertiary: #162420;
+  --color-pd-elevated: #1c2e28;
+  --color-pd-hover: #243830;
+
+  /* Electric Cyan accent */
+  --color-cyan-accent: #3FC4E0;
+  --color-cyan-dim: rgba(63, 196, 224, 0.15);
+  --color-cyan-glow: rgba(63, 196, 224, 0.4);
+  --color-cyan-dark: #2B7A8C;
+
+  /* Fonts */
+  --font-sans: 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+}
+
+/* Custom animations */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(63, 196, 224, 0.4); }
+  50% { box-shadow: 0 0 20px 0 rgba(63, 196, 224, 0.4); }
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.6s ease both;
+}
+
+.animate-fade-up-delay-1 {
+  animation: fadeUp 0.6s ease 0.1s both;
+}
+
+.animate-fade-up-delay-2 {
+  animation: fadeUp 0.6s ease 0.2s both;
+}
+
+.animate-fade-up-delay-3 {
+  animation: fadeUp 0.6s ease 0.3s both;
+}
+
+.animate-pulse-dot {
+  animation: pulseDot 2s infinite;
+}
+
+.animate-slide-down {
+  animation: slideDown 0.3s ease;
+}
+
+.animate-pulse-glow {
+  animation: pulse 2s ease-in-out infinite;
+}

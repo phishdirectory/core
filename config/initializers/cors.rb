@@ -9,14 +9,14 @@
 
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
-    # Allow requests from PhishDirectory frontends
+    # Allow requests from phish.directory frontends
     origins(
       "localhost:3000",
       "localhost:3001",
       "127.0.0.1:3000",
       "127.0.0.1:3001",
-      /\Ahttps:\/\/.*\.phishdirectory\.com\z/,
-      "https://phishdirectory.com"
+      /\Ahttps:\/\/.*\.phish\.directory\z/,
+      "https://phish.directory"
     )
 
     resource "/api/*",

@@ -4,7 +4,7 @@ class UsernameFailJob < ApplicationJob
   queue_as :default
 
   def perform(email:, desired_username:)
-    # TODO: Notify ops team about username conflict
     Rails.logger.info "[UsernameFailJob] Username conflict for #{email}, desired: #{desired_username}"
+    OpsMailer.with(email: email, desired_username: desired_username).username_conflict.deliver_now
   end
 end

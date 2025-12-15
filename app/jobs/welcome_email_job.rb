@@ -4,7 +4,7 @@ class WelcomeEmailJob < ApplicationJob
   queue_as :default
 
   def perform(user)
-    # TODO: Implement welcome email sending
     Rails.logger.info "[WelcomeEmailJob] Sending welcome email to #{user.email}"
+    UserMailer.with(user: user).welcome.deliver_now
   end
 end

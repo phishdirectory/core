@@ -5,8 +5,8 @@
 
 Geocoder.configure(
   # Geocoding service (default is :nominatim for free tier)
-  # For production, consider using a paid service like :ipinfo or :maxmind
-  ip_lookup: :ipinfo,
+  # For production, consider using a paid service like :ipinfo_io or :maxmind
+  ip_lookup: :ipinfo_io,
 
   # API key (required for some services)
   api_key: Rails.application.credentials.dig(:ipinfo, :api_key) || ENV["IPINFO_API_KEY"],

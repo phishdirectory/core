@@ -4,7 +4,7 @@ module Phish
   # Google Safe Browsing API v4
   # https://developers.google.com/safe-browsing/v4
   class GoogleSafeBrowsingService < BaseService
-    BASE_URL = "https://safebrowsing.googleapis.com/v4"
+    BASE_URL = "https://safebrowsing.googleapis.com/v4/"
 
     THREAT_TYPES = %w[
       MALWARE
@@ -30,7 +30,7 @@ module Phish
       raise AuthenticationError, "Google Safe Browsing API key not configured" unless api_key
 
       conn = connection(base_url: BASE_URL)
-      response = post(conn, "/threatMatches:find?key=#{api_key}", threat_request(normalized))
+      response = post(conn, "threatMatches:find?key=#{api_key}", threat_request(normalized))
 
       if response["matches"].present?
         build_result(
@@ -60,7 +60,7 @@ module Phish
       raise AuthenticationError, "Google Safe Browsing API key not configured" unless api_key
 
       conn = connection(base_url: BASE_URL)
-      response = post(conn, "/threatMatches:find?key=#{api_key}", threat_request(*normalized_urls))
+      response = post(conn, "threatMatches:find?key=#{api_key}", threat_request(*normalized_urls))
 
       matches_by_url = (response["matches"] || []).group_by { |m| m.dig("threat", "url") }
 

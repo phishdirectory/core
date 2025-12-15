@@ -1,0 +1,17 @@
+phish.directory
+================
+
+Sign in to your account
+
+Hi <%= @user.first_name %>,
+
+Click the link below to sign in to your phish.directory account:
+
+<%= @magic_link_url %>
+
+This link will expire at <%= @expires_at.strftime("%I:%M %p %Z") %>.
+
+If you didn't request this email, you can safely ignore it.
+
+---
+© <%= Date.current.year %> phish.directory

@@ -20,6 +20,13 @@ Rails.application.routes.draw do
   end
 
   # ===========================================
+  # Development Tools (unauthenticated)
+  # ===========================================
+  if Rails.env.development?
+    mount LetterOpenerWeb::Engine, at: "/letter_opener"
+  end
+
+  # ===========================================
   # Admin Engines (protected by AdminConstraint)
   # ===========================================
   constraints AdminConstraint.new(minimum_level: :admin) do
@@ -34,9 +41,6 @@ Rails.application.routes.draw do
 
     # Console audit UI
     mount Audits1984::Engine => "/admin/console_audits"
-
-    # Email preview (development only)
-    mount LetterOpenerWeb::Engine => "/admin/mail" if Rails.env.development?
   end
 
   # ===========================================
@@ -67,6 +71,10 @@ Rails.application.routes.draw do
   # ===========================================
   namespace :dashboard do
     root to: "dashboard#index"
+
+    # Domain checking
+    get "check", to: "domain_checks#new", as: :domain_check
+    post "check", to: "domain_checks#create"
 
     resources :api_keys, only: [:index, :create, :destroy] do
       member do

@@ -5,17 +5,17 @@
 
 module ServiceMappings
   SERVICES = {
-    # Core PhishDirectory services
+    # Core phish.directory services
     "phishdirectory-api" => {
-      name: "PhishDirectory API",
+      name: "phish.directory API",
       description: "Main phishing detection API"
     },
     "phishdirectory-web" => {
-      name: "PhishDirectory Web",
+      name: "phish.directory Web",
       description: "Web frontend application"
     },
     "phishdirectory-admin" => {
-      name: "PhishDirectory Admin",
+      name: "phish.directory Admin",
       description: "Admin dashboard"
     },
 

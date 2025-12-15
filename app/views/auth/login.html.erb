@@ -1,0 +1,65 @@
+<% content_for :title, "Sign in" %>
+
+<div class="min-h-screen flex items-center justify-center p-10 relative bg-pd-primary">
+  <%# Background image %>
+  <div class="absolute inset-0 bg-cover bg-center opacity-25" style="background-image: url('<%= image_path("bg.JPG") %>');"></div>
+
+  <%# Radial gradient overlay %>
+  <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,#0a1210_75%)]"></div>
+
+  <%# Content %>
+  <div class="relative z-10 w-full max-w-md">
+    <%# Flash messages %>
+    <% if flash[:notice] %>
+      <div class="mb-5 bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 px-5 py-3.5 rounded-xl text-sm font-medium">
+        <%= flash[:notice] %>
+      </div>
+    <% end %>
+    <% if flash[:alert] %>
+      <div class="mb-5 bg-red-500/15 border border-red-500/30 text-red-400 px-5 py-3.5 rounded-xl text-sm font-medium">
+        <%= flash[:alert] %>
+      </div>
+    <% end %>
+
+    <%# Header %>
+    <div class="text-center mb-10">
+      <a href="<%= root_path %>" class="inline-flex items-center gap-3 text-slate-100 font-bold text-xl mb-8 no-underline">
+        <span class="w-11 h-11 bg-gradient-to-br from-cyan-accent to-cyan-dark rounded-xl flex items-center justify-center text-lg font-extrabold text-pd-primary shadow-[0_0_30px_rgba(63,196,224,0.4)]">PD</span>
+        <span>phish.directory</span>
+      </a>
+      <h1 class="text-3xl font-bold text-slate-100 mb-2">Welcome back</h1>
+      <p class="text-slate-400">Sign in to your account</p>
+    </div>
+
+    <%# Card %>
+    <div class="bg-pd-secondary border border-slate-700/30 rounded-2xl p-8">
+      <%# Info box %>
+      <div class="bg-cyan-accent/10 border border-cyan-accent/20 rounded-xl p-4 mb-6">
+        <p class="text-sm text-slate-400 leading-relaxed">
+          <strong class="text-cyan-accent">Passwordless login</strong> - We'll send a secure link to your email. Click it to sign in instantly.
+        </p>
+      </div>
+
+      <%# Form %>
+      <%= form_with url: login_path, method: :post do |f| %>
+        <div class="mb-5">
+          <label for="email" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Email address</label>
+          <%= email_field_tag :email, params[:email],
+            class: "w-full px-4 py-3.5 bg-pd-primary border border-slate-600/40 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-accent focus:ring-2 focus:ring-cyan-accent/20 transition-all",
+            placeholder: "you@example.com",
+            autofocus: true,
+            required: true %>
+        </div>
+
+        <%= submit_tag "Send magic link",
+          class: "w-full py-3.5 bg-cyan-accent text-pd-primary font-semibold rounded-xl hover:shadow-[0_0_20px_rgba(63,196,224,0.4)] hover:-translate-y-0.5 transition-all cursor-pointer" %>
+      <% end %>
+    </div>
+
+    <%# Footer %>
+    <p class="text-center mt-6 text-slate-400 text-sm">
+      Don't have an account?
+      <%= link_to "Sign up", signup_path, class: "text-cyan-accent font-semibold hover:opacity-80 transition-opacity" %>
+    </p>
+  </div>
+</div>

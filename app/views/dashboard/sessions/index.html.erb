@@ -1,0 +1,111 @@
+<% content_for :title, "Sessions" %>
+
+<header class="px-10 py-6 border-b border-slate-700/20 flex items-center justify-between bg-pd-secondary sticky top-0 z-40">
+  <div>
+    <h1 class="text-2xl font-bold text-slate-100">Sessions</h1>
+    <p class="text-sm text-slate-500 mt-1">Manage your active sessions across devices</p>
+  </div>
+</header>
+
+<div class="p-8 px-10">
+  <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl overflow-hidden mb-6">
+    <div class="px-6 py-5 border-b border-slate-700/20 flex items-center justify-between">
+      <h2 class="text-lg font-semibold text-slate-100">Active Sessions</h2>
+      <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-slate-600/30 text-slate-400"><%= @sessions.active.count %> active</span>
+    </div>
+
+    <% if @sessions.any? %>
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Device</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">IP Address</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Location</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Last Active</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Status</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @sessions.each do |session| %>
+              <tr class="hover:bg-pd-tertiary transition-colors">
+                <td class="px-6 py-4 border-b border-slate-700/20">
+                  <div class="font-semibold text-slate-100"><%= session.device_info&.truncate(50) || "Unknown device" %></div>
+                  <% if session.os_info.present? %>
+                    <div class="text-xs text-slate-500 mt-1"><%= session.os_info %></div>
+                  <% end %>
+                </td>
+                <td class="px-6 py-4 border-b border-slate-700/20">
+                  <code class="font-mono text-sm text-slate-400"><%= session.ip || "Unknown" %></code>
+                </td>
+                <td class="px-6 py-4 border-b border-slate-700/20 text-slate-400 text-sm">
+                  <% if session.latitude && session.longitude %>
+                    <%= session.latitude.round(2) %>, <%= session.longitude.round(2) %>
+                  <% else %>
+                    <span class="text-slate-500">Unknown</span>
+                  <% end %>
+                </td>
+                <td class="px-6 py-4 border-b border-slate-700/20 text-slate-400 text-sm">
+                  <%= session.last_seen_at ? time_ago_in_words(session.last_seen_at) + " ago" : "Just now" %>
+                </td>
+                <td class="px-6 py-4 border-b border-slate-700/20">
+                  <% if session == @current_session %>
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-emerald-500/15 text-emerald-500">Current</span>
+                  <% elsif session.active? %>
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-blue-500/15 text-blue-400">Active</span>
+                  <% elsif session.signed_out? %>
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-slate-600/30 text-slate-400">Signed out</span>
+                  <% else %>
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-amber-500/15 text-amber-500">Expired</span>
+                  <% end %>
+                  <% if session.impersonated? %>
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-amber-500/15 text-amber-500 ml-1">Impersonated</span>
+                  <% end %>
+                </td>
+                <td class="px-6 py-4 border-b border-slate-700/20">
+                  <% if session == @current_session %>
+                    <span class="text-slate-500 text-sm">Current session</span>
+                  <% elsif session.active? %>
+                    <%= button_to "Terminate", dashboard_session_path(session), method: :delete, class: "px-3 py-1.5 text-xs font-medium text-red-400 bg-red-500/15 border border-red-500/30 rounded-lg hover:bg-red-500/25 transition-all cursor-pointer", data: { confirm: "This will sign out this device. Continue?" } %>
+                  <% else %>
+                    <span class="text-slate-500 text-sm">-</span>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="text-center py-16 text-slate-500">
+        <div class="text-5xl mb-4 opacity-50">&#9788;</div>
+        <div class="text-lg font-semibold text-slate-400 mb-2">No sessions found</div>
+        <p class="text-slate-500">Your session history will appear here</p>
+      </div>
+    <% end %>
+  </div>
+
+  <%# Session info %>
+  <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl overflow-hidden">
+    <div class="px-6 py-5 border-b border-slate-700/20">
+      <h2 class="text-lg font-semibold text-slate-100">About Sessions</h2>
+    </div>
+    <div class="p-6">
+      <div class="space-y-4 text-slate-400 text-sm leading-relaxed">
+        <p>
+          <strong class="text-slate-100">What are sessions?</strong><br>
+          Sessions represent each time you sign in to your account. Each device or browser creates a new session.
+        </p>
+        <p>
+          <strong class="text-slate-100">Security tip</strong><br>
+          If you see a session you don't recognize, terminate it immediately and consider changing your account security settings.
+        </p>
+        <p>
+          <strong class="text-slate-100">Session expiration</strong><br>
+          Sessions automatically expire after a period of inactivity. You can also manually terminate sessions you no longer need.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

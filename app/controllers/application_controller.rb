@@ -11,7 +11,7 @@ class ApplicationController < ActionController::Base
   before_action :set_paper_trail_whodunnit
 
   # Helper methods available to views
-  helper_method :current_user, :user_signed_in?, :impersonating?
+  helper_method :current_user, :current_session, :user_signed_in?, :impersonating?
 
   # ===========================================
   # Authentication

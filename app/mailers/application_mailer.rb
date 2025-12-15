@@ -3,7 +3,7 @@
 class ApplicationMailer < ActionMailer::Base
   include AhoyEmail if defined?(AhoyEmail)
 
-  default from: email_address_with_name("no-reply@transactional.phish.directory", "Phish Directory")
+  default from: email_address_with_name("no-reply@transactional.phish.directory", "phish.directory")
 
   layout "mailer"
 

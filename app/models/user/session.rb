@@ -76,36 +76,34 @@ class User::Session < ApplicationRecord
   # Class methods for authentication
   # ===========================================
 
-  class << self
-    def find_by_token(token)
-      return nil if token.blank?
+  def self.find_by_token(token)
+    return nil if token.blank?
 
-      find_by(session_token_bidx: blind_index_value(:session_token, token))
-    end
+    find_by(session_token_bidx: generate_session_token_bidx(token))
+  end
 
-    def authenticate(token)
-      session = find_by_token(token)
-      return nil unless session&.active?
+  def self.authenticate(token)
+    session = find_by_token(token)
+    return nil unless session&.active?
 
-      session.touch_last_seen!
-      session
-    end
+    session.touch_last_seen!
+    session
+  end
 
-    def create_for_user(user, ip: nil, device_info: nil, os_info: nil, timezone: nil, fingerprint: nil, impersonator: nil)
-      create!(
-        user: user,
-        ip: ip,
-        device_info: device_info,
-        os_info: os_info,
-        timezone: timezone,
-        fingerprint: fingerprint,
-        impersonated_by_id: impersonator&.id
-      )
-    end
+  def self.create_for_user(user, ip: nil, device_info: nil, os_info: nil, timezone: nil, fingerprint: nil, impersonator: nil)
+    create!(
+      user: user,
+      ip: ip,
+      device_info: device_info,
+      os_info: os_info,
+      timezone: timezone,
+      fingerprint: fingerprint,
+      impersonated_by_id: impersonator&.id
+    )
+  end
 
-    def cleanup_expired!
-      expired.destroy_all
-    end
+  def self.cleanup_expired!
+    expired.destroy_all
   end
 
   private

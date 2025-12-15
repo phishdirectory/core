@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class OpsMailer < ApplicationMailer
-  default from: email_address_with_name("ops@transactional.phish.directory", "Phish Directory Ops"),
+  default from: email_address_with_name("ops@transactional.phish.directory", "phish.directory Ops"),
           to: -> { ops_email }
 
   def new_user_notification
@@ -50,6 +50,14 @@ class OpsMailer < ApplicationMailer
     @last_error = params[:last_error]
 
     mail(subject: env_subject("[WEBHOOK] Delivery failed for #{@webhook.url}"))
+  end
+
+  def username_conflict
+    @email = params[:email]
+    @desired_username = params[:desired_username]
+    @timestamp = Time.current
+
+    mail(subject: env_subject("[USERNAME] Conflict for #{@email}"))
   end
 
   private

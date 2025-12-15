@@ -4,7 +4,7 @@ module Phish
   # URLScan.io API
   # https://urlscan.io/docs/api/
   class UrlscanService < BaseService
-    BASE_URL = "https://urlscan.io/api/v1"
+    BASE_URL = "https://urlscan.io/api/v1/"
 
     def check_domain(domain)
       normalized = normalize_domain(domain)
@@ -17,7 +17,7 @@ module Phish
 
       # First, search for existing scans
       conn = authenticated_connection
-      search_response = get(conn, "/search/", { q: "page.url:\"#{normalized}\"", size: 1 })
+      search_response = get(conn, "search/", { q: "page.url:\"#{normalized}\"", size: 1 })
 
       if search_response["results"].present?
         result = search_response["results"].first
@@ -33,7 +33,7 @@ module Phish
       log_info("Submitting URL for scan: #{normalized}")
 
       conn = authenticated_connection
-      response = post(conn, "/scan/", {
+      response = post(conn, "scan/", {
         url: normalized,
         visibility: "unlisted"
       })
@@ -54,7 +54,7 @@ module Phish
       log_info("Fetching scan result: #{uuid}")
 
       conn = authenticated_connection
-      response = get(conn, "/result/#{uuid}/")
+      response = get(conn, "result/#{uuid}/")
 
       parse_scan_result(response)
     end
