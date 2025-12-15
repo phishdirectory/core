@@ -103,13 +103,14 @@ virustotal:
   api_key: <key>
 urlscan:
   api_key: <key>
-phishtank:
-  api_key: <key>
-slack:
-  browser_token: <token>
-  cookie: <cookie>
-ops:
-  email: ops@phish.directory
+scoring:
+  min_confidence: <threshold>
+  default_weight: <weight>
+  weights:
+    google_safe_browsing: <weight>
+    virustotal: <weight>
+    urlscan: <weight>
+    walshy: <weight>
 ```
 
 ### Feature Flags (Flipper)

@@ -4,7 +4,7 @@ The core phishing detection API and dashboard. Aggregates threat intelligence fr
 
 ## Features
 
-- **Multi-Source Detection**: Aggregates verdicts from Google Safe Browsing, VirusTotal, PhishTank, URLScan.io, and Walshy API
+- **Multi-Source Detection**: Aggregates verdicts from Google Safe Browsing, VirusTotal, URLScan.io, and Walshy API
 - **Weighted Scoring**: Combines results using confidence-weighted aggregation for accurate verdicts
 - **RESTful API**: Clean JSON API for domain and URL checking with bulk support
 - **Passwordless Auth**: Secure magic link authentication (no passwords to leak)
@@ -49,12 +49,14 @@ bin/rails credentials:edit
 Add required keys:
 
 ```yaml
+# Encryption keys (required - generate with: SecureRandom.hex(32))
 lockbox:
   master_key: <64-char hex string>
 
 blind_index:
   master_key: <64-char hex string>
 
+# Phishing detection services (optional - services skip if unconfigured)
 google_safe_browsing:
   api_key: <your-api-key>
 
@@ -64,15 +66,15 @@ virustotal:
 urlscan:
   api_key: <your-api-key>
 
-phishtank:
-  api_key: <your-api-key>
-
-slack:
-  browser_token: <token>
-  cookie: <cookie>
-
-ops:
-  email: ops@yourdomain.com
+# Scoring configuration (optional - stored encrypted for security)
+scoring:
+  min_confidence: <threshold>
+  default_weight: <fallback-weight>
+  weights:
+    google_safe_browsing: <weight>
+    virustotal: <weight>
+    urlscan: <weight>
+    walshy: <weight>
 ```
 
 ## API Usage
@@ -191,12 +193,12 @@ GET /api/v1/user/me
 │  - Admin Panel               │  - Domain/URL Checking       │
 ├─────────────────────────────────────────────────────────────┤
 │                    Detection Services                        │
-│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌───────┐ │
-│  │ Google  │ │ Virus   │ │ Phish   │ │ URLScan │ │Walshy │ │
-│  │ Safe    │ │ Total   │ │ Tank    │ │   .io   │ │  API  │ │
-│  │Browsing │ │         │ │         │ │         │ │       │ │
-│  └────┬────┘ └────┬────┘ └────┬────┘ └────┬────┘ └───┬───┘ │
-│       └───────────┴──────────┬┴───────────┴─────────┘      │
+│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌───────┐              │
+│  │ Google  │ │ Virus   │ │ URLScan │ │Walshy │              │
+│  │ Safe    │ │ Total   │ │   .io   │ │  API  │              │
+│  │Browsing │ │         │ │         │ │       │              │
+│  └────┬────┘ └────┬────┘ └────┬────┘ └───┬───┘              │
+│       └───────────┴──────────┬┴──────────┘                  │
 │                              ▼                              │
 │                    Aggregator Service                       │
 │                  (Weighted Confidence)                      │

@@ -416,12 +416,6 @@ GEM
       crass (~> 1.0.2)
       nokogiri (>= 1.16.8)
     securerandom (0.4.1)
-    sentry-rails (6.2.0)
-      railties (>= 5.2.0)
-      sentry-ruby (~> 6.2.0)
-    sentry-ruby (6.2.0)
-      bigdecimal
-      concurrent-ruby (~> 1.0, >= 1.0.2)
     simpleidn (0.2.3)
     solid_cable (3.0.12)
       actioncable (>= 7.2)
@@ -545,8 +539,6 @@ DEPENDENCIES
   rails (~> 8.1.1)
   rollup
   rubocop-rails-omakase
-  sentry-rails
-  sentry-ruby
   solid_cable
   solid_cache
   solid_queue

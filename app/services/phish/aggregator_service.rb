@@ -11,18 +11,6 @@ module Phish
       virustotal
     ].freeze
 
-    # Weights for different services (higher = more trusted)
-    SERVICE_WEIGHTS = {
-      google_safe_browsing: 1.5,
-      virustotal: 1.3,
-      phishtank: 1.2,
-      urlscan: 1.0,
-      walshy: 1.0
-    }.freeze
-
-    # Minimum confidence to consider a verdict
-    MIN_CONFIDENCE = 0.3
-
     attr_reader :services
 
     def initialize(services: DEFAULT_SERVICES, logger: Rails.logger)
@@ -69,7 +57,6 @@ module Phish
       when :walshy then WalshyService
       when :google_safe_browsing then GoogleSafeBrowsingService
       when :virustotal then VirustotalService
-      when :phishtank then PhishtankService
       when :urlscan then UrlscanService
       else
         log_info("Unknown service: #{name}")
@@ -89,9 +76,9 @@ module Phish
       service_results = []
 
       results.each do |result|
-        next unless result[:confidence] && result[:confidence] >= MIN_CONFIDENCE
+        next unless result[:confidence] && result[:confidence] >= min_confidence
 
-        weight = SERVICE_WEIGHTS[result[:service].to_sym] || 1.0
+        weight = service_weight(result[:service])
         confidence = result[:confidence]
         weighted_confidence = confidence * weight
 
@@ -117,7 +104,7 @@ module Phish
         normalized_phishing = phishing_score / total_weight
         normalized_clean = clean_score / total_weight
 
-        if normalized_phishing > normalized_clean && normalized_phishing >= MIN_CONFIDENCE
+        if normalized_phishing > normalized_clean && normalized_phishing >= min_confidence
           build_result(
             verdict: "phishing",
             confidence: normalized_phishing.round(2),
@@ -128,7 +115,7 @@ module Phish
               clean_score: normalized_clean.round(2)
             )
           )
-        elsif normalized_clean > normalized_phishing && normalized_clean >= MIN_CONFIDENCE
+        elsif normalized_clean > normalized_phishing && normalized_clean >= min_confidence
           build_result(
             verdict: "clean",
             confidence: normalized_clean.round(2),
@@ -163,6 +150,29 @@ module Phish
           reason: "No services returned results"
         )
       )
+    end
+
+    # Scoring configuration from encrypted credentials
+    def scoring_config
+      @scoring_config ||= Rails.application.credentials.scoring || {}
+    end
+
+    def service_weight(service_name)
+      weights = scoring_config[:weights] || {}
+      weights[service_name.to_sym] || default_weight
+    end
+
+    def min_confidence
+      scoring_config[:min_confidence] || default_min_confidence
+    end
+
+    def default_weight
+      scoring_config[:default_weight] || 1.0
+    end
+
+    # Fallback for development/test when credentials not configured
+    def default_min_confidence
+      0.3
     end
   end
 end

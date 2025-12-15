@@ -9,7 +9,7 @@ class CleanupUnverifiedAccountsJob < ApplicationJob
   def perform
     cutoff = EXPIRATION_DAYS.days.ago
 
-    users = User.where(email_confirmed_at: nil)
+    users = User.where(email_verified_at: nil)
                 .where("created_at < ?", cutoff)
                 .where.not(status: :deactivated)
 

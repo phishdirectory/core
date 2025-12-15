@@ -352,7 +352,6 @@ class User < ApplicationRecord
   end
 
   def post_signup_tasks
-    InviteToSlackJob.perform_later(email)
     WelcomeEmailJob.perform_later(self)
     NotifyOpsOnNewUserJob.perform_later(self)
   end

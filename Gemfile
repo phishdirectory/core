@@ -67,8 +67,6 @@ gem "blazer"                        # BI dashboards
 gem "flipper"                       # Feature flags
 gem "flipper-active_record"         # Flipper ActiveRecord adapter
 gem "flipper-ui"                    # Flipper web UI
-gem "sentry-ruby"                   # Error tracking
-gem "sentry-rails"                  # Rails integration for Sentry
 gem "statsd-instrument"             # Metrics collection
 gem "okcomputer"                    # Health checks
 gem "rollup"                        # Time-series rollups

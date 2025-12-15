@@ -19,14 +19,6 @@ class OpsMailer < ApplicationMailer
     mail(subject: env_subject("[SECURITY] #{@incident_type}"))
   end
 
-  def slack_invite_error
-    @email = params[:email]
-    @error = params[:error]
-    @timestamp = Time.current
-
-    mail(subject: env_subject("[SLACK ERROR] Failed to invite #{@email}"))
-  end
-
   def rate_limit_exceeded
     @ip_address = params[:ip_address]
     @endpoint = params[:endpoint]
@@ -63,6 +55,6 @@ class OpsMailer < ApplicationMailer
   private
 
   def ops_email
-    Rails.application.credentials.dig(:ops, :email) || "ops@phish.directory"
+    "ops@phish.directory"
   end
 end

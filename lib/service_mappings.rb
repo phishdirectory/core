@@ -30,10 +30,6 @@ module ServiceMappings
     },
 
     # External integrations
-    "slack-bot" => {
-      name: "Slack Bot",
-      description: "Slack integration bot"
-    },
     "discord-bot" => {
       name: "Discord Bot",
       description: "Discord integration bot"

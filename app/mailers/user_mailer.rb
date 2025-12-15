@@ -39,17 +39,6 @@ class UserMailer < ApplicationMailer
     )
   end
 
-  def email_confirmation
-    @user = params[:user]
-    @confirmation_url = confirm_email_url(token: @user.email_confirmation_token)
-
-    mail(
-      to: email_address_with_name(@user.email, @user.full_name),
-      from: email_address_with_name("confirm@transactional.phish.directory", "phish.directory"),
-      subject: env_subject("Please confirm your email address")
-    )
-  end
-
   def api_key_created
     @user = params[:user]
     @api_key_name = params[:api_key_name]

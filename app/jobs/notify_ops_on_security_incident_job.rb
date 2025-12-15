@@ -30,19 +30,5 @@ class NotifyOpsOnSecurityIncidentJob < ApplicationJob
     if defined?(StatsD)
       StatsD.increment("security.incidents", tags: { type: incident_type })
     end
-
-    # Could also send to Slack, PagerDuty, etc.
-    notify_slack(incident_type, details, user) if critical_incident?(incident_type)
-  end
-
-  private
-
-  def critical_incident?(incident_type)
-    %w[data_exfiltration_attempt unauthorized_access_attempt].include?(incident_type)
-  end
-
-  def notify_slack(incident_type, details, user)
-    # Placeholder for Slack notification
-    Rails.logger.info("[SecurityIncident] Would notify Slack: #{incident_type}")
   end
 end
