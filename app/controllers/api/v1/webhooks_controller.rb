@@ -35,8 +35,8 @@ module Api
 
       # DELETE /api/v1/webhooks/:id
       def destroy
-        webhook = current_service.webhooks.find(params[:id])
-        webhook.destroy
+        webhook = find_webhook(params[:id])
+        webhook.discard  # Use soft delete
 
         render json: { success: true }
       end
@@ -47,9 +47,19 @@ module Api
         params.permit(:url)
       end
 
+      def find_webhook(id)
+        # Support both public_id format (swh_xxx) and legacy UUID
+        # Scoped to current service for security
+        if id.to_s.start_with?("swh_")
+          current_service.service_webhooks.find_by_public_id!(id)
+        else
+          current_service.service_webhooks.find(id)
+        end
+      end
+
       def serialize_webhook(webhook)
         {
-          id: webhook.id,
+          id: webhook.public_id,
           url: webhook.url,
           active: webhook.active?,
           created_at: webhook.created_at.iso8601

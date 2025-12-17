@@ -36,7 +36,8 @@ module Api
 
         def serialize_user(user)
           {
-            id: user.id,
+            id: user.public_id,
+            pd_id: user.pd_id,
             email: user.email,
             username: user.username,
             first_name: user.first_name,

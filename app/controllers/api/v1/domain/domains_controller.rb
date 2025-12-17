@@ -26,13 +26,7 @@ module Api
 
           log_service_usage(response_code: 200)
 
-          render json: {
-            domain: normalized_domain,
-            verdict: phish_domain.verdict&.verdict || "unknown",
-            confidence: phish_domain.verdict&.confidence,
-            last_checked: phish_domain.last_checked_at&.iso8601,
-            created_at: phish_domain.created_at.iso8601
-          }
+          render json: serialize_domain(phish_domain)
         end
 
         # GET/POST /api/v1/domain/bulk
@@ -50,13 +44,7 @@ module Api
           results = domains.map do |domain|
             normalized = normalize_domain(domain)
             phish_domain = Phish::Domain.find_or_create_by(domain: normalized)
-
-            {
-              domain: normalized,
-              verdict: phish_domain.verdict&.verdict || "unknown",
-              confidence: phish_domain.verdict&.confidence,
-              last_checked: phish_domain.last_checked_at&.iso8601
-            }
+            serialize_domain(phish_domain)
           end
 
           log_service_usage(response_code: 200)
@@ -68,6 +56,18 @@ module Api
         end
 
         private
+
+        def serialize_domain(phish_domain)
+          {
+            id: phish_domain.public_id,
+            domain: phish_domain.domain,
+            verdict: phish_domain.verdict&.verdict || "unknown",
+            confidence: phish_domain.verdict&.confidence,
+            verdict_id: phish_domain.verdict&.public_id,
+            last_checked: phish_domain.last_checked_at&.iso8601,
+            created_at: phish_domain.created_at.iso8601
+          }
+        end
 
         def normalize_domain(domain)
           # Remove protocol

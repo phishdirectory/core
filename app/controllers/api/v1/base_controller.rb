@@ -92,6 +92,22 @@ module Api
         render json: { error: "Rate limit exceeded" }, status: :too_many_requests
       end
 
+      # Find a record by public_id or legacy UUID
+      # Supports both formats for backwards compatibility
+      #
+      # @param model_class [Class] The model class to search
+      # @param id [String] Either a public_id (e.g., "usr_xxx") or UUID
+      # @param prefix [String] Expected prefix for public_id format
+      # @return [ActiveRecord::Base] The found record
+      # @raise [ActiveRecord::RecordNotFound] If no record found
+      def find_by_public_or_uuid!(model_class, id, prefix:)
+        if id.to_s.start_with?("#{prefix}_")
+          model_class.find_by_public_id!(id)
+        else
+          model_class.find(id)
+        end
+      end
+
       # Log API usage for service keys
       def log_service_usage(response_code:, response_body: nil, duration_ms: nil)
         return unless @current_service_key

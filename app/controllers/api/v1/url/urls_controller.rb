@@ -26,13 +26,7 @@ module Api
 
           log_service_usage(response_code: 200)
 
-          render json: {
-            url: normalized_url,
-            verdict: phish_url.verdict&.verdict || "unknown",
-            confidence: phish_url.verdict&.confidence,
-            last_checked: phish_url.last_checked_at&.iso8601,
-            created_at: phish_url.created_at.iso8601
-          }
+          render json: serialize_url(phish_url)
         end
 
         # GET/POST /api/v1/url/bulk
@@ -50,13 +44,7 @@ module Api
           results = urls.map do |url|
             normalized = normalize_url(url)
             phish_url = Phish::Url.find_or_create_by(url: normalized)
-
-            {
-              url: normalized,
-              verdict: phish_url.verdict&.verdict || "unknown",
-              confidence: phish_url.verdict&.confidence,
-              last_checked: phish_url.last_checked_at&.iso8601
-            }
+            serialize_url(phish_url)
           end
 
           log_service_usage(response_code: 200)
@@ -68,6 +56,19 @@ module Api
         end
 
         private
+
+        def serialize_url(phish_url)
+          {
+            id: phish_url.public_id,
+            url: phish_url.url,
+            domain: phish_url.domain,
+            verdict: phish_url.verdict&.verdict || "unknown",
+            confidence: phish_url.verdict&.confidence,
+            verdict_id: phish_url.verdict&.public_id,
+            last_checked: phish_url.last_checked_at&.iso8601,
+            created_at: phish_url.created_at.iso8601
+          }
+        end
 
         def normalize_url(url)
           # Add protocol if missing

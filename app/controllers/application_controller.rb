@@ -126,6 +126,15 @@ class ApplicationController < ActionController::Base
   end
 
   # ===========================================
+  # Audits1984 integration
+  # ===========================================
+
+  # Required by Audits1984 to identify who is viewing console audits
+  def find_current_auditor
+    current_user
+  end
+
+  # ===========================================
   # Error handling
   # ===========================================
 
