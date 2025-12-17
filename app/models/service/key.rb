@@ -4,6 +4,10 @@ class Service::Key < ApplicationRecord
   self.table_name = "service_keys"
 
   include AASM
+  include SoftDeletable
+  include PublicIdentifiable
+
+  set_public_id_prefix "sak"
 
   has_paper_trail
 

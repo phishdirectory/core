@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 
 class Phish::Domain < ApplicationRecord
+  include SoftDeletable
+  include PublicIdentifiable
+
   self.table_name = "phish_domains"
+  set_public_id_prefix "dom"
 
   # Associations
   belongs_to :verdict, optional: true

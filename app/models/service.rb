@@ -2,6 +2,10 @@
 
 class Service < ApplicationRecord
   include AASM
+  include SoftDeletable
+  include PublicIdentifiable
+
+  set_public_id_prefix "svc"
 
   has_paper_trail
 

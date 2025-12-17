@@ -3,6 +3,11 @@
 class Service::Webhook < ApplicationRecord
   self.table_name = "service_webhooks"
 
+  include SoftDeletable
+  include PublicIdentifiable
+
+  set_public_id_prefix "swh"
+
   has_paper_trail
 
   # Associations

@@ -2,6 +2,10 @@
 
 class User < ApplicationRecord
   include AASM
+  include SoftDeletable
+  include PublicIdentifiable
+
+  set_public_id_prefix "usr"
 
   has_paper_trail
 

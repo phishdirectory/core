@@ -1,8 +1,12 @@
 # frozen_string_literal: true
 
 class UserApiKey < ApplicationRecord
+  include SoftDeletable
+  include PublicIdentifiable
+
   # API Key prefix for easy identification
   KEY_PREFIX = "pdat_"
+  set_public_id_prefix "uak"
 
   # Associations
   belongs_to :user

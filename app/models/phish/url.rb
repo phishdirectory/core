@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 
 class Phish::Url < ApplicationRecord
+  include SoftDeletable
+  include PublicIdentifiable
+
   self.table_name = "phish_urls"
+  set_public_id_prefix "url"
 
   # Associations
   belongs_to :verdict, optional: true

@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 class Verdict < ApplicationRecord
+  include PublicIdentifiable
+
+  set_public_id_prefix "vrd"
+
   # Classifications
   CLASSIFICATIONS = %w[phishing suspicious clean unknown].freeze
 
