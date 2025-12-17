@@ -1,0 +1,94 @@
+<% content_for :title, "Authentication" %>
+
+<div class="prose prose-invert max-w-none">
+  <h1 class="text-4xl font-bold text-slate-100 mb-4">Authentication</h1>
+  <p class="text-xl text-slate-400 mb-8">
+    All API requests require authentication using an API key.
+  </p>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Getting an API Key</h2>
+  <p class="text-slate-300 mb-4">
+    To get an API key:
+  </p>
+  <ol class="text-slate-300 space-y-2 mb-6">
+    <li>1. Sign up or log in to your account</li>
+    <li>2. Navigate to the <%= link_to "API Keys page", dashboard_api_keys_path, class: "text-cyan-accent hover:underline" %> in your dashboard</li>
+    <li>3. Click "Create API Key"</li>
+    <li>4. Copy and securely store your key</li>
+  </ol>
+
+  <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 not-prose mb-8">
+    <div class="font-semibold text-amber-400 mb-1">⚠️ Security Warning</div>
+    <p class="text-sm text-slate-300">
+      Your API key grants access to your account. Never share it publicly or commit it to version control.
+      If your key is compromised, revoke it immediately from your dashboard.
+    </p>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Using Your API Key</h2>
+  <p class="text-slate-300 mb-4">
+    Include your API key in the request headers. We support two methods:
+  </p>
+
+  <h3 class="text-xl font-semibold text-slate-100 mt-6 mb-3">Authorization Header (Recommended)</h3>
+  <div class="bg-pd-tertiary rounded-xl p-4 font-mono text-sm not-prose mb-6">
+    <span class="text-slate-400">Authorization:</span> <span class="text-slate-100">Bearer pdat_your_api_key</span>
+  </div>
+
+  <h3 class="text-xl font-semibold text-slate-100 mt-6 mb-3">X-API-Key Header</h3>
+  <div class="bg-pd-tertiary rounded-xl p-4 font-mono text-sm not-prose mb-6">
+    <span class="text-slate-400">X-API-Key:</span> <span class="text-slate-100">pdat_your_api_key</span>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Example Requests</h2>
+
+  <h3 class="text-xl font-semibold text-slate-100 mt-6 mb-3">curl</h3>
+  <div class="bg-pd-tertiary rounded-xl p-5 font-mono text-sm overflow-x-auto not-prose mb-6">
+    <div class="text-slate-100">
+      curl https://phish.directory/api/v1/domain/check?domain=example.com \<br>
+      <span class="pl-4">-H "Authorization: Bearer pdat_your_api_key"</span>
+    </div>
+  </div>
+
+  <h3 class="text-xl font-semibold text-slate-100 mt-6 mb-3">JavaScript (fetch)</h3>
+  <div class="bg-pd-tertiary rounded-xl p-5 font-mono text-sm overflow-x-auto not-prose mb-6">
+<pre class="text-slate-100">const response = await fetch(
+  'https://phish.directory/api/v1/domain/check?domain=example.com',
+  {
+    headers: {
+      'Authorization': 'Bearer pdat_your_api_key'
+    }
+  }
+);
+const data = await response.json();</pre>
+  </div>
+
+  <h3 class="text-xl font-semibold text-slate-100 mt-6 mb-3">Python (requests)</h3>
+  <div class="bg-pd-tertiary rounded-xl p-5 font-mono text-sm overflow-x-auto not-prose mb-6">
+<pre class="text-slate-100">import requests
+
+response = requests.get(
+    'https://phish.directory/api/v1/domain/check',
+    params={'domain': 'example.com'},
+    headers={'Authorization': 'Bearer pdat_your_api_key'}
+)
+data = response.json()</pre>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Authentication Errors</h2>
+  <p class="text-slate-300 mb-4">
+    If authentication fails, you'll receive a <code class="bg-pd-tertiary px-2 py-1 rounded text-sm">401 Unauthorized</code> response:
+  </p>
+  <div class="bg-pd-tertiary rounded-xl p-5 font-mono text-sm overflow-x-auto not-prose mb-6">
+<pre class="text-slate-100">{
+  "error": "Invalid or missing API key"
+}</pre>
+  </div>
+
+  <p class="text-slate-300 mb-4">Common causes:</p>
+  <ul class="text-slate-300 space-y-2 mb-8">
+    <li>• Missing Authorization or X-API-Key header</li>
+    <li>• Invalid or revoked API key</li>
+    <li>• Malformed header (missing "Bearer " prefix)</li>
+  </ul>
+</div>

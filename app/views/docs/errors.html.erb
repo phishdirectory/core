@@ -1,0 +1,219 @@
+<% content_for :title, "Error Handling" %>
+
+<div class="prose prose-invert max-w-none">
+  <h1 class="text-4xl font-bold text-slate-100 mb-4">Error Handling</h1>
+  <p class="text-xl text-slate-400 mb-8">
+    Understanding API errors and how to handle them in your application.
+  </p>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Error Response Format</h2>
+  <p class="text-slate-300 mb-4">
+    All API errors return a consistent JSON format:
+  </p>
+  <div class="bg-pd-tertiary rounded-xl p-5 font-mono text-sm overflow-x-auto not-prose mb-6">
+<pre class="text-slate-100">{
+  "error": "Error message describing what went wrong",
+  "code": "ERROR_CODE",
+  "details": {}  // Optional additional context
+}</pre>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">HTTP Status Codes</h2>
+
+  <div class="not-prose">
+    <table class="w-full text-sm mb-8">
+      <thead>
+        <tr class="border-b border-slate-700/30">
+          <th class="text-left py-3 px-4 text-slate-400 font-semibold">Code</th>
+          <th class="text-left py-3 px-4 text-slate-400 font-semibold">Meaning</th>
+          <th class="text-left py-3 px-4 text-slate-400 font-semibold">Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="border-b border-slate-700/20">
+          <td class="py-3 px-4"><span class="px-2 py-1 bg-emerald-500/15 text-emerald-500 rounded font-mono text-xs">200</span></td>
+          <td class="py-3 px-4 text-slate-100">OK</td>
+          <td class="py-3 px-4 text-slate-400">Request succeeded</td>
+        </tr>
+        <tr class="border-b border-slate-700/20">
+          <td class="py-3 px-4"><span class="px-2 py-1 bg-emerald-500/15 text-emerald-500 rounded font-mono text-xs">201</span></td>
+          <td class="py-3 px-4 text-slate-100">Created</td>
+          <td class="py-3 px-4 text-slate-400">Resource created successfully</td>
+        </tr>
+        <tr class="border-b border-slate-700/20">
+          <td class="py-3 px-4"><span class="px-2 py-1 bg-amber-500/15 text-amber-500 rounded font-mono text-xs">400</span></td>
+          <td class="py-3 px-4 text-slate-100">Bad Request</td>
+          <td class="py-3 px-4 text-slate-400">Invalid request parameters</td>
+        </tr>
+        <tr class="border-b border-slate-700/20">
+          <td class="py-3 px-4"><span class="px-2 py-1 bg-red-500/15 text-red-500 rounded font-mono text-xs">401</span></td>
+          <td class="py-3 px-4 text-slate-100">Unauthorized</td>
+          <td class="py-3 px-4 text-slate-400">Missing or invalid API key</td>
+        </tr>
+        <tr class="border-b border-slate-700/20">
+          <td class="py-3 px-4"><span class="px-2 py-1 bg-red-500/15 text-red-500 rounded font-mono text-xs">403</span></td>
+          <td class="py-3 px-4 text-slate-100">Forbidden</td>
+          <td class="py-3 px-4 text-slate-400">Valid key but insufficient permissions</td>
+        </tr>
+        <tr class="border-b border-slate-700/20">
+          <td class="py-3 px-4"><span class="px-2 py-1 bg-amber-500/15 text-amber-500 rounded font-mono text-xs">404</span></td>
+          <td class="py-3 px-4 text-slate-100">Not Found</td>
+          <td class="py-3 px-4 text-slate-400">Resource not found</td>
+        </tr>
+        <tr class="border-b border-slate-700/20">
+          <td class="py-3 px-4"><span class="px-2 py-1 bg-amber-500/15 text-amber-500 rounded font-mono text-xs">422</span></td>
+          <td class="py-3 px-4 text-slate-100">Unprocessable Entity</td>
+          <td class="py-3 px-4 text-slate-400">Validation errors</td>
+        </tr>
+        <tr class="border-b border-slate-700/20">
+          <td class="py-3 px-4"><span class="px-2 py-1 bg-red-500/15 text-red-500 rounded font-mono text-xs">429</span></td>
+          <td class="py-3 px-4 text-slate-100">Too Many Requests</td>
+          <td class="py-3 px-4 text-slate-400">Rate limit exceeded</td>
+        </tr>
+        <tr class="border-b border-slate-700/20">
+          <td class="py-3 px-4"><span class="px-2 py-1 bg-red-500/15 text-red-500 rounded font-mono text-xs">500</span></td>
+          <td class="py-3 px-4 text-slate-100">Internal Server Error</td>
+          <td class="py-3 px-4 text-slate-400">Something went wrong on our end</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Common Errors</h2>
+
+  <h3 class="text-xl font-semibold text-slate-100 mt-6 mb-3">Authentication Errors (401)</h3>
+  <div class="bg-pd-tertiary rounded-xl p-5 font-mono text-sm overflow-x-auto not-prose mb-6">
+<pre class="text-slate-100">{
+  "error": "Invalid or missing API key",
+  "code": "INVALID_API_KEY"
+}</pre>
+  </div>
+  <p class="text-slate-300 mb-4">
+    <strong class="text-slate-100">How to fix:</strong> Ensure your API key is included in the request header and is valid.
+    Check that you're using either <code class="bg-pd-tertiary px-2 py-1 rounded text-sm">Authorization: Bearer pdat_...</code>
+    or <code class="bg-pd-tertiary px-2 py-1 rounded text-sm">X-API-Key: pdat_...</code>.
+  </p>
+
+  <h3 class="text-xl font-semibold text-slate-100 mt-6 mb-3">Validation Errors (422)</h3>
+  <div class="bg-pd-tertiary rounded-xl p-5 font-mono text-sm overflow-x-auto not-prose mb-6">
+<pre class="text-slate-100">{
+  "error": "Validation failed",
+  "code": "VALIDATION_ERROR",
+  "details": {
+    "domain": ["is required", "must be a valid domain"]
+  }
+}</pre>
+  </div>
+  <p class="text-slate-300 mb-4">
+    <strong class="text-slate-100">How to fix:</strong> Check the <code class="bg-pd-tertiary px-2 py-1 rounded text-sm">details</code>
+    object for specific field errors and correct your request.
+  </p>
+
+  <h3 class="text-xl font-semibold text-slate-100 mt-6 mb-3">Rate Limit Errors (429)</h3>
+  <div class="bg-pd-tertiary rounded-xl p-5 font-mono text-sm overflow-x-auto not-prose mb-6">
+<pre class="text-slate-100">{
+  "error": "Rate limit exceeded",
+  "code": "RATE_LIMIT_EXCEEDED",
+  "details": {
+    "retry_after": 60,
+    "limit": 100,
+    "remaining": 0,
+    "reset_at": "2024-01-15T10:31:00Z"
+  }
+}</pre>
+  </div>
+  <p class="text-slate-300 mb-4">
+    <strong class="text-slate-100">How to fix:</strong> Wait for the <code class="bg-pd-tertiary px-2 py-1 rounded text-sm">retry_after</code>
+    period before making more requests. Consider using bulk endpoints to reduce the number of requests.
+  </p>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Best Practices</h2>
+
+  <ul class="text-slate-300 space-y-3 mb-8">
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">✓</span>
+      <span><strong class="text-slate-100">Always check the status code</strong> — Don't assume success; check for 2xx status codes</span>
+    </li>
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">✓</span>
+      <span><strong class="text-slate-100">Parse error responses</strong> — Use the error message and code to provide meaningful feedback</span>
+    </li>
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">✓</span>
+      <span><strong class="text-slate-100">Implement retry logic</strong> — For 429 and 5xx errors, implement exponential backoff</span>
+    </li>
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">✓</span>
+      <span><strong class="text-slate-100">Log errors</strong> — Keep track of errors for debugging and monitoring</span>
+    </li>
+  </ul>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Example Error Handling</h2>
+
+  <h3 class="text-xl font-semibold text-slate-100 mt-6 mb-3">JavaScript</h3>
+  <div class="bg-pd-tertiary rounded-xl p-5 font-mono text-sm overflow-x-auto not-prose mb-6">
+<pre class="text-slate-100">async function checkDomain(domain) {
+  try {
+    const response = await fetch(
+      'https://phish.directory/api/v1/domain/check',
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer pdat_your_api_key',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ domain })
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+
+      switch (response.status) {
+        case 401:
+          throw new Error('Invalid API key');
+        case 429:
+          const retryAfter = error.details?.retry_after || 60;
+          throw new Error(`Rate limited. Retry in ${retryAfter}s`);
+        default:
+          throw new Error(error.error || 'Unknown error');
+      }
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('API Error:', error.message);
+    throw error;
+  }
+}</pre>
+  </div>
+
+  <h3 class="text-xl font-semibold text-slate-100 mt-6 mb-3">Python</h3>
+  <div class="bg-pd-tertiary rounded-xl p-5 font-mono text-sm overflow-x-auto not-prose mb-6">
+<pre class="text-slate-100">import requests
+import time
+
+def check_domain(domain, max_retries=3):
+    headers = {'Authorization': 'Bearer pdat_your_api_key'}
+
+    for attempt in range(max_retries):
+        response = requests.post(
+            'https://phish.directory/api/v1/domain/check',
+            headers=headers,
+            json={'domain': domain}
+        )
+
+        if response.status_code == 200:
+            return response.json()
+
+        if response.status_code == 429:
+            retry_after = response.json().get('details', {}).get('retry_after', 60)
+            time.sleep(retry_after)
+            continue
+
+        error = response.json()
+        raise Exception(f"API Error: {error.get('error')}")
+
+    raise Exception("Max retries exceeded")</pre>
+  </div>
+</div>

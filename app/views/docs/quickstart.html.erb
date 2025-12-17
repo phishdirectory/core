@@ -1,0 +1,95 @@
+<% content_for :title, "Quickstart" %>
+
+<div class="prose prose-invert max-w-none">
+  <h1 class="text-4xl font-bold text-slate-100 mb-4">Quickstart</h1>
+  <p class="text-xl text-slate-400 mb-8">
+    Get up and running with phish.directory in 5 minutes.
+  </p>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">1. Create an Account</h2>
+  <p class="text-slate-300 mb-4">
+    First, <%= link_to "sign up for a free account", signup_path, class: "text-cyan-accent hover:underline" %>.
+    You'll receive an API key that you'll use to authenticate your requests.
+  </p>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">2. Get Your API Key</h2>
+  <p class="text-slate-300 mb-4">
+    After signing in, go to your <%= link_to "Dashboard", dashboard_api_keys_path, class: "text-cyan-accent hover:underline" %>
+    and create a new API key. Your key will look like this:
+  </p>
+  <div class="bg-pd-tertiary rounded-xl p-4 font-mono text-sm not-prose mb-6">
+    <span class="text-slate-400">pdat_</span><span class="text-slate-100">a1b2c3d4e5f6g7h8i9j0...</span>
+  </div>
+  <p class="text-slate-300 mb-4">
+    <strong class="text-amber-400">Important:</strong> Keep your API key secret. Don't share it or commit it to version control.
+  </p>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">3. Make Your First Request</h2>
+  <p class="text-slate-300 mb-4">
+    Use curl or your favorite HTTP client to check a domain:
+  </p>
+  <div class="bg-pd-tertiary rounded-xl p-5 font-mono text-sm overflow-x-auto not-prose mb-6">
+    <div class="text-slate-100">
+      curl -X POST https://phish.directory/api/v1/domain/check \<br>
+      <span class="pl-4">-H "Authorization: Bearer pdat_your_api_key" \</span><br>
+      <span class="pl-4">-H "Content-Type: application/json" \</span><br>
+      <span class="pl-4">-d '{"domain": "example.com"}'</span>
+    </div>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">4. Understand the Response</h2>
+  <p class="text-slate-300 mb-4">
+    The API returns a JSON response with the verdict:
+  </p>
+  <div class="bg-pd-tertiary rounded-xl p-5 font-mono text-sm overflow-x-auto not-prose mb-6">
+<pre class="text-slate-100">{
+  "domain": "example.com",
+  "verdict": "clean",
+  "confidence": 0.98,
+  "last_checked": "2024-01-15T10:30:00Z",
+  "created_at": "2024-01-01T00:00:00Z"
+}</pre>
+  </div>
+
+  <h3 class="text-xl font-semibold text-slate-100 mt-6 mb-3">Verdict Values</h3>
+  <div class="not-prose">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="border-b border-slate-700/30">
+          <th class="text-left py-3 px-4 text-slate-400 font-semibold">Verdict</th>
+          <th class="text-left py-3 px-4 text-slate-400 font-semibold">Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="border-b border-slate-700/20">
+          <td class="py-3 px-4"><span class="px-2 py-1 bg-emerald-500/15 text-emerald-500 rounded font-mono text-xs">clean</span></td>
+          <td class="py-3 px-4 text-slate-300">No threats detected</td>
+        </tr>
+        <tr class="border-b border-slate-700/20">
+          <td class="py-3 px-4"><span class="px-2 py-1 bg-amber-500/15 text-amber-500 rounded font-mono text-xs">suspicious</span></td>
+          <td class="py-3 px-4 text-slate-300">Potentially malicious, exercise caution</td>
+        </tr>
+        <tr class="border-b border-slate-700/20">
+          <td class="py-3 px-4"><span class="px-2 py-1 bg-red-500/15 text-red-500 rounded font-mono text-xs">phishing</span></td>
+          <td class="py-3 px-4 text-slate-300">Confirmed phishing threat</td>
+        </tr>
+        <tr class="border-b border-slate-700/20">
+          <td class="py-3 px-4"><span class="px-2 py-1 bg-slate-600/30 text-slate-400 rounded font-mono text-xs">unknown</span></td>
+          <td class="py-3 px-4 text-slate-300">Not yet analyzed</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-12 mb-4">Next Steps</h2>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose">
+    <%= link_to docs_page_path(page: 'authentication'), class: "bg-pd-secondary border border-slate-700/20 rounded-xl p-4 hover:border-cyan-accent/30 transition-all" do %>
+      <div class="font-semibold text-slate-100 mb-1">Authentication →</div>
+      <div class="text-sm text-slate-400">Learn about API key management</div>
+    <% end %>
+    <a href="/docs/api" class="bg-pd-secondary border border-slate-700/20 rounded-xl p-4 hover:border-cyan-accent/30 transition-all">
+      <div class="font-semibold text-slate-100 mb-1">API Reference →</div>
+      <div class="text-sm text-slate-400">Explore all endpoints</div>
+    </a>
+  </div>
+</div>

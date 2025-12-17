@@ -1,0 +1,77 @@
+<% content_for :title, "Introduction" %>
+
+<div class="prose prose-invert max-w-none">
+  <h1 class="text-4xl font-bold text-slate-100 mb-4">phish.directory Documentation</h1>
+  <p class="text-xl text-slate-400 mb-8">
+    Real-time phishing detection API. Protect your users from malicious domains and URLs.
+  </p>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12 not-prose">
+    <%= link_to docs_page_path(page: 'quickstart'), class: "bg-pd-secondary border border-slate-700/20 rounded-2xl p-6 hover:border-cyan-accent/30 transition-all group" do %>
+      <div class="text-2xl mb-3">🚀</div>
+      <h3 class="text-lg font-semibold text-slate-100 mb-2 group-hover:text-cyan-accent transition-colors">Quickstart</h3>
+      <p class="text-sm text-slate-400">Get up and running in 5 minutes with your first API call.</p>
+    <% end %>
+
+    <a href="/docs/api" class="bg-pd-secondary border border-slate-700/20 rounded-2xl p-6 hover:border-cyan-accent/30 transition-all group">
+      <div class="text-2xl mb-3">📖</div>
+      <h3 class="text-lg font-semibold text-slate-100 mb-2 group-hover:text-cyan-accent transition-colors">API Reference</h3>
+      <p class="text-sm text-slate-400">Interactive API documentation with Swagger UI.</p>
+    </a>
+
+    <%= link_to docs_page_path(page: 'authentication'), class: "bg-pd-secondary border border-slate-700/20 rounded-2xl p-6 hover:border-cyan-accent/30 transition-all group" do %>
+      <div class="text-2xl mb-3">🔐</div>
+      <h3 class="text-lg font-semibold text-slate-100 mb-2 group-hover:text-cyan-accent transition-colors">Authentication</h3>
+      <p class="text-sm text-slate-400">Learn how to authenticate your API requests.</p>
+    <% end %>
+
+    <%= link_to docs_page_path(page: 'endpoints'), class: "bg-pd-secondary border border-slate-700/20 rounded-2xl p-6 hover:border-cyan-accent/30 transition-all group" do %>
+      <div class="text-2xl mb-3">📡</div>
+      <h3 class="text-lg font-semibold text-slate-100 mb-2 group-hover:text-cyan-accent transition-colors">Endpoints</h3>
+      <p class="text-sm text-slate-400">Complete API endpoint reference with examples.</p>
+    <% end %>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-12 mb-4">What is phish.directory?</h2>
+  <p class="text-slate-300 mb-4">
+    phish.directory is a real-time phishing detection API that aggregates threat intelligence from multiple sources
+    to help you protect your users from malicious domains and URLs.
+  </p>
+
+  <h3 class="text-xl font-semibold text-slate-100 mt-8 mb-3">Key Features</h3>
+  <ul class="text-slate-300 space-y-2 mb-8">
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">✓</span>
+      <span><strong class="text-slate-100">Real-time detection</strong> — Check domains and URLs instantly against multiple threat feeds</span>
+    </li>
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">✓</span>
+      <span><strong class="text-slate-100">Bulk checking</strong> — Check up to 100 domains or URLs in a single request</span>
+    </li>
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">✓</span>
+      <span><strong class="text-slate-100">Confidence scoring</strong> — Get detailed confidence scores for each verdict</span>
+    </li>
+  </ul>
+
+  <h3 class="text-xl font-semibold text-slate-100 mt-8 mb-3">Quick Example</h3>
+  <div class="bg-pd-tertiary rounded-xl p-5 font-mono text-sm overflow-x-auto not-prose mb-8">
+    <div class="text-slate-500 mb-2"># Check if a domain is malicious</div>
+    <div class="text-slate-100">
+      curl -X POST https://phish.directory/api/v1/domain/check \<br>
+      <span class="pl-4">-H "Authorization: Bearer pdat_your_api_key" \</span><br>
+      <span class="pl-4">-H "Content-Type: application/json" \</span><br>
+      <span class="pl-4">-d '{"domain": "suspicious-site.com"}'</span>
+    </div>
+  </div>
+
+  <div class="bg-pd-secondary border border-slate-700/20 rounded-xl p-6 not-prose">
+    <h4 class="font-semibold text-slate-100 mb-2">Need an API key?</h4>
+    <p class="text-sm text-slate-400 mb-4">Sign up for a free account to get your API key and start protecting your users.</p>
+    <% if user_signed_in? %>
+      <%= link_to "Go to Dashboard", dashboard_api_keys_path, class: "px-4 py-2 bg-cyan-accent text-pd-primary font-semibold rounded-xl text-sm hover:shadow-[0_0_20px_rgba(63,196,224,0.4)] transition-all inline-block" %>
+    <% else %>
+      <%= link_to "Get Started Free", signup_path, class: "px-4 py-2 bg-cyan-accent text-pd-primary font-semibold rounded-xl text-sm hover:shadow-[0_0_20px_rgba(63,196,224,0.4)] transition-all inline-block" %>
+    <% end %>
+  </div>
+</div>

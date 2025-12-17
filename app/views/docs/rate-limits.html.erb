@@ -1,0 +1,205 @@
+<% content_for :title, "Rate Limits" %>
+
+<div class="prose prose-invert max-w-none">
+  <h1 class="text-4xl font-bold text-slate-100 mb-4">Rate Limits</h1>
+  <p class="text-xl text-slate-400 mb-8">
+    Understanding and working with API rate limits.
+  </p>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Current Limits</h2>
+  <p class="text-slate-300 mb-4">
+    All API requests require authentication. We use a sliding window with burst support, allowing
+    short bursts of requests while enforcing overall limits:
+  </p>
+
+  <div class="not-prose mb-8">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="border-b border-slate-700/30">
+          <th class="text-left py-3 px-4 text-slate-400 font-semibold">Window</th>
+          <th class="text-left py-3 px-4 text-slate-400 font-semibold">Limit</th>
+          <th class="text-left py-3 px-4 text-slate-400 font-semibold">Purpose</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="border-b border-slate-700/20">
+          <td class="py-3 px-4 text-slate-100">10 seconds</td>
+          <td class="py-3 px-4 text-slate-300">60 requests</td>
+          <td class="py-3 px-4 text-slate-400">Allows quick bursts</td>
+        </tr>
+        <tr class="border-b border-slate-700/20">
+          <td class="py-3 px-4 text-slate-100">1 minute</td>
+          <td class="py-3 px-4 text-slate-300">200 requests</td>
+          <td class="py-3 px-4 text-slate-400">Smooths request patterns</td>
+        </tr>
+        <tr class="border-b border-slate-700/20">
+          <td class="py-3 px-4 text-slate-100">1 hour</td>
+          <td class="py-3 px-4 text-slate-300">1,000 requests</td>
+          <td class="py-3 px-4 text-slate-400">Overall cap</td>
+        </tr>
+        <tr class="border-b border-slate-700/20">
+          <td class="py-3 px-4 text-slate-100">Per request</td>
+          <td class="py-3 px-4 text-slate-300">100 items</td>
+          <td class="py-3 px-4 text-slate-400">Bulk endpoint limit</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="bg-pd-secondary border border-slate-700/20 rounded-xl p-4 not-prose mb-8">
+    <div class="font-semibold text-slate-100 mb-1">How it works</div>
+    <p class="text-sm text-slate-400">
+      All limits apply simultaneously. You can burst up to 60 requests in 10 seconds, but you can't
+      exceed 200 in a minute or 1,000 in an hour. This lets you make quick bulk checks while preventing abuse.
+    </p>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Upstream Service Limits</h2>
+  <p class="text-slate-300 mb-4">
+    phish.directory aggregates threat intelligence from multiple sources. Each source has its own rate limits:
+  </p>
+
+  <div class="not-prose mb-8">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="border-b border-slate-700/30">
+          <th class="text-left py-3 px-4 text-slate-400 font-semibold">Service</th>
+          <th class="text-left py-3 px-4 text-slate-400 font-semibold">Per Minute</th>
+          <th class="text-left py-3 px-4 text-slate-400 font-semibold">Per Hour</th>
+          <th class="text-left py-3 px-4 text-slate-400 font-semibold">Per Day</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="border-b border-slate-700/20">
+          <td class="py-3 px-4 text-slate-100">VirusTotal</td>
+          <td class="py-3 px-4 text-slate-300">4</td>
+          <td class="py-3 px-4 text-slate-400">-</td>
+          <td class="py-3 px-4 text-slate-300">500</td>
+        </tr>
+        <tr class="border-b border-slate-700/20">
+          <td class="py-3 px-4 text-slate-100">URLScan</td>
+          <td class="py-3 px-4 text-slate-300">60</td>
+          <td class="py-3 px-4 text-slate-300">100</td>
+          <td class="py-3 px-4 text-slate-300">1,000</td>
+        </tr>
+        <tr class="border-b border-slate-700/20">
+          <td class="py-3 px-4 text-slate-100">Google Safe Browsing</td>
+          <td class="py-3 px-4 text-slate-300">100</td>
+          <td class="py-3 px-4 text-slate-400">-</td>
+          <td class="py-3 px-4 text-slate-300">10,000</td>
+        </tr>
+        <tr class="border-b border-slate-700/20">
+          <td class="py-3 px-4 text-slate-100">Walshy</td>
+          <td class="py-3 px-4 text-slate-300">30</td>
+          <td class="py-3 px-4 text-slate-300">500</td>
+          <td class="py-3 px-4 text-slate-400">-</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="bg-pd-secondary border border-slate-700/20 rounded-xl p-4 not-prose mb-8">
+    <div class="font-semibold text-slate-100 mb-1">Graceful Degradation</div>
+    <p class="text-sm text-slate-400">
+      When an upstream service is rate-limited, we still return results from available services.
+      The response includes a <code class="text-cyan-accent">rate_limited_services</code> field
+      indicating which sources were temporarily unavailable.
+    </p>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Rate Limit Headers</h2>
+  <p class="text-slate-300 mb-4">
+    When rate limited, responses include these headers:
+  </p>
+
+  <div class="not-prose mb-8">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="border-b border-slate-700/30">
+          <th class="text-left py-3 px-4 text-slate-400 font-semibold">Header</th>
+          <th class="text-left py-3 px-4 text-slate-400 font-semibold">Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="border-b border-slate-700/20">
+          <td class="py-3 px-4"><code class="text-cyan-accent">X-RateLimit-Limit</code></td>
+          <td class="py-3 px-4 text-slate-300">Maximum requests allowed</td>
+        </tr>
+        <tr class="border-b border-slate-700/20">
+          <td class="py-3 px-4"><code class="text-cyan-accent">X-RateLimit-Remaining</code></td>
+          <td class="py-3 px-4 text-slate-300">Requests remaining (0 when limited)</td>
+        </tr>
+        <tr class="border-b border-slate-700/20">
+          <td class="py-3 px-4"><code class="text-cyan-accent">X-RateLimit-Reset</code></td>
+          <td class="py-3 px-4 text-slate-300">Unix timestamp when the limit resets</td>
+        </tr>
+        <tr class="border-b border-slate-700/20">
+          <td class="py-3 px-4"><code class="text-cyan-accent">Retry-After</code></td>
+          <td class="py-3 px-4 text-slate-300">Seconds to wait before retrying</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Rate Limit Response</h2>
+  <p class="text-slate-300 mb-4">
+    When you exceed the rate limit, you'll receive a <code class="bg-pd-tertiary px-2 py-1 rounded text-sm">429 Too Many Requests</code> response:
+  </p>
+
+  <div class="bg-pd-tertiary rounded-xl p-5 font-mono text-sm overflow-x-auto not-prose mb-6">
+<pre class="text-slate-100">{
+  "error": "Rate limit exceeded. Retry later."
+}</pre>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Best Practices</h2>
+
+  <ul class="text-slate-300 space-y-3 mb-8">
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">✓</span>
+      <span><strong class="text-slate-100">Use bulk endpoints</strong> — Check up to 100 domains/URLs in a single request instead of making individual calls</span>
+    </li>
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">✓</span>
+      <span><strong class="text-slate-100">Monitor rate limit headers</strong> — Track your usage and slow down before hitting limits</span>
+    </li>
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">✓</span>
+      <span><strong class="text-slate-100">Implement exponential backoff</strong> — When rate limited, wait progressively longer between retries</span>
+    </li>
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">✓</span>
+      <span><strong class="text-slate-100">Cache results</strong> — Store results locally to avoid redundant API calls</span>
+    </li>
+  </ul>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Example: Handling Rate Limits</h2>
+
+  <div class="bg-pd-tertiary rounded-xl p-5 font-mono text-sm overflow-x-auto not-prose mb-6">
+<pre class="text-slate-100">async function checkWithRetry(domain, maxRetries = 3) {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const response = await fetch(
+      'https://phish.directory/api/v1/domain/check',
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer pdat_your_api_key',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ domain })
+      }
+    );
+
+    if (response.status === 429) {
+      const retryAfter = response.headers.get('Retry-After') || 60;
+      await new Promise(r => setTimeout(r, retryAfter * 1000));
+      continue;
+    }
+
+    return response.json();
+  }
+
+  throw new Error('Max retries exceeded');
+}</pre>
+  </div>
+</div>

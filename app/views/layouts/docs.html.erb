@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= content_for?(:title) ? "#{yield(:title)} | phish.directory Docs" : "Documentation | phish.directory" %></title>
+
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+
+  <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+  <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+</head>
+<body class="bg-pd-primary text-slate-100 font-sans min-h-screen antialiased">
+  <%# Background %>
+  <div class="fixed inset-0 bg-gradient-to-br from-pd-primary to-slate-900 pointer-events-none -z-10"></div>
+
+  <div class="flex min-h-screen">
+    <%# Sidebar %>
+    <aside class="w-[280px] bg-pd-secondary border-r border-slate-700/20 flex flex-col fixed top-0 left-0 bottom-0 z-50">
+      <div class="p-6 border-b border-slate-700/20">
+        <a href="<%= root_path %>" class="flex items-center gap-3 text-slate-100 font-bold text-lg no-underline">
+          <%= image_tag "phish-logo.png", alt: "phish.directory", class: "w-9 h-9 rounded-xl shadow-[0_0_20px_rgba(63,196,224,0.4)]" rescue nil %>
+          <span>phish.directory</span>
+        </a>
+        <div class="text-xs text-slate-500 mt-2">Documentation</div>
+      </div>
+
+      <nav class="flex-1 p-4 overflow-y-auto">
+        <div class="mb-6">
+          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-2">Getting Started</div>
+          <%= link_to docs_path, class: "flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all #{action_name == 'index' ? 'bg-cyan-accent/15 text-cyan-accent' : 'text-slate-400 hover:bg-pd-tertiary hover:text-slate-100'}" do %>
+            <span>Introduction</span>
+          <% end %>
+          <%= link_to docs_page_path(page: 'quickstart'), class: "flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all #{params[:page] == 'quickstart' ? 'bg-cyan-accent/15 text-cyan-accent' : 'text-slate-400 hover:bg-pd-tertiary hover:text-slate-100'}" do %>
+            <span>Quickstart</span>
+          <% end %>
+          <%= link_to docs_page_path(page: 'authentication'), class: "flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all #{params[:page] == 'authentication' ? 'bg-cyan-accent/15 text-cyan-accent' : 'text-slate-400 hover:bg-pd-tertiary hover:text-slate-100'}" do %>
+            <span>Authentication</span>
+          <% end %>
+        </div>
+
+        <div class="mb-6">
+          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-2">API Reference</div>
+          <a href="/docs/api" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-pd-tertiary hover:text-slate-100 transition-all">
+            <span>Interactive API Docs</span>
+            <span class="text-xs text-cyan-accent">↗</span>
+          </a>
+          <%= link_to docs_page_path(page: 'endpoints'), class: "flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all #{params[:page] == 'endpoints' ? 'bg-cyan-accent/15 text-cyan-accent' : 'text-slate-400 hover:bg-pd-tertiary hover:text-slate-100'}" do %>
+            <span>Endpoints</span>
+          <% end %>
+          <%= link_to docs_page_path(page: 'errors'), class: "flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all #{params[:page] == 'errors' ? 'bg-cyan-accent/15 text-cyan-accent' : 'text-slate-400 hover:bg-pd-tertiary hover:text-slate-100'}" do %>
+            <span>Error Handling</span>
+          <% end %>
+          <%= link_to docs_page_path(page: 'rate-limits'), class: "flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all #{params[:page] == 'rate-limits' ? 'bg-cyan-accent/15 text-cyan-accent' : 'text-slate-400 hover:bg-pd-tertiary hover:text-slate-100'}" do %>
+            <span>Rate Limits</span>
+          <% end %>
+        </div>
+
+        <div class="mb-6">
+          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-2">Resources</div>
+          <%= link_to docs_page_path(page: 'changelog'), class: "flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all #{params[:page] == 'changelog' ? 'bg-cyan-accent/15 text-cyan-accent' : 'text-slate-400 hover:bg-pd-tertiary hover:text-slate-100'}" do %>
+            <span>Changelog</span>
+          <% end %>
+        </div>
+      </nav>
+
+      <div class="p-4 border-t border-slate-700/20">
+        <% if user_signed_in? %>
+          <%= link_to dashboard_root_path, class: "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-pd-tertiary hover:text-slate-100 transition-all" do %>
+            <span>&larr; Back to Dashboard</span>
+          <% end %>
+        <% else %>
+          <%= link_to root_path, class: "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-pd-tertiary hover:text-slate-100 transition-all" do %>
+            <span>&larr; Back to Home</span>
+          <% end %>
+        <% end %>
+      </div>
+    </aside>
+
+    <%# Main Content %>
+    <main class="flex-1 ml-[280px] min-h-screen">
+      <% if flash[:alert] %>
+        <div class="px-10 pt-5">
+          <div class="bg-amber-500/15 border border-amber-500/30 text-amber-400 px-5 py-3.5 rounded-xl text-sm font-medium flex items-center gap-2 mb-5">
+            <span>!</span>
+            <%= flash[:alert] %>
+          </div>
+        </div>
+      <% end %>
+
+      <div class="max-w-4xl mx-auto px-10 py-12">
+        <%= yield %>
+      </div>
+    </main>
+  </div>
+
+  <%= render "shared/command_k" %>
+</body>
+</html>

@@ -1,0 +1,215 @@
+<% content_for :title, "Endpoints" %>
+
+<div class="prose prose-invert max-w-none">
+  <h1 class="text-4xl font-bold text-slate-100 mb-4">API Endpoints</h1>
+  <p class="text-xl text-slate-400 mb-8">
+    Complete reference for all available API endpoints.
+  </p>
+
+  <div class="bg-pd-secondary border border-slate-700/20 rounded-xl p-4 not-prose mb-8">
+    <div class="font-semibold text-slate-100 mb-1">Base URL</div>
+    <code class="text-cyan-accent">https://phish.directory/api</code>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Domain Endpoints</h2>
+
+  <div class="not-prose space-y-4 mb-8">
+    <div class="bg-pd-secondary border border-slate-700/20 rounded-xl p-5">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="px-2 py-1 bg-emerald-500/15 text-emerald-500 rounded font-mono text-xs font-semibold">GET</span>
+        <span class="px-2 py-1 bg-blue-500/15 text-blue-500 rounded font-mono text-xs font-semibold">POST</span>
+        <code class="text-slate-100 font-mono">/v1/domain/check</code>
+      </div>
+      <p class="text-slate-400 text-sm mb-4">Check a single domain for phishing threats.</p>
+
+      <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Parameters</div>
+      <table class="w-full text-sm mb-4">
+        <tr class="border-b border-slate-700/20">
+          <td class="py-2 pr-4"><code class="text-cyan-accent">domain</code></td>
+          <td class="py-2 pr-4 text-slate-500">string</td>
+          <td class="py-2 pr-4"><span class="text-red-400 text-xs">required</span></td>
+          <td class="py-2 text-slate-400">The domain to check (e.g., example.com)</td>
+        </tr>
+      </table>
+
+      <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Example Response</div>
+      <div class="bg-pd-tertiary rounded-lg p-4 font-mono text-sm">
+<pre class="text-slate-100">{
+  "domain": "example.com",
+  "verdict": "clean",
+  "confidence": 0.98,
+  "last_checked": "2024-01-15T10:30:00Z",
+  "created_at": "2024-01-01T00:00:00Z"
+}</pre>
+      </div>
+    </div>
+
+    <div class="bg-pd-secondary border border-slate-700/20 rounded-xl p-5">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="px-2 py-1 bg-emerald-500/15 text-emerald-500 rounded font-mono text-xs font-semibold">GET</span>
+        <span class="px-2 py-1 bg-blue-500/15 text-blue-500 rounded font-mono text-xs font-semibold">POST</span>
+        <code class="text-slate-100 font-mono">/v1/domain/bulk</code>
+      </div>
+      <p class="text-slate-400 text-sm mb-4">Check multiple domains in a single request (max 100).</p>
+
+      <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Parameters</div>
+      <table class="w-full text-sm mb-4">
+        <tr class="border-b border-slate-700/20">
+          <td class="py-2 pr-4"><code class="text-cyan-accent">domains</code></td>
+          <td class="py-2 pr-4 text-slate-500">array</td>
+          <td class="py-2 pr-4"><span class="text-red-400 text-xs">required</span></td>
+          <td class="py-2 text-slate-400">Array of domains to check (max 100)</td>
+        </tr>
+      </table>
+
+      <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Example Request</div>
+      <div class="bg-pd-tertiary rounded-lg p-4 font-mono text-sm mb-4">
+<pre class="text-slate-100">{
+  "domains": ["example.com", "suspicious.net"]
+}</pre>
+      </div>
+
+      <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Example Response</div>
+      <div class="bg-pd-tertiary rounded-lg p-4 font-mono text-sm">
+<pre class="text-slate-100">{
+  "results": [
+    {
+      "domain": "example.com",
+      "verdict": "clean",
+      "confidence": 0.98
+    },
+    {
+      "domain": "suspicious.net",
+      "verdict": "phishing",
+      "confidence": 0.95
+    }
+  ]
+}</pre>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">URL Endpoints</h2>
+
+  <div class="not-prose space-y-4 mb-8">
+    <div class="bg-pd-secondary border border-slate-700/20 rounded-xl p-5">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="px-2 py-1 bg-emerald-500/15 text-emerald-500 rounded font-mono text-xs font-semibold">GET</span>
+        <span class="px-2 py-1 bg-blue-500/15 text-blue-500 rounded font-mono text-xs font-semibold">POST</span>
+        <code class="text-slate-100 font-mono">/v1/url/check</code>
+      </div>
+      <p class="text-slate-400 text-sm mb-4">Check a single URL for phishing threats.</p>
+
+      <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Parameters</div>
+      <table class="w-full text-sm mb-4">
+        <tr class="border-b border-slate-700/20">
+          <td class="py-2 pr-4"><code class="text-cyan-accent">url</code></td>
+          <td class="py-2 pr-4 text-slate-500">string</td>
+          <td class="py-2 pr-4"><span class="text-red-400 text-xs">required</span></td>
+          <td class="py-2 text-slate-400">The full URL to check</td>
+        </tr>
+      </table>
+
+      <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Example Response</div>
+      <div class="bg-pd-tertiary rounded-lg p-4 font-mono text-sm">
+<pre class="text-slate-100">{
+  "url": "https://example.com/login",
+  "verdict": "clean",
+  "confidence": 0.97,
+  "domain": {
+    "name": "example.com",
+    "verdict": "clean"
+  }
+}</pre>
+      </div>
+    </div>
+
+    <div class="bg-pd-secondary border border-slate-700/20 rounded-xl p-5">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="px-2 py-1 bg-emerald-500/15 text-emerald-500 rounded font-mono text-xs font-semibold">GET</span>
+        <span class="px-2 py-1 bg-blue-500/15 text-blue-500 rounded font-mono text-xs font-semibold">POST</span>
+        <code class="text-slate-100 font-mono">/v1/url/bulk</code>
+      </div>
+      <p class="text-slate-400 text-sm mb-4">Check multiple URLs in a single request (max 100).</p>
+
+      <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Parameters</div>
+      <table class="w-full text-sm mb-4">
+        <tr class="border-b border-slate-700/20">
+          <td class="py-2 pr-4"><code class="text-cyan-accent">urls</code></td>
+          <td class="py-2 pr-4 text-slate-500">array</td>
+          <td class="py-2 pr-4"><span class="text-red-400 text-xs">required</span></td>
+          <td class="py-2 text-slate-400">Array of URLs to check (max 100)</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">User Endpoints</h2>
+
+  <div class="not-prose space-y-4 mb-8">
+    <div class="bg-pd-secondary border border-slate-700/20 rounded-xl p-5">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="px-2 py-1 bg-emerald-500/15 text-emerald-500 rounded font-mono text-xs font-semibold">GET</span>
+        <code class="text-slate-100 font-mono">/v1/user/me</code>
+      </div>
+      <p class="text-slate-400 text-sm mb-4">Get current user information.</p>
+
+      <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Example Response</div>
+      <div class="bg-pd-tertiary rounded-lg p-4 font-mono text-sm">
+<pre class="text-slate-100">{
+  "id": "uuid",
+  "email": "user@example.com",
+  "name": "John Doe",
+  "access_level": "user",
+  "created_at": "2024-01-01T00:00:00Z"
+}</pre>
+      </div>
+    </div>
+
+    <div class="bg-pd-secondary border border-slate-700/20 rounded-xl p-5">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="px-2 py-1 bg-amber-500/15 text-amber-500 rounded font-mono text-xs font-semibold">PUT</span>
+        <code class="text-slate-100 font-mono">/v1/user/me</code>
+      </div>
+      <p class="text-slate-400 text-sm mb-4">Update current user profile.</p>
+
+      <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Parameters</div>
+      <table class="w-full text-sm">
+        <tr class="border-b border-slate-700/20">
+          <td class="py-2 pr-4"><code class="text-cyan-accent">name</code></td>
+          <td class="py-2 pr-4 text-slate-500">string</td>
+          <td class="py-2 pr-4"><span class="text-slate-500 text-xs">optional</span></td>
+          <td class="py-2 text-slate-400">Display name</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Health Endpoint</h2>
+
+  <div class="not-prose space-y-4 mb-8">
+    <div class="bg-pd-secondary border border-slate-700/20 rounded-xl p-5">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="px-2 py-1 bg-emerald-500/15 text-emerald-500 rounded font-mono text-xs font-semibold">GET</span>
+        <code class="text-slate-100 font-mono">/v1/health</code>
+      </div>
+      <p class="text-slate-400 text-sm mb-4">Health check endpoint. No authentication required.</p>
+
+      <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Example Response</div>
+      <div class="bg-pd-tertiary rounded-lg p-4 font-mono text-sm">
+<pre class="text-slate-100">{
+  "status": "ok",
+  "timestamp": "2024-01-15T10:30:00Z"
+}</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-pd-secondary border border-cyan-accent/30 rounded-xl p-6 not-prose">
+    <h4 class="font-semibold text-slate-100 mb-2">Interactive API Documentation</h4>
+    <p class="text-sm text-slate-400 mb-4">Try out the API endpoints directly in your browser with our Swagger UI.</p>
+    <a href="/docs/api" class="px-4 py-2 bg-cyan-accent text-pd-primary font-semibold rounded-xl text-sm hover:shadow-[0_0_20px_rgba(63,196,224,0.4)] transition-all inline-block">
+      Open API Explorer →
+    </a>
+  </div>
+</div>

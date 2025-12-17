@@ -1,0 +1,94 @@
+<% content_for :title, "Changelog" %>
+
+<div class="prose prose-invert max-w-none">
+  <h1 class="text-4xl font-bold text-slate-100 mb-4">Changelog</h1>
+  <p class="text-xl text-slate-400 mb-8">
+    Recent updates and changes to the phish.directory API.
+  </p>
+
+  <div class="space-y-8 not-prose">
+    <div class="border-l-2 border-cyan-accent pl-6">
+      <div class="flex items-center gap-3 mb-2">
+        <span class="px-2 py-1 bg-cyan-accent/15 text-cyan-accent rounded font-mono text-xs font-semibold">v1.0.0</span>
+        <span class="text-slate-500 text-sm">December 2024</span>
+      </div>
+      <h3 class="text-lg font-semibold text-slate-100 mb-2">Initial Release</h3>
+      <ul class="text-slate-300 space-y-2">
+        <li class="flex items-start gap-2">
+          <span class="text-emerald-500 mt-1">+</span>
+          <span>Domain checking API with real-time threat detection</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="text-emerald-500 mt-1">+</span>
+          <span>URL checking API for full URL analysis</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="text-emerald-500 mt-1">+</span>
+          <span>Bulk checking endpoints (up to 100 items per request)</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="text-emerald-500 mt-1">+</span>
+          <span>Webhook support for real-time notifications</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="text-emerald-500 mt-1">+</span>
+          <span>JavaScript and Python SDKs</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="text-emerald-500 mt-1">+</span>
+          <span>Interactive API documentation with Swagger UI</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-12 mb-4">Versioning Policy</h2>
+  <p class="text-slate-300 mb-4">
+    We follow semantic versioning (SemVer) for our API:
+  </p>
+
+  <ul class="text-slate-300 space-y-2 mb-8">
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">•</span>
+      <span><strong class="text-slate-100">Major versions</strong> (v1 → v2) may include breaking changes</span>
+    </li>
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">•</span>
+      <span><strong class="text-slate-100">Minor versions</strong> add new features in a backwards-compatible manner</span>
+    </li>
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">•</span>
+      <span><strong class="text-slate-100">Patch versions</strong> include backwards-compatible bug fixes</span>
+    </li>
+  </ul>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Deprecation Policy</h2>
+  <p class="text-slate-300 mb-4">
+    When we deprecate an API version:
+  </p>
+
+  <ul class="text-slate-300 space-y-2 mb-8">
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">1.</span>
+      <span>We'll announce the deprecation at least <strong class="text-slate-100">6 months</strong> in advance</span>
+    </li>
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">2.</span>
+      <span>Deprecated versions will continue to work during the deprecation period</span>
+    </li>
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">3.</span>
+      <span>We'll provide migration guides and support to help you upgrade</span>
+    </li>
+  </ul>
+
+  <div class="bg-pd-secondary border border-slate-700/20 rounded-xl p-6 not-prose">
+    <h4 class="font-semibold text-slate-100 mb-2">Stay Updated</h4>
+    <p class="text-sm text-slate-400 mb-4">
+      Subscribe to our newsletter to receive updates about new features, deprecations, and important changes.
+    </p>
+    <a href="mailto:updates@phish.directory" class="text-cyan-accent hover:underline text-sm">
+      Subscribe to updates →
+    </a>
+  </div>
+</div>
