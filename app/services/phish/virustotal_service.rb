@@ -3,8 +3,20 @@
 module Phish
   # VirusTotal API v3
   # https://developers.virustotal.com/reference
+  #
+  # Rate Limits (Public API):
+  #   - 4 requests per minute
+  #   - 500 requests per day
+  #   - 15.5K requests per month
+  #
+  # Note: Premium API has higher limits
+  #
   class VirustotalService < BaseService
     BASE_URL = "https://www.virustotal.com/api/v3/"
+
+    # Rate limits for Public API (conservative to avoid hitting limits)
+    rate_limit :minute, requests: 4,   period: 1.minute
+    rate_limit :daily,  requests: 500, period: 1.day
 
     # Threshold for considering a domain/URL as phishing
     MALICIOUS_THRESHOLD = 3
@@ -13,23 +25,29 @@ module Phish
       normalized = normalize_domain(domain)
       log_info("Checking domain: #{normalized}")
 
-      conn = authenticated_connection
-      response = get(conn, "domains/#{normalized}")
-
-      parse_domain_response(response, normalized)
+      with_rate_limit do
+        conn = authenticated_connection
+        response = get(conn, "domains/#{normalized}")
+        parse_domain_response(response, normalized)
+      end
+    rescue RateLimitable::RateLimitExceeded => e
+      raise RateLimitError.new("#{service_name} rate limit exceeded", retry_after: e.retry_after)
     end
 
     def check_url(url)
       normalized = normalize_url(url)
       log_info("Checking URL: #{normalized}")
 
-      # URL needs to be base64 encoded (URL-safe, no padding)
-      url_id = Base64.urlsafe_encode64(normalized, padding: false)
+      with_rate_limit do
+        # URL needs to be base64 encoded (URL-safe, no padding)
+        url_id = Base64.urlsafe_encode64(normalized, padding: false)
 
-      conn = authenticated_connection
-      response = get(conn, "urls/#{url_id}")
-
-      parse_url_response(response, normalized)
+        conn = authenticated_connection
+        response = get(conn, "urls/#{url_id}")
+        parse_url_response(response, normalized)
+      end
+    rescue RateLimitable::RateLimitExceeded => e
+      raise RateLimitError.new("#{service_name} rate limit exceeded", retry_after: e.retry_after)
     rescue Faraday::ResourceNotFound
       # URL not in VT database, submit for analysis
       submit_url(normalized)
@@ -39,18 +57,22 @@ module Phish
       normalized = normalize_url(url)
       log_info("Submitting URL for analysis: #{normalized}")
 
-      conn = authenticated_connection
-      response = post(conn, "urls", { url: normalized })
+      with_rate_limit do
+        conn = authenticated_connection
+        response = post(conn, "urls", { url: normalized })
 
-      build_result(
-        verdict: "pending",
-        confidence: 0.0,
-        details: {
-          analysis_id: response.dig("data", "id"),
-          source: "virustotal",
-          status: "submitted_for_analysis"
-        }
-      )
+        build_result(
+          verdict: "pending",
+          confidence: 0.0,
+          details: {
+            analysis_id: response.dig("data", "id"),
+            source: "virustotal",
+            status: "submitted_for_analysis"
+          }
+        )
+      end
+    rescue RateLimitable::RateLimitExceeded => e
+      raise RateLimitError.new("#{service_name} rate limit exceeded", retry_after: e.retry_after)
     end
 
     private

@@ -5,10 +5,24 @@ require "faraday"
 module Phish
   # Base service for all phishing detection services
   # Provides common HTTP client functionality using Faraday
+  #
+  # Subclasses should:
+  # 1. Include RateLimitable and define their rate limits
+  # 2. Wrap API calls in with_rate_limit blocks
+  #
   class BaseService
+    include RateLimitable
+
     class ServiceError < StandardError; end
     class TimeoutError < ServiceError; end
-    class RateLimitError < ServiceError; end
+    class RateLimitError < ServiceError
+      attr_reader :retry_after
+
+      def initialize(message, retry_after: nil)
+        @retry_after = retry_after
+        super(message)
+      end
+    end
     class AuthenticationError < ServiceError; end
 
     DEFAULT_TIMEOUT = 30
@@ -101,11 +115,31 @@ module Phish
         log_error("Authentication failed", error)
         raise AuthenticationError, "#{service_name} authentication failed"
       when 429
-        log_error("Rate limited", error)
-        raise RateLimitError, "#{service_name} rate limit exceeded"
+        retry_after = extract_retry_after(error.response)
+        log_error("Rate limited (retry after #{retry_after}s)", error)
+        raise RateLimitError.new("#{service_name} rate limit exceeded", retry_after: retry_after)
       else
         log_error("Client error", error)
         raise ServiceError, "#{service_name} client error: #{status}"
+      end
+    end
+
+    # Extract retry-after from response headers
+    def extract_retry_after(response)
+      headers = response[:headers] || {}
+      retry_after = headers["retry-after"] || headers["Retry-After"]
+
+      return 60 unless retry_after
+
+      # Can be seconds or HTTP-date
+      if retry_after.match?(/^\d+$/)
+        retry_after.to_i
+      else
+        begin
+          (Time.parse(retry_after) - Time.current).to_i.clamp(1, 3600)
+        rescue ArgumentError
+          60
+        end
       end
     end
 

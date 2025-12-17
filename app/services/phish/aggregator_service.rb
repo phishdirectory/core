@@ -18,39 +18,89 @@ module Phish
       @services = services.map { |s| instantiate_service(s) }.compact
     end
 
-    def check_domain(domain)
+    # Check a domain against all configured services
+    # @param domain [String] The domain to check
+    # @param record [Phish::Domain, nil] Optional record for scheduling retries
+    # @return [Hash] Aggregated result
+    def check_domain(domain, record: nil)
       normalized = normalize_domain(domain)
       log_info("Aggregating checks for domain: #{normalized}")
 
-      results = services.map do |service|
-        begin
-          service.check_domain(normalized)
-        rescue ServiceError => e
-          log_error("Service #{service.service_name} failed", e)
-          nil
-        end
-      end.compact
+      results, rate_limited = collect_service_results(:check_domain, normalized)
 
-      aggregate_results(results, domain: normalized)
+      # Schedule retry jobs for rate-limited services
+      schedule_retries(rate_limited, record_type: "domain", record: record)
+
+      aggregate_results(results, domain: normalized, rate_limited_services: rate_limited)
     end
 
-    def check_url(url)
+    # Check a URL against all configured services
+    # @param url [String] The URL to check
+    # @param record [Phish::Url, nil] Optional record for scheduling retries
+    # @return [Hash] Aggregated result
+    def check_url(url, record: nil)
       normalized = normalize_url(url)
       log_info("Aggregating checks for URL: #{normalized}")
 
-      results = services.map do |service|
-        begin
-          service.check_url(normalized)
-        rescue ServiceError => e
-          log_error("Service #{service.service_name} failed", e)
-          nil
-        end
-      end.compact
+      results, rate_limited = collect_service_results(:check_url, normalized)
 
-      aggregate_results(results, url: normalized)
+      # Schedule retry jobs for rate-limited services
+      schedule_retries(rate_limited, record_type: "url", record: record)
+
+      aggregate_results(results, url: normalized, rate_limited_services: rate_limited)
+    end
+
+    # Check rate limit status for all services
+    def services_rate_limit_status
+      services.each_with_object({}) do |service, status|
+        status[service.service_name] = {
+          available: service.rate_limit_available?,
+          limits: service.rate_limit_status
+        }
+      end
     end
 
     private
+
+    # Schedule retry jobs for rate-limited services
+    def schedule_retries(rate_limited, record_type:, record:)
+      return if rate_limited.empty? || record.nil?
+
+      rate_limited.each do |info|
+        wait_time = [(info[:retry_after] || 60).to_i, 5].max.seconds
+
+        PhishServiceRetryJob
+          .set(wait: wait_time)
+          .perform_later(
+            record_type: record_type,
+            record_id: record.id,
+            service_name: info[:service]
+          )
+
+        log_info("Scheduled retry for #{info[:service]} in #{wait_time.to_i}s")
+      end
+    end
+
+    # Collect results from all services, tracking rate-limited ones
+    def collect_service_results(method, *args)
+      results = []
+      rate_limited = []
+
+      services.each do |service|
+        result = service.public_send(method, *args)
+        results << result if result
+      rescue RateLimitError => e
+        rate_limited << {
+          service: service.service_name,
+          retry_after: e.retry_after
+        }
+        log_info("Service #{service.service_name} rate limited, retry after #{e.retry_after}s")
+      rescue ServiceError => e
+        log_error("Service #{service.service_name} failed", e)
+      end
+
+      [results, rate_limited]
+    end
 
     def instantiate_service(name)
       klass = case name.to_sym
@@ -66,7 +116,10 @@ module Phish
       klass.new(logger: logger)
     end
 
-    def aggregate_results(results, **context)
+    def aggregate_results(results, rate_limited_services: [], **context)
+      # Include rate limited info in context
+      context[:rate_limited_services] = rate_limited_services if rate_limited_services.any?
+
       return build_unknown_result(context) if results.empty?
 
       # Calculate weighted scores
