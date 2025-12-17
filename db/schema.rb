@@ -10,10 +10,11 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_15_164308) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_17_233644) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "fuzzystrmatch"
   enable_extension "pg_catalog.plpgsql"
+  enable_extension "pg_stat_statements"
   enable_extension "pgcrypto"
 
   # Custom types defined in this database.
@@ -247,7 +248,6 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_15_164308) do
     t.uuid "sluggable_id", null: false
     t.string "sluggable_type", limit: 50
     t.index ["slug", "sluggable_type", "scope"], name: "index_friendly_id_slugs_on_slug_and_sluggable_type_and_scope", unique: true
-    t.index ["slug", "sluggable_type"], name: "index_friendly_id_slugs_on_slug_and_sluggable_type"
     t.index ["sluggable_type", "sluggable_id"], name: "index_friendly_id_slugs_on_sluggable_type_and_sluggable_id"
   end
 
@@ -319,10 +319,12 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_15_164308) do
 
   create_table "phish_domains", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.datetime "discarded_at"
     t.string "domain", null: false
     t.datetime "last_checked_at"
     t.datetime "updated_at", null: false
     t.uuid "verdict_id"
+    t.index ["discarded_at"], name: "index_phish_domains_on_discarded_at"
     t.index ["domain"], name: "index_phish_domains_on_domain", unique: true
     t.index ["last_checked_at"], name: "index_phish_domains_on_last_checked_at"
     t.index ["verdict_id"], name: "index_phish_domains_on_verdict_id"
@@ -330,10 +332,12 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_15_164308) do
 
   create_table "phish_urls", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.datetime "discarded_at"
     t.datetime "last_checked_at"
     t.datetime "updated_at", null: false
     t.string "url", null: false
     t.uuid "verdict_id"
+    t.index ["discarded_at"], name: "index_phish_urls_on_discarded_at"
     t.index ["last_checked_at"], name: "index_phish_urls_on_last_checked_at"
     t.index ["url"], name: "index_phish_urls_on_url", unique: true
     t.index ["verdict_id"], name: "index_phish_urls_on_verdict_id"
@@ -373,31 +377,37 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_15_164308) do
   create_table "service_keys", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "api_key", null: false
     t.datetime "created_at", null: false
+    t.datetime "discarded_at"
     t.string "hash_key", null: false
     t.text "notes"
     t.uuid "service_id", null: false
     t.enum "status", default: "active", null: false, enum_type: "service_key_status"
     t.datetime "updated_at", null: false
     t.index ["api_key"], name: "index_service_keys_on_api_key", unique: true
+    t.index ["discarded_at"], name: "index_service_keys_on_discarded_at"
     t.index ["service_id"], name: "index_service_keys_on_service_id"
   end
 
   create_table "service_webhooks", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.datetime "discarded_at"
     t.string "secret", null: false
     t.uuid "service_id", null: false
     t.datetime "updated_at", null: false
     t.string "url", null: false
+    t.index ["discarded_at"], name: "index_service_webhooks_on_discarded_at"
     t.index ["service_id"], name: "index_service_webhooks_on_service_id"
     t.index ["url"], name: "index_service_webhooks_on_url", unique: true
   end
 
   create_table "services", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.datetime "discarded_at"
     t.integer "keys_count", default: 0, null: false
     t.string "name", null: false
     t.enum "status", default: "active", null: false, enum_type: "service_status"
     t.datetime "updated_at", null: false
+    t.index ["discarded_at"], name: "index_services_on_discarded_at"
     t.index ["name"], name: "index_services_on_name", unique: true
   end
 
@@ -413,16 +423,17 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_15_164308) do
   create_table "user_api_keys", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.boolean "active", default: true, null: false
     t.datetime "created_at", null: false
+    t.datetime "discarded_at"
     t.datetime "expires_at"
     t.string "key_digest", null: false
     t.datetime "last_used_at"
     t.string "name", null: false
     t.datetime "updated_at", null: false
     t.uuid "user_id", null: false
+    t.index ["discarded_at"], name: "index_user_api_keys_on_discarded_at"
     t.index ["expires_at"], name: "index_user_api_keys_on_expires_at"
     t.index ["key_digest"], name: "index_user_api_keys_on_key_digest", unique: true
     t.index ["user_id", "active"], name: "index_user_api_keys_on_user_id_and_active"
-    t.index ["user_id"], name: "index_user_api_keys_on_user_id"
   end
 
   create_table "user_sessions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -450,6 +461,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_15_164308) do
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.enum "access_level", default: "user", null: false, enum_type: "access_level"
     t.datetime "created_at", null: false
+    t.datetime "discarded_at"
     t.string "email", null: false
     t.boolean "email_verified", default: false
     t.datetime "email_verified_at"
@@ -468,6 +480,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_15_164308) do
     t.enum "status", default: "active", null: false, enum_type: "status"
     t.datetime "updated_at", null: false
     t.string "username", null: false
+    t.index ["discarded_at"], name: "index_users_on_discarded_at"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["locked_at"], name: "index_users_on_locked_at"
     t.index ["magic_link_token"], name: "index_users_on_magic_link_token", unique: true
