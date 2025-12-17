@@ -37,20 +37,43 @@ class Rack::Attack
     end
   end
 
-  ### API Rate Limiting ###
-  # Authenticated API requests (by API key)
-  throttle("api/key", limit: 1000, period: 1.hour) do |req|
-    if req.path.start_with?("/api/")
-      # Extract API key from header
+  ### API Rate Limiting (Sliding Window with Burst Support) ###
+  #
+  # Multi-tier rate limiting allows bursts while enforcing sustained limits:
+  # - Burst:    60 requests per 10 seconds (allows quick bursts)
+  # - Short:   200 requests per minute (smooths out usage)
+  # - Hourly: 1000 requests per hour (overall cap)
+  #
+  # All tiers must pass - hitting any limit triggers throttling.
+  #
+  # NOTE: Upstream services have their own limits (see service classes):
+  # - VirusTotal:        4/min, 500/day (most restrictive)
+  # - URLScan:           60/min, 100/hour, 1000/day
+  # - Google Safe Browsing: 100/min, 10000/day
+  # - Walshy:            30/min, 500/hour (conservative)
+  #
+  # The aggregator gracefully handles rate-limited services and returns
+  # results from available services. Responses include rate_limited_services
+  # when applicable.
+
+  # Burst limit - allows quick bursts of requests
+  throttle("api/burst", limit: 60, period: 10.seconds) do |req|
+    if req.path.start_with?("/api/") && !req.path.start_with?("/api/v1/health")
       req.get_header("HTTP_X_API_KEY") || req.get_header("HTTP_AUTHORIZATION")&.gsub(/^Bearer\s+/, "")
     end
   end
 
-  # Unauthenticated API requests (by IP)
-  throttle("api/ip", limit: 100, period: 1.hour) do |req|
-    if req.path.start_with?("/api/")
-      api_key = req.get_header("HTTP_X_API_KEY") || req.get_header("HTTP_AUTHORIZATION")&.gsub(/^Bearer\s+/, "")
-      req.ip if api_key.blank?
+  # Short-term limit - smooths out request patterns
+  throttle("api/minute", limit: 200, period: 1.minute) do |req|
+    if req.path.start_with?("/api/") && !req.path.start_with?("/api/v1/health")
+      req.get_header("HTTP_X_API_KEY") || req.get_header("HTTP_AUTHORIZATION")&.gsub(/^Bearer\s+/, "")
+    end
+  end
+
+  # Hourly limit - overall cap per API key
+  throttle("api/hour", limit: 1000, period: 1.hour) do |req|
+    if req.path.start_with?("/api/") && !req.path.start_with?("/api/v1/health")
+      req.get_header("HTTP_X_API_KEY") || req.get_header("HTTP_AUTHORIZATION")&.gsub(/^Bearer\s+/, "")
     end
   end
 
