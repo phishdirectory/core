@@ -41,7 +41,15 @@ Rails.application.routes.draw do
 
     # Console audit UI
     mount Audits1984::Engine => "/admin/console_audits"
+
+    # PostgreSQL monitoring
+    mount PgHero::Engine => "/admin/pghero"
   end
+
+  # ===========================================
+  # Global Quick Search (Command-K)
+  # ===========================================
+  get "quick_search", to: "quick_search#index"
 
   # ===========================================
   # Authentication Routes
@@ -53,6 +61,14 @@ Rails.application.routes.draw do
     delete "logout", to: "auth#logout", as: :logout
     get "me", to: "auth#me", as: :auth_me
   end
+
+  # ===========================================
+  # Documentation
+  # ===========================================
+  get "docs", to: "docs#index", as: :docs
+  get "docs/:page", to: "docs#show", as: :docs_page
+  mount Rswag::Ui::Engine => "/docs/api"
+  mount Rswag::Api::Engine => "/api-docs"
 
   # ===========================================
   # User Routes
@@ -91,6 +107,9 @@ Rails.application.routes.draw do
   # ===========================================
   namespace :admin do
     root to: "dashboard#index"
+
+    # Command-K quick search
+    get "quick_search", to: "quick_search#index"
 
     resources :users do
       member do

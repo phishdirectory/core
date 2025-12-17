@@ -29,8 +29,9 @@ Rails.application.configure do
   # Store uploaded files on the local file system (see config/storage.yml for options).
   config.active_storage.service = :local
 
-  # Use letter_opener for email delivery in development
-  config.action_mailer.delivery_method = :letter_opener
+  # Use letter_opener_web for email delivery in development
+  # This stores emails for viewing at /letter_opener (works with async jobs)
+  config.action_mailer.delivery_method = :letter_opener_web
   config.action_mailer.raise_delivery_errors = true
 
   # Make template changes take effect immediately.
@@ -54,8 +55,9 @@ Rails.application.configure do
   # Highlight code that enqueued background job in logs.
   config.active_job.verbose_enqueue_logs = true
 
-  # Run jobs inline in development for immediate execution
-  config.active_job.queue_adapter = :inline
+  # Use Solid Queue for background jobs (same as production)
+  config.active_job.queue_adapter = :solid_queue
+  config.solid_queue.connects_to = { database: { writing: :queue } }
 
   # Highlight code that triggered redirect in logs.
   config.action_dispatch.verbose_redirect_logs = true

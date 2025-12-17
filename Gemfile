@@ -3,6 +3,7 @@ source "https://rubygems.org"
 # Core Rails
 gem "rails", "~> 8.1.1"
 gem "logger"                        # Required for Ruby 3.4+ (bundled gem)
+gem "ostruct"                       # Required for Ruby 3.5+ (bundled gem)
 gem "pg", "~> 1.1"
 gem "puma", ">= 5.0"
 
@@ -47,12 +48,15 @@ gem "aasm"                          # State machines
 gem "kaminari"                      # Pagination
 gem "validates_email_format_of"     # Email format validation
 gem "valid_email2"                  # Disposable email checking
+gem "discard"                       # Soft delete with recovery
 
 # ============================================
 # API & HTTP
 # ============================================
 gem "faraday"                       # HTTP client (per CLAUDE.md)
 gem "faraday-retry"                 # Retry middleware
+gem "rswag-api"                     # Serve OpenAPI JSON
+gem "rswag-ui"                      # Swagger UI for API docs
 
 # ============================================
 # Background Jobs
@@ -70,6 +74,9 @@ gem "flipper-ui"                    # Flipper web UI
 gem "statsd-instrument"             # Metrics collection
 gem "okcomputer"                    # Health checks
 gem "rollup"                        # Time-series rollups
+gem "pghero"                        # PostgreSQL monitoring
+gem "lograge"                       # Structured JSON logging
+gem "logstop"                       # PII filtering in logs
 
 # ============================================
 # Console Auditing (Production Security)

@@ -21,8 +21,13 @@ default: &default
 
 
 development:
-  <<: *default
-  database: phish_directory_development
+  primary:
+    <<: *default
+    database: phish_directory_development
+  queue:
+    <<: *default
+    database: phish_directory_development_queue
+    migrations_paths: db/queue_migrate
 
   # The specified database role being used to connect to PostgreSQL.
   # To create additional roles in PostgreSQL see `$ createuser --help`.
