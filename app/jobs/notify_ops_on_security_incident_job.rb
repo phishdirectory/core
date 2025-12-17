@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class NotifyOpsOnSecurityIncidentJob < ApplicationJob
-  queue_as :critical
+  queue_as QUEUE_CRITICAL
 
   # Known incident types
   INCIDENT_TYPES = %w[

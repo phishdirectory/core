@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class UsernameFailJob < ApplicationJob
-  queue_as :default
+  queue_as QUEUE_DEFAULT
 
   def perform(email:, desired_username:)
     Rails.logger.info "[UsernameFailJob] Username conflict for #{email}, desired: #{desired_username}"

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class PhishDomainCheckJob < ApplicationJob
-  queue_as :default
+  queue_as QUEUE_DEFAULT
 
   def perform(domain_id)
     domain = Phish::Domain.find_by(id: domain_id)

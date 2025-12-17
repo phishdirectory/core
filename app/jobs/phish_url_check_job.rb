@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class PhishUrlCheckJob < ApplicationJob
-  queue_as :default
+  queue_as QUEUE_DEFAULT
 
   def perform(url_id)
     phish_url = Phish::Url.find_by(id: url_id)

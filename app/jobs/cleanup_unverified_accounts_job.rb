@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class CleanupUnverifiedAccountsJob < ApplicationJob
-  queue_as :maintenance
+  queue_as QUEUE_MAINTENANCE
 
   # Clean up accounts that haven't verified email in 7 days
   EXPIRATION_DAYS = 7

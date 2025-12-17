@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class DeliverWebhookJob < ApplicationJob
-  queue_as :webhooks
+  queue_as QUEUE_WEBHOOKS
 
   retry_on StandardError, wait: :polynomially_longer, attempts: 5
 

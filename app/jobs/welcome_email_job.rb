@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class WelcomeEmailJob < ApplicationJob
-  queue_as :default
+  queue_as QUEUE_DEFAULT
 
   def perform(user)
     Rails.logger.info "[WelcomeEmailJob] Sending welcome email to #{user.email}"

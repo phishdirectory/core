@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class SessionCleanupJob < ApplicationJob
-  queue_as :maintenance
+  queue_as QUEUE_MAINTENANCE
 
   def perform
     # Clean up expired sessions
