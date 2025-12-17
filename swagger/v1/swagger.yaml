@@ -1,0 +1,471 @@
+openapi: 3.0.3
+info:
+  title: phish.directory API
+  description: |
+    Real-time phishing detection API. Check domains and URLs against multiple threat intelligence sources.
+
+    ## Authentication
+
+    All API requests require authentication via API key. Include your key in the request headers:
+
+    ```
+    Authorization: Bearer pdat_your_api_key
+    ```
+
+    Or alternatively:
+
+    ```
+    X-API-Key: pdat_your_api_key
+    ```
+
+    ## Rate Limits
+
+    All endpoints require authentication (except `/health`). We use sliding windows with burst support:
+    - **Burst:** 60 requests per 10 seconds
+    - **Short-term:** 200 requests per minute
+    - **Hourly:** 1,000 requests per hour
+    - **Bulk:** Max 100 items per request
+
+    ### Upstream Service Limits
+    We aggregate data from multiple threat intelligence sources, each with their own limits:
+    | Service | Per Minute | Per Day |
+    |---------|------------|---------|
+    | VirusTotal | 4 | 500 |
+    | URLScan | 60 | 1,000 |
+    | Google Safe Browsing | 100 | 10,000 |
+
+    When a source is rate-limited, responses include `rate_limited_services` in the details.
+
+  version: '1.0'
+  contact:
+    name: phish.directory Support
+    email: support@phish.directory
+  license:
+    name: Proprietary
+    url: https://phish.directory/terms
+
+servers:
+  - url: https://phish.directory/api/v1
+    description: Production
+  - url: http://localhost:3000/api/v1
+    description: Development
+
+tags:
+  - name: Health
+    description: API health checks
+  - name: Domain
+    description: Domain verification endpoints
+  - name: URL
+    description: URL verification endpoints
+  - name: User
+    description: User account management
+  - name: Webhooks
+    description: Webhook management (Service API keys only)
+
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Health check
+      description: Check if the API is operational. No authentication required.
+      security: []
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /domain/check:
+    get:
+      tags:
+        - Domain
+      summary: Check a domain
+      description: Check if a domain is associated with phishing or other malicious activity.
+      parameters:
+        - name: domain
+          in: query
+          required: true
+          description: The domain to check (e.g., example.com)
+          schema:
+            type: string
+            example: suspicious-site.com
+      responses:
+        '200':
+          description: Domain check result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DomainResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags:
+        - Domain
+      summary: Check a domain
+      description: Check if a domain is associated with phishing or other malicious activity.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - domain
+              properties:
+                domain:
+                  type: string
+                  description: The domain to check
+                  example: suspicious-site.com
+      responses:
+        '200':
+          description: Domain check result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DomainResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /domain/bulk:
+    post:
+      tags:
+        - Domain
+      summary: Check multiple domains
+      description: Check up to 100 domains in a single request.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - domains
+              properties:
+                domains:
+                  type: array
+                  items:
+                    type: string
+                  maxItems: 100
+                  example:
+                    - example.com
+                    - suspicious-site.com
+      responses:
+        '200':
+          description: Bulk domain check results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DomainResult'
+                  count:
+                    type: integer
+                    example: 2
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /url/check:
+    get:
+      tags:
+        - URL
+      summary: Check a URL
+      description: Check if a URL is associated with phishing or other malicious activity.
+      parameters:
+        - name: url
+          in: query
+          required: true
+          description: The full URL to check
+          schema:
+            type: string
+            example: https://suspicious-site.com/login
+      responses:
+        '200':
+          description: URL check result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UrlResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags:
+        - URL
+      summary: Check a URL
+      description: Check if a URL is associated with phishing or other malicious activity.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - url
+              properties:
+                url:
+                  type: string
+                  description: The full URL to check
+                  example: https://suspicious-site.com/login
+      responses:
+        '200':
+          description: URL check result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UrlResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /url/bulk:
+    post:
+      tags:
+        - URL
+      summary: Check multiple URLs
+      description: Check up to 100 URLs in a single request.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - urls
+              properties:
+                urls:
+                  type: array
+                  items:
+                    type: string
+                  maxItems: 100
+                  example:
+                    - https://example.com/page
+                    - https://suspicious-site.com/login
+      responses:
+        '200':
+          description: Bulk URL check results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UrlResult'
+                  count:
+                    type: integer
+                    example: 2
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /user/me:
+    get:
+      tags:
+        - User
+      summary: Get current user
+      description: Get information about the authenticated user.
+      responses:
+        '200':
+          description: User information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    put:
+      tags:
+        - User
+      summary: Update current user
+      description: Update the authenticated user's profile.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                first_name:
+                  type: string
+                last_name:
+                  type: string
+      responses:
+        '200':
+          description: Updated user information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: API key with pdat_ prefix
+    ApiKeyHeader:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key with pdat_ prefix
+
+  schemas:
+    DomainResult:
+      type: object
+      properties:
+        domain:
+          type: string
+          description: The normalized domain
+          example: suspicious-site.com
+        verdict:
+          type: string
+          enum: [clean, suspicious, phishing, unknown]
+          description: The verdict for this domain
+          example: phishing
+        confidence:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          nullable: true
+          description: Confidence score (0-1)
+          example: 0.94
+        last_checked:
+          type: string
+          format: date-time
+          nullable: true
+          description: When the domain was last checked
+        created_at:
+          type: string
+          format: date-time
+          description: When the domain was first seen
+
+    UrlResult:
+      type: object
+      properties:
+        url:
+          type: string
+          description: The normalized URL
+          example: https://suspicious-site.com/login
+        verdict:
+          type: string
+          enum: [clean, suspicious, phishing, unknown]
+          description: The verdict for this URL
+          example: phishing
+        confidence:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          nullable: true
+          description: Confidence score (0-1)
+          example: 0.87
+        last_checked:
+          type: string
+          format: date-time
+          nullable: true
+          description: When the URL was last checked
+        created_at:
+          type: string
+          format: date-time
+          description: When the URL was first seen
+
+    User:
+      type: object
+      properties:
+        pd_id:
+          type: string
+          description: Unique user identifier
+          example: PDU5A1B2C3D
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        first_name:
+          type: string
+          example: John
+        last_name:
+          type: string
+          example: Doe
+        username:
+          type: string
+          example: jdoe
+        access_level:
+          type: string
+          enum: [user, trusted, admin, superadmin, owner]
+          example: user
+        created_at:
+          type: string
+          format: date-time
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: Missing required parameter
+
+  responses:
+    BadRequest:
+      description: Bad request - missing or invalid parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Missing required parameter: domain"
+
+    Unauthorized:
+      description: Unauthorized - invalid or missing API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Invalid or missing API key"
+
+    UnprocessableEntity:
+      description: Unprocessable entity - validation failed
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              errors:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+
+security:
+  - BearerAuth: []
+  - ApiKeyHeader: []
