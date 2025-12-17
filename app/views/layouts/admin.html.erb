@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= content_for?(:title) ? "#{yield(:title)} | Admin | phish.directory" : "Admin | phish.directory" %></title>
+
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+
+  <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+  <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+</head>
+<body class="bg-pd-primary text-slate-100 font-sans min-h-screen antialiased">
+  <%# Subtle background %>
+  <div class="fixed inset-0 bg-cover bg-center opacity-[0.08] pointer-events-none -z-20" style="background-image: url('<%= image_path("bg.JPG") %>');"></div>
+  <div class="fixed inset-0 bg-gradient-to-br from-pd-primary/[0.97] to-slate-900/95 pointer-events-none -z-10"></div>
+
+  <div class="flex min-h-screen">
+    <%# Sidebar %>
+    <aside class="w-[260px] bg-pd-secondary border-r border-slate-700/20 flex flex-col fixed top-0 left-0 bottom-0 z-50">
+      <div class="p-6 border-b border-slate-700/20">
+        <a href="<%= admin_root_path %>" class="flex items-center gap-3 text-slate-100 font-bold text-lg no-underline">
+          <%= image_tag "phish-logo.png", alt: "phish.directory", class: "w-9 h-9 rounded-xl shadow-[0_0_20px_rgba(63,196,224,0.4)]" %>
+          <span>Admin Panel</span>
+        </a>
+      </div>
+
+      <nav class="flex-1 p-3 overflow-y-auto">
+        <div class="mb-6">
+          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-2">Overview</div>
+          <%= link_to admin_root_path, class: "flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium transition-all #{controller_path == 'admin/dashboard' ? 'bg-cyan-accent/15 text-cyan-accent' : 'text-slate-400 hover:bg-pd-tertiary hover:text-slate-100'}" do %>
+            <span class="w-5 text-center opacity-80">&#9632;</span>
+            <span>Dashboard</span>
+          <% end %>
+        </div>
+
+        <div class="mb-6">
+          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-2">Management</div>
+          <%= link_to admin_users_path, class: "flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium transition-all #{controller_path == 'admin/users' ? 'bg-cyan-accent/15 text-cyan-accent' : 'text-slate-400 hover:bg-pd-tertiary hover:text-slate-100'}" do %>
+            <span class="w-5 text-center opacity-80">&#9786;</span>
+            <span>Users</span>
+          <% end %>
+          <%= link_to admin_services_path, class: "flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium transition-all #{controller_path == 'admin/services' ? 'bg-cyan-accent/15 text-cyan-accent' : 'text-slate-400 hover:bg-pd-tertiary hover:text-slate-100'}" do %>
+            <span class="w-5 text-center opacity-80">&#9881;</span>
+            <span>Services</span>
+          <% end %>
+        </div>
+
+        <div class="mb-6">
+          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-2">Phishing Data</div>
+          <%= link_to admin_domains_path, class: "flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium transition-all #{controller_path == 'admin/phish_domains' ? 'bg-cyan-accent/15 text-cyan-accent' : 'text-slate-400 hover:bg-pd-tertiary hover:text-slate-100'}" do %>
+            <span class="w-5 text-center opacity-80">&#127760;</span>
+            <span>Domains</span>
+          <% end %>
+          <%= link_to admin_urls_path, class: "flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium transition-all #{controller_path == 'admin/phish_urls' ? 'bg-cyan-accent/15 text-cyan-accent' : 'text-slate-400 hover:bg-pd-tertiary hover:text-slate-100'}" do %>
+            <span class="w-5 text-center opacity-80">&#128279;</span>
+            <span>URLs</span>
+          <% end %>
+        </div>
+
+        <div class="mb-6">
+          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-2">Tools</div>
+          <a href="/admin/flipper" class="flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium text-slate-400 hover:bg-pd-tertiary hover:text-slate-100 transition-all">
+            <span class="w-5 text-center opacity-80">&#9873;</span>
+            <span>Feature Flags</span>
+          </a>
+          <a href="/admin/jobs" class="flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium text-slate-400 hover:bg-pd-tertiary hover:text-slate-100 transition-all">
+            <span class="w-5 text-center opacity-80">&#9889;</span>
+            <span>Background Jobs</span>
+          </a>
+          <a href="/admin/blazer" class="flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium text-slate-400 hover:bg-pd-tertiary hover:text-slate-100 transition-all">
+            <span class="w-5 text-center opacity-80">&#128200;</span>
+            <span>Analytics</span>
+          </a>
+          <a href="/admin/console_audits" class="flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium text-slate-400 hover:bg-pd-tertiary hover:text-slate-100 transition-all">
+            <span class="w-5 text-center opacity-80">&#128221;</span>
+            <span>Console Audits</span>
+          </a>
+        </div>
+
+        <div class="mb-6">
+          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-2">Navigation</div>
+          <%= link_to dashboard_root_path, class: "flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium text-slate-400 hover:bg-pd-tertiary hover:text-slate-100 transition-all" do %>
+            <span class="w-5 text-center opacity-80">&#8592;</span>
+            <span>Back to Dashboard</span>
+          <% end %>
+        </div>
+      </nav>
+
+      <div class="p-3 border-t border-slate-700/20">
+        <%= link_to dashboard_profile_path, class: "flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-pd-tertiary transition-colors" do %>
+          <div class="w-9 h-9 bg-gradient-to-br from-pd-elevated to-pd-tertiary border border-slate-700/30 rounded-full flex items-center justify-center font-semibold text-sm text-slate-400">
+            <%= current_user.initials %>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="font-semibold text-sm text-slate-100 truncate"><%= current_user.full_name %></div>
+            <div class="text-xs text-slate-500 truncate"><%= current_user.email %></div>
+          </div>
+        <% end %>
+        <%= button_to logout_path, method: :delete, class: "w-full mt-2 px-3 py-2 text-sm font-medium text-slate-400 bg-pd-elevated border border-slate-700/30 rounded-xl hover:bg-pd-hover hover:border-slate-600/50 transition-all cursor-pointer" do %>
+          Sign out
+        <% end %>
+      </div>
+    </aside>
+
+    <%# Main Content %>
+    <main class="flex-1 ml-[260px] min-h-screen">
+      <% if impersonating? %>
+        <div class="bg-amber-500/15 border-b border-amber-500/30 px-10 py-2.5 flex items-center justify-between text-sm text-amber-500">
+          <span>You are impersonating <%= current_user.full_name %></span>
+          <%= button_to "Stop Impersonating", admin_stop_impersonating_path, method: :delete, class: "px-3 py-1.5 text-xs font-medium bg-pd-elevated border border-slate-700/30 rounded-lg hover:bg-pd-hover transition-all cursor-pointer" %>
+        </div>
+      <% end %>
+
+      <% if flash[:notice] || flash[:alert] %>
+        <div class="px-10 pt-5">
+          <% if flash[:notice] %>
+            <div class="bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 px-5 py-3.5 rounded-xl text-sm font-medium flex items-center gap-2 mb-5 animate-slide-down">
+              <span>&#10003;</span>
+              <%= flash[:notice] %>
+            </div>
+          <% end %>
+          <% if flash[:alert] %>
+            <div class="bg-red-500/15 border border-red-500/30 text-red-400 px-5 py-3.5 rounded-xl text-sm font-medium flex items-center gap-2 mb-5 animate-slide-down">
+              <span>!</span>
+              <%= flash[:alert] %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+
+      <%= yield %>
+    </main>
+  </div>
+
+  <%= render "shared/command_k" %>
+</body>
+</html>

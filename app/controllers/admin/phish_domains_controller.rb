@@ -9,7 +9,7 @@ module Admin
     end
 
     def show
-      @domain = Phish::Domain.find(params[:id])
+      @domain = Phish::Domain.find_by_public_id!(params[:id])
     end
   end
 end

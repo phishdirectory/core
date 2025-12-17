@@ -1,0 +1,178 @@
+<% content_for :title, @url.domain %>
+
+<header class="px-10 py-6 border-b border-slate-700/20 flex items-center justify-between bg-pd-secondary sticky top-0 z-40">
+  <div class="flex items-center gap-4">
+    <%= link_to admin_urls_path, class: "text-slate-400 hover:text-slate-100 transition-colors" do %>
+      <span class="text-lg">&larr;</span>
+    <% end %>
+    <div>
+      <h1 class="text-2xl font-bold text-slate-100">URL Details</h1>
+      <p class="text-sm text-slate-500 mt-1 font-mono"><%= @url.domain %></p>
+    </div>
+  </div>
+</header>
+
+<div class="p-8 px-10">
+  <%# Full URL display %>
+  <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl p-6 mb-6">
+    <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Full URL</div>
+    <code class="text-slate-100 font-mono text-sm break-all"><%= @url.url %></code>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <%# Left column - Verdict details %>
+    <div class="lg:col-span-2 space-y-6">
+      <%# Verdict card %>
+      <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl overflow-hidden">
+        <div class="px-6 py-5 border-b border-slate-700/20">
+          <h2 class="text-lg font-semibold text-slate-100">Verdict</h2>
+        </div>
+        <div class="p-6">
+          <% if @url.verdict %>
+            <div class="flex items-center gap-6 mb-6">
+              <div>
+                <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Classification</div>
+                <% case @url.classification %>
+                <% when 'phishing' %>
+                  <span class="inline-flex items-center px-4 py-2 rounded-xl text-lg font-bold font-mono uppercase tracking-wide bg-red-500/15 text-red-500">Phishing</span>
+                <% when 'suspicious' %>
+                  <span class="inline-flex items-center px-4 py-2 rounded-xl text-lg font-bold font-mono uppercase tracking-wide bg-amber-500/15 text-amber-500">Suspicious</span>
+                <% when 'clean' %>
+                  <span class="inline-flex items-center px-4 py-2 rounded-xl text-lg font-bold font-mono uppercase tracking-wide bg-emerald-500/15 text-emerald-500">Clean</span>
+                <% when 'unknown' %>
+                  <span class="inline-flex items-center px-4 py-2 rounded-xl text-lg font-bold font-mono uppercase tracking-wide bg-slate-600/30 text-slate-400">Unknown</span>
+                <% end %>
+              </div>
+              <div>
+                <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Confidence</div>
+                <div class="flex items-center gap-3">
+                  <div class="w-24 h-2 bg-pd-tertiary rounded-full overflow-hidden">
+                    <div class="h-full rounded-full <%= @url.confidence_score && @url.confidence_score >= 0.8 ? 'bg-emerald-500' : @url.confidence_score && @url.confidence_score >= 0.5 ? 'bg-amber-500' : 'bg-red-500' %>" style="width: <%= @url.confidence_score ? (@url.confidence_score * 100).to_i : 0 %>%"></div>
+                  </div>
+                  <span class="text-2xl font-bold font-mono text-slate-100"><%= @url.confidence_score ? "#{(@url.confidence_score * 100).to_i}%" : "—" %></span>
+                </div>
+              </div>
+            </div>
+
+            <%# Sources %>
+            <% if @url.verdict.sources_list.any? %>
+              <div class="border-t border-slate-700/20 pt-6">
+                <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-4">Detection Sources</div>
+                <div class="space-y-3">
+                  <% @url.verdict.sources_list.each do |source| %>
+                    <div class="bg-pd-elevated rounded-xl p-4 flex items-center justify-between">
+                      <div>
+                        <div class="font-semibold text-slate-100"><%= source["name"] || source[:name] %></div>
+                        <div class="text-xs text-slate-500 mt-1">
+                          Checked <%= source["checked_at"] ? time_ago_in_words(Time.parse(source["checked_at"])) + " ago" : "unknown" %>
+                        </div>
+                      </div>
+                      <div class="text-sm text-slate-400 font-mono">
+                        <%= source["result"] || source[:result] %>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+
+            <%# Metadata %>
+            <% if @url.verdict.metadata_hash.any? %>
+              <div class="border-t border-slate-700/20 pt-6 mt-6">
+                <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-4">Additional Metadata</div>
+                <div class="bg-pd-elevated rounded-xl p-4 font-mono text-sm overflow-x-auto">
+                  <pre class="text-slate-300"><%= JSON.pretty_generate(@url.verdict.metadata_hash) %></pre>
+                </div>
+              </div>
+            <% end %>
+          <% else %>
+            <div class="text-center py-10 text-slate-500">
+              <div class="text-lg font-semibold text-slate-400 mb-1">No verdict yet</div>
+              <p class="text-sm">This URL has not been checked by any detection services</p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <%# Right column - Details %>
+    <div class="space-y-6">
+      <%# URL parts card %>
+      <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl overflow-hidden">
+        <div class="px-6 py-5 border-b border-slate-700/20">
+          <h2 class="text-lg font-semibold text-slate-100">URL Parts</h2>
+        </div>
+        <div class="p-6 space-y-4">
+          <div>
+            <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">Domain</div>
+            <code class="text-slate-100 font-mono"><%= @url.domain %></code>
+          </div>
+          <% if @url.path.present? %>
+            <div>
+              <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">Path</div>
+              <code class="text-slate-100 font-mono text-sm break-all"><%= @url.path %></code>
+            </div>
+          <% end %>
+          <% if @url.query_string.present? %>
+            <div>
+              <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">Query String</div>
+              <code class="text-slate-400 font-mono text-sm break-all"><%= @url.query_string %></code>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <%# Info card %>
+      <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl overflow-hidden">
+        <div class="px-6 py-5 border-b border-slate-700/20">
+          <h2 class="text-lg font-semibold text-slate-100">Details</h2>
+        </div>
+        <div class="p-6 space-y-4">
+          <div>
+            <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">ID</div>
+            <code class="text-slate-400 font-mono text-sm break-all"><%= @url.id %></code>
+          </div>
+          <div>
+            <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">First Seen</div>
+            <div class="text-slate-100"><%= @url.created_at.strftime("%B %d, %Y at %I:%M %p") %></div>
+          </div>
+          <div>
+            <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">Last Checked</div>
+            <div class="text-slate-100"><%= @url.last_checked_at ? @url.last_checked_at.strftime("%B %d, %Y at %I:%M %p") : "Never" %></div>
+          </div>
+          <div>
+            <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">Status</div>
+            <% if @url.stale? %>
+              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-amber-500/15 text-amber-500">Stale</span>
+            <% elsif @url.checked? %>
+              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-emerald-500/15 text-emerald-500">Current</span>
+            <% else %>
+              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-slate-600/30 text-slate-400">Unchecked</span>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <%# External links %>
+      <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl overflow-hidden">
+        <div class="px-6 py-5 border-b border-slate-700/20">
+          <h2 class="text-lg font-semibold text-slate-100">External Tools</h2>
+        </div>
+        <div class="p-6 space-y-3">
+          <a href="https://www.virustotal.com/gui/url/<%= Digest::SHA256.hexdigest(@url.url) %>" target="_blank" rel="noopener" class="flex items-center justify-between px-4 py-3 bg-pd-elevated rounded-xl hover:bg-pd-hover transition-colors">
+            <span class="text-slate-100">VirusTotal</span>
+            <span class="text-slate-500">&rarr;</span>
+          </a>
+          <a href="https://urlscan.io/search/#<%= CGI.escape(@url.url) %>" target="_blank" rel="noopener" class="flex items-center justify-between px-4 py-3 bg-pd-elevated rounded-xl hover:bg-pd-hover transition-colors">
+            <span class="text-slate-100">urlscan.io</span>
+            <span class="text-slate-500">&rarr;</span>
+          </a>
+          <a href="https://transparencyreport.google.com/safe-browsing/search?url=<%= CGI.escape(@url.url) %>" target="_blank" rel="noopener" class="flex items-center justify-between px-4 py-3 bg-pd-elevated rounded-xl hover:bg-pd-hover transition-colors">
+            <span class="text-slate-100">Google Safe Browsing</span>
+            <span class="text-slate-500">&rarr;</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

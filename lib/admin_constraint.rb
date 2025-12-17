@@ -25,9 +25,14 @@ class AdminConstraint
   end
 
   def matches?(request)
-    return false unless request.session[:user_id]
+    session_token = request.session[:session_token]
+    return false unless session_token.present?
 
-    user = User.find_by(id: request.session[:user_id])
+    # Authenticate via User::Session (same as ApplicationController)
+    user_session = User::Session.authenticate(session_token)
+    return false unless user_session
+
+    user = user_session.user
     return false unless user&.can_authenticate?
 
     user_level = ACCESS_HIERARCHY[user.access_level.to_sym] || 0

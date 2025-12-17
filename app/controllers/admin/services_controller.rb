@@ -49,7 +49,7 @@ module Admin
     private
 
     def set_service
-      @service = Service.find(params[:id])
+      @service = Service.find_by_public_id!(params[:id])
     end
 
     def service_params

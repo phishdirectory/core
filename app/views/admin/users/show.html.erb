@@ -1,0 +1,271 @@
+<% content_for :title, @user.full_name %>
+
+<header class="px-10 py-6 border-b border-slate-700/20 flex items-center justify-between bg-pd-secondary sticky top-0 z-40">
+  <div class="flex items-center gap-4">
+    <%= link_to admin_users_path, class: "text-slate-400 hover:text-slate-100 transition-colors" do %>
+      <span class="text-lg">&larr;</span>
+    <% end %>
+    <div>
+      <h1 class="text-2xl font-bold text-slate-100"><%= @user.full_name %></h1>
+      <p class="text-sm text-slate-500 mt-1 font-mono"><%= @user.pd_id %></p>
+    </div>
+  </div>
+  <div class="flex items-center gap-3">
+    <%= link_to "Edit", edit_admin_user_path(@user), class: "px-4 py-2 text-sm font-medium text-slate-400 bg-pd-elevated border border-slate-700/30 rounded-xl hover:bg-pd-hover hover:border-slate-600/50 transition-all" %>
+  </div>
+</header>
+
+<div class="p-8 px-10">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <%# Left column - User details %>
+    <div class="lg:col-span-2 space-y-6">
+      <%# Basic Info %>
+      <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl overflow-hidden">
+        <div class="px-6 py-5 border-b border-slate-700/20">
+          <h2 class="text-lg font-semibold text-slate-100">User Information</h2>
+        </div>
+        <div class="p-6">
+          <div class="flex items-start gap-6">
+            <div class="w-20 h-20 bg-gradient-to-br from-pd-elevated to-pd-tertiary border border-slate-700/30 rounded-2xl flex items-center justify-center font-bold text-2xl text-slate-400">
+              <%= @user.initials %>
+            </div>
+            <div class="flex-1 grid grid-cols-2 gap-4">
+              <div>
+                <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">First Name</div>
+                <div class="text-slate-100"><%= @user.first_name %></div>
+              </div>
+              <div>
+                <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">Last Name</div>
+                <div class="text-slate-100"><%= @user.last_name %></div>
+              </div>
+              <div>
+                <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">Email</div>
+                <div class="text-slate-100"><%= @user.email %></div>
+              </div>
+              <div>
+                <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">Username</div>
+                <div class="text-slate-100 font-mono">@<%= @user.username %></div>
+              </div>
+              <div>
+                <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">PD ID</div>
+                <div class="text-slate-100 font-mono"><%= @user.pd_id %></div>
+              </div>
+              <div>
+                <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">Public ID</div>
+                <div class="text-slate-100 font-mono text-sm"><%= @user.public_id %></div>
+              </div>
+              <div>
+                <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">Email Verified</div>
+                <div>
+                  <% if @user.email_verified? %>
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-emerald-500/15 text-emerald-500">Verified</span>
+                  <% else %>
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-amber-500/15 text-amber-500">Unverified</span>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <%# Sessions %>
+      <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl overflow-hidden">
+        <div class="px-6 py-5 border-b border-slate-700/20 flex items-center justify-between">
+          <h2 class="text-lg font-semibold text-slate-100">Active Sessions</h2>
+          <span class="text-sm text-slate-500"><%= @user.user_sessions.active.count %> active</span>
+        </div>
+        <% if @user.user_sessions.any? %>
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Device</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">IP</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Last Seen</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @user.user_sessions.order(last_seen_at: :desc).limit(5).each do |session| %>
+                  <tr class="hover:bg-pd-tertiary transition-colors">
+                    <td class="px-6 py-4 border-b border-slate-700/20 text-slate-100 text-sm"><%= session.device_info&.truncate(30) || "Unknown" %></td>
+                    <td class="px-6 py-4 border-b border-slate-700/20 text-slate-400 text-sm font-mono"><%= session.ip || "Unknown" %></td>
+                    <td class="px-6 py-4 border-b border-slate-700/20 text-slate-400 text-sm"><%= session.last_seen_at ? time_ago_in_words(session.last_seen_at) + " ago" : "Never" %></td>
+                    <td class="px-6 py-4 border-b border-slate-700/20">
+                      <% if session.active? %>
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-emerald-500/15 text-emerald-500">Active</span>
+                      <% else %>
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-slate-600/30 text-slate-400">Expired</span>
+                      <% end %>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        <% else %>
+          <div class="text-center py-10 text-slate-500">
+            <div class="text-lg font-semibold text-slate-400 mb-1">No sessions</div>
+            <p class="text-sm">This user has no active sessions</p>
+          </div>
+        <% end %>
+      </div>
+
+      <%# API Keys %>
+      <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl overflow-hidden">
+        <div class="px-6 py-5 border-b border-slate-700/20 flex items-center justify-between">
+          <h2 class="text-lg font-semibold text-slate-100">API Keys</h2>
+          <span class="text-sm text-slate-500"><%= @user.user_api_keys.active.count %> active</span>
+        </div>
+        <% if @user.user_api_keys.any? %>
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Name</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Last Used</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Created</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @user.user_api_keys.order(created_at: :desc).limit(5).each do |key| %>
+                  <tr class="hover:bg-pd-tertiary transition-colors">
+                    <td class="px-6 py-4 border-b border-slate-700/20 text-slate-100 text-sm font-semibold"><%= key.name %></td>
+                    <td class="px-6 py-4 border-b border-slate-700/20 text-slate-400 text-sm"><%= key.last_used_at ? time_ago_in_words(key.last_used_at) + " ago" : "Never" %></td>
+                    <td class="px-6 py-4 border-b border-slate-700/20 text-slate-400 text-sm"><%= key.created_at.strftime("%b %d, %Y") %></td>
+                    <td class="px-6 py-4 border-b border-slate-700/20">
+                      <% if key.usable? %>
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-emerald-500/15 text-emerald-500">Active</span>
+                      <% elsif key.expired? %>
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-amber-500/15 text-amber-500">Expired</span>
+                      <% else %>
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-red-500/15 text-red-500">Revoked</span>
+                      <% end %>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        <% else %>
+          <div class="text-center py-10 text-slate-500">
+            <div class="text-lg font-semibold text-slate-400 mb-1">No API keys</div>
+            <p class="text-sm">This user hasn't created any API keys</p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <%# Right column - Status and actions %>
+    <div class="space-y-6">
+      <%# Status card %>
+      <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl overflow-hidden">
+        <div class="px-6 py-5 border-b border-slate-700/20">
+          <h2 class="text-lg font-semibold text-slate-100">Status</h2>
+        </div>
+        <div class="p-6 space-y-4">
+          <div>
+            <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Account Status</div>
+            <% case @user.status %>
+            <% when 'active' %>
+              <span class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold font-mono uppercase tracking-wide bg-emerald-500/15 text-emerald-500">Active</span>
+            <% when 'suspended' %>
+              <span class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold font-mono uppercase tracking-wide bg-red-500/15 text-red-500">Suspended</span>
+            <% when 'deactivated' %>
+              <span class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold font-mono uppercase tracking-wide bg-slate-600/30 text-slate-400">Deactivated</span>
+            <% end %>
+          </div>
+          <div>
+            <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Access Level</div>
+            <span class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold font-mono uppercase tracking-wide bg-blue-500/15 text-blue-400"><%= @user.access_level.titleize %></span>
+          </div>
+          <% if @user.locked? %>
+          <div>
+            <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Lock Status</div>
+            <span class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold font-mono uppercase tracking-wide bg-red-500/15 text-red-500">Locked</span>
+          </div>
+          <% end %>
+          <div>
+            <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Staff Member</div>
+            <span class="text-slate-100"><%= @user.staff? ? "Yes" : "No" %></span>
+          </div>
+          <div>
+            <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">PD Developer</div>
+            <span class="text-slate-100"><%= @user.pd_dev? ? "Yes" : "No" %></span>
+          </div>
+        </div>
+      </div>
+
+      <%# Activity card %>
+      <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl overflow-hidden">
+        <div class="px-6 py-5 border-b border-slate-700/20">
+          <h2 class="text-lg font-semibold text-slate-100">Activity</h2>
+        </div>
+        <div class="p-6 space-y-4">
+          <div>
+            <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">Joined</div>
+            <div class="text-slate-100"><%= @user.created_at.strftime("%B %d, %Y") %></div>
+          </div>
+          <div>
+            <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">Last Seen</div>
+            <div class="text-slate-100"><%= @user.last_seen_at ? time_ago_in_words(@user.last_seen_at) + " ago" : "Never" %></div>
+          </div>
+          <div>
+            <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">Last Login</div>
+            <div class="text-slate-100"><%= @user.last_login_at ? time_ago_in_words(@user.last_login_at) + " ago" : "Never" %></div>
+          </div>
+        </div>
+      </div>
+
+      <%# Actions card %>
+      <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl overflow-hidden">
+        <div class="px-6 py-5 border-b border-slate-700/20">
+          <h2 class="text-lg font-semibold text-slate-100">Actions</h2>
+        </div>
+        <div class="p-6 space-y-3">
+          <%# Impersonation %>
+          <% if current_user.can_impersonate? && @user.impersonatable_by?(current_user) %>
+            <%= button_to "Impersonate User", impersonate_admin_user_path(@user), method: :post, class: "w-full px-4 py-2.5 text-sm font-medium text-slate-100 bg-pd-elevated border border-slate-700/30 rounded-xl hover:bg-pd-hover hover:border-slate-600/50 transition-all cursor-pointer text-left" %>
+          <% end %>
+
+          <%# Status actions %>
+          <% if @user.may_suspend? %>
+            <%= button_to "Suspend User", suspend_admin_user_path(@user), method: :post, class: "w-full px-4 py-2.5 text-sm font-medium text-amber-500 bg-amber-500/10 border border-amber-500/30 rounded-xl hover:bg-amber-500/20 transition-all cursor-pointer text-left", data: { turbo_confirm: "Are you sure you want to suspend this user?" } %>
+          <% end %>
+
+          <% if @user.may_reactivate? %>
+            <%= button_to "Reactivate User", reactivate_admin_user_path(@user), method: :post, class: "w-full px-4 py-2.5 text-sm font-medium text-emerald-500 bg-emerald-500/10 border border-emerald-500/30 rounded-xl hover:bg-emerald-500/20 transition-all cursor-pointer text-left" %>
+          <% end %>
+
+          <%# Lock actions %>
+          <% if @user.locked? %>
+            <%= button_to "Unlock Account", unlock_admin_user_path(@user), method: :post, class: "w-full px-4 py-2.5 text-sm font-medium text-emerald-500 bg-emerald-500/10 border border-emerald-500/30 rounded-xl hover:bg-emerald-500/20 transition-all cursor-pointer text-left" %>
+          <% else %>
+            <%= button_to "Lock Account", lock_admin_user_path(@user), method: :post, class: "w-full px-4 py-2.5 text-sm font-medium text-amber-500 bg-amber-500/10 border border-amber-500/30 rounded-xl hover:bg-amber-500/20 transition-all cursor-pointer text-left", data: { turbo_confirm: "Are you sure you want to lock this account?" } %>
+          <% end %>
+
+          <%# Role actions (superadmin only) %>
+          <% if current_user.superadmin? && @user != current_user %>
+            <div class="border-t border-slate-700/20 pt-3 mt-3">
+              <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-3">Role Management</div>
+              <% if @user.access_level != 'admin' && @user.access_level != 'superadmin' && @user.access_level != 'owner' %>
+                <%= button_to "Promote to Admin", make_admin_admin_user_path(@user), method: :post, class: "w-full px-4 py-2.5 text-sm font-medium text-blue-400 bg-blue-500/10 border border-blue-500/30 rounded-xl hover:bg-blue-500/20 transition-all cursor-pointer text-left", data: { turbo_confirm: "Are you sure you want to promote this user to admin?" } %>
+              <% end %>
+              <% if @user.access_level != 'user' %>
+                <%= button_to "Remove Privileges", remove_privileges_admin_user_path(@user), method: :post, class: "w-full px-4 py-2.5 text-sm font-medium text-red-500 bg-red-500/10 border border-red-500/30 rounded-xl hover:bg-red-500/20 transition-all cursor-pointer text-left mt-2", data: { turbo_confirm: "Are you sure you want to remove all privileges from this user?" } %>
+              <% end %>
+            </div>
+          <% end %>
+
+          <%# Danger zone %>
+          <div class="border-t border-slate-700/20 pt-3 mt-3">
+            <div class="text-xs font-semibold text-red-500/70 uppercase tracking-widest mb-3">Danger Zone</div>
+            <%= button_to "Delete User", admin_user_path(@user), method: :delete, class: "w-full px-4 py-2.5 text-sm font-medium text-red-500 bg-red-500/10 border border-red-500/30 rounded-xl hover:bg-red-500/20 transition-all cursor-pointer text-left", data: { turbo_confirm: "Are you sure you want to permanently delete this user? This action cannot be undone." } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

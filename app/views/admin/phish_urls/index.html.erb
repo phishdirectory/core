@@ -1,0 +1,107 @@
+<% content_for :title, "URLs" %>
+
+<header class="px-10 py-6 border-b border-slate-700/20 flex items-center justify-between bg-pd-secondary sticky top-0 z-40">
+  <div>
+    <h1 class="text-2xl font-bold text-slate-100">Phishing URLs</h1>
+    <p class="text-sm text-slate-500 mt-1"><%= Phish::Url.count %> URLs tracked</p>
+  </div>
+  <div class="flex items-center gap-4">
+    <div class="flex items-center gap-2 text-sm">
+      <span class="px-2.5 py-1 rounded-full bg-red-500/15 text-red-500 font-mono"><%= Phish::Url.phishing.count %></span>
+      <span class="text-slate-500">phishing</span>
+      <span class="px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-500 font-mono ml-2"><%= Phish::Url.suspicious.count %></span>
+      <span class="text-slate-500">suspicious</span>
+      <span class="px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-500 font-mono ml-2"><%= Phish::Url.clean.count %></span>
+      <span class="text-slate-500">clean</span>
+    </div>
+  </div>
+</header>
+
+<div class="p-8 px-10">
+  <% if @urls.any? %>
+    <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">URL</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Classification</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Confidence</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Last Checked</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Added</th>
+              <th class="px-6 py-4 text-right text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @urls.each do |url| %>
+              <tr class="hover:bg-pd-tertiary transition-colors">
+                <td class="px-6 py-4 border-b border-slate-700/20 max-w-md">
+                  <code class="text-sm text-slate-100 font-mono block truncate" title="<%= url.url %>"><%= url.url.truncate(60) %></code>
+                  <div class="text-xs text-slate-500 mt-1"><%= url.domain %> &middot; <span class="font-mono"><%= url.public_id %></span></div>
+                </td>
+                <td class="px-6 py-4 border-b border-slate-700/20">
+                  <% if url.verdict %>
+                    <% case url.classification %>
+                    <% when 'phishing' %>
+                      <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-red-500/15 text-red-500">Phishing</span>
+                    <% when 'suspicious' %>
+                      <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-amber-500/15 text-amber-500">Suspicious</span>
+                    <% when 'clean' %>
+                      <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-emerald-500/15 text-emerald-500">Clean</span>
+                    <% when 'unknown' %>
+                      <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-slate-600/30 text-slate-400">Unknown</span>
+                    <% end %>
+                  <% else %>
+                    <span class="text-slate-500">—</span>
+                  <% end %>
+                </td>
+                <td class="px-6 py-4 border-b border-slate-700/20">
+                  <% if url.confidence_score %>
+                    <div class="flex items-center gap-2">
+                      <div class="w-16 h-1.5 bg-pd-tertiary rounded-full overflow-hidden">
+                        <div class="h-full rounded-full <%= url.confidence_score >= 0.8 ? 'bg-emerald-500' : url.confidence_score >= 0.5 ? 'bg-amber-500' : 'bg-red-500' %>" style="width: <%= (url.confidence_score * 100).to_i %>%"></div>
+                      </div>
+                      <span class="text-slate-400 text-sm font-mono"><%= (url.confidence_score * 100).to_i %>%</span>
+                    </div>
+                  <% else %>
+                    <span class="text-slate-500">—</span>
+                  <% end %>
+                </td>
+                <td class="px-6 py-4 border-b border-slate-700/20 text-slate-400 text-sm">
+                  <%= url.last_checked_at ? time_ago_in_words(url.last_checked_at) + " ago" : "Never" %>
+                </td>
+                <td class="px-6 py-4 border-b border-slate-700/20 text-slate-400 text-sm">
+                  <%= url.created_at.strftime("%b %d, %Y") %>
+                </td>
+                <td class="px-6 py-4 border-b border-slate-700/20 text-right">
+                  <%= link_to "View", admin_url_path(url), class: "px-3 py-1.5 text-xs font-medium text-slate-400 bg-pd-elevated border border-slate-700/30 rounded-lg hover:bg-pd-hover transition-all" %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <%# Pagination %>
+    <% if @urls.respond_to?(:total_pages) && @urls.total_pages > 1 %>
+      <div class="mt-6 flex items-center justify-center gap-2">
+        <% if @urls.current_page > 1 %>
+          <%= link_to "&larr; Previous".html_safe, admin_urls_path(page: @urls.current_page - 1), class: "px-4 py-2 text-sm font-medium text-slate-400 bg-pd-elevated border border-slate-700/30 rounded-xl hover:bg-pd-hover transition-all" %>
+        <% end %>
+        <span class="px-4 py-2 text-sm text-slate-500">
+          Page <%= @urls.current_page %> of <%= @urls.total_pages %>
+        </span>
+        <% if @urls.current_page < @urls.total_pages %>
+          <%= link_to "Next &rarr;".html_safe, admin_urls_path(page: @urls.current_page + 1), class: "px-4 py-2 text-sm font-medium text-slate-400 bg-pd-elevated border border-slate-700/30 rounded-xl hover:bg-pd-hover transition-all" %>
+        <% end %>
+      </div>
+    <% end %>
+  <% else %>
+    <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl p-16 text-center">
+      <div class="text-5xl mb-4 opacity-50">&#128279;</div>
+      <div class="text-lg font-semibold text-slate-400 mb-2">No URLs tracked</div>
+      <p class="text-slate-500">URLs will appear here as they are checked via the API</p>
+    </div>
+  <% end %>
+</div>

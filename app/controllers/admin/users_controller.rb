@@ -126,7 +126,13 @@ module Admin
     private
 
     def set_user
-      @user = User.find(params[:id])
+      # Support lookup by public_id (usr_xxx) or pd_id (PDUxxxxxxxx)
+      id = params[:id]
+      @user = if id.to_s.start_with?("PDU")
+                User.find_by!(pd_id: id.upcase)
+              else
+                User.find_by_public_id!(id)
+              end
     end
 
     def authorize_view!
