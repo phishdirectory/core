@@ -8,7 +8,7 @@
     <span>phish.directory</span>
   </a>
   <div class="flex items-center gap-6">
-    <a href="https://docs.phish.directory" class="text-slate-400 font-medium text-sm hover:text-slate-100 transition-colors">Docs</a>
+    <a href="/docs" class="text-slate-400 font-medium text-sm hover:text-slate-100 transition-colors">Docs</a>
     <% if user_signed_in? %>
       <%= link_to "Dashboard", dashboard_root_path, class: "px-5 py-2.5 bg-cyan-accent text-pd-primary font-semibold rounded-xl hover:shadow-[0_0_20px_rgba(63,196,224,0.4)] transition-all" %>
     <% else %>
@@ -46,7 +46,7 @@
         <%= link_to "Go to Dashboard", dashboard_root_path, class: "px-8 py-4 bg-cyan-accent text-pd-primary font-semibold rounded-xl hover:shadow-[0_0_20px_rgba(63,196,224,0.4)] hover:-translate-y-0.5 transition-all" %>
       <% else %>
         <%= link_to "Start for free", signup_path, class: "px-8 py-4 bg-cyan-accent text-pd-primary font-semibold rounded-xl hover:shadow-[0_0_20px_rgba(63,196,224,0.4)] hover:-translate-y-0.5 transition-all" %>
-        <%= link_to "View documentation", "https://phish.directory/docs", class: "px-8 py-4 bg-pd-elevated text-slate-100 font-semibold rounded-xl border border-slate-700/40 hover:bg-pd-hover hover:border-slate-600/50 transition-all" %>
+        <%= link_to "View documentation", "/docs", class: "px-8 py-4 bg-pd-elevated text-slate-100 font-semibold rounded-xl border border-slate-700/40 hover:bg-pd-hover hover:border-slate-600/50 transition-all" %>
       <% end %>
     </div>
   </div>
@@ -66,7 +66,7 @@
     <div class="p-6 font-mono text-sm leading-loose">
       <div class="mb-2">
         <span class="text-cyan-accent">$</span>
-        <span class="text-slate-100"> curl -X POST https://api.phish.directory/v1/domain/check \</span>
+        <span class="text-slate-100"> curl -X POST https://phish.directory/api/v1/domain/check \</span>
       </div>
       <div class="pl-5 text-slate-400 mb-2">-H "Authorization: Bearer pdat_xxx" \</div>
       <div class="pl-5 text-slate-400 mb-4">-d '{"domain": "suspicious-site.com"}'</div>
