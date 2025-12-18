@@ -13,6 +13,7 @@ module Report
       "phishtank" => :submit_phishtank,
       "urlscan" => :submit_urlscan,
       "fishfish" => :submit_fishfish,
+      "phish_report" => :submit_phish_report,
       "generic" => :submit_generic
     }.freeze
 
@@ -89,6 +90,7 @@ module Report
       return :submit_phishtank if name.include?("phishtank")
       return :submit_urlscan if name.include?("urlscan")
       return :submit_fishfish if name.include?("fishfish") || name.include?("yuri")
+      return :submit_phish_report if name.include?("phish.report") || name.include?("phish report")
 
       # Default to generic
       :submit_generic
@@ -400,6 +402,52 @@ module Report
       "Confidence: #{(payload[:confidence].to_f * 100).round}%. " \
       "Sources: #{source_text}. " \
       "Case: #{payload[:case_reference]}"
+    end
+
+    # =========================================
+    # Phish Report API
+    # https://phish.report/api/v0
+    # Creates takedown cases via phish.report
+    # =========================================
+    def submit_phish_report
+      api_key = api_key_for(:phish_report)
+      raise ServiceError, "Phish Report API key not configured" if api_key.blank?
+
+      conn = connection(
+        base_url: "https://phish.report",
+        headers: {
+          "Content-Type" => "application/json",
+          "Authorization" => "Bearer #{api_key}"
+        }
+      )
+
+      url_to_report = payload[:url] || "https://#{payload[:domain]}"
+
+      body = {
+        url: url_to_report,
+        ignore_duplicates: true
+      }
+
+      response = conn.post("/api/v0/cases", body)
+      response_body = response.body
+
+      # Extract case ID from response
+      case_id = response_body.is_a?(Hash) ? response_body["id"] : nil
+
+      submission.record_response!(
+        status_code: response.status,
+        body: response_body.to_json,
+        reference: case_id
+      )
+
+      log_info("Phish Report case created: #{case_id}")
+      true
+    rescue Faraday::ClientError => e
+      submission.record_response!(
+        status_code: e.response[:status],
+        body: e.response[:body].to_s
+      )
+      raise ServiceError, "Phish Report API error: #{e.response[:status]}"
     end
 
     # =========================================
