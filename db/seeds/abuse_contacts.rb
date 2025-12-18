@@ -98,6 +98,45 @@ module Seeds
       { name: "APWG eCrime", contact_type: :security_vendor, method: :email, email: "reportphishing@apwg.org", priority: 20, trusted_reporter: true, notes: "Anti-Phishing Working Group. Industry consortium for fighting phishing." },
       { name: "Microsoft Security", contact_type: :security_vendor, method: :web_form, web_form_url: "https://www.microsoft.com/en-us/wdsi/support/report-unsafe-site", priority: 20, notes: "Reports to Microsoft Defender SmartScreen." },
 
+      # Additional Email-based Security Vendors (priority: 20)
+      { name: "US-CERT", contact_type: :security_vendor, method: :email, email: "phishing-report@us-cert.gov", priority: 20, notes: "US Computer Emergency Readiness Team." },
+      { name: "FTC Spam", contact_type: :security_vendor, method: :email, email: "spam@uce.gov", priority: 20, notes: "Federal Trade Commission spam reporting." },
+      { name: "Microsoft 365", contact_type: :security_vendor, method: :email, email: "phish@office365.microsoft.com", priority: 20, notes: "Microsoft 365 phishing reports." },
+      { name: "OpenPhish", contact_type: :security_vendor, method: :email, email: "report@openphish.com", priority: 20, notes: "Community phishing feed." },
+
+      # Security Vendor Web Forms (priority: 25) - From issue #8 comments
+      { name: "Avira", contact_type: :security_vendor, method: :web_form, web_form_url: "https://www.avira.com/en/analysis/submit-url", priority: 25 },
+      { name: "Dr. Web", contact_type: :security_vendor, method: :web_form, web_form_url: "https://support.drweb-av.de/new/urlfilter/", priority: 25 },
+      { name: "Kaspersky", contact_type: :security_vendor, method: :web_form, web_form_url: "https://opentip.kaspersky.com/", priority: 25 },
+      { name: "Symantec / Norton", contact_type: :security_vendor, method: :web_form, web_form_url: "https://sitereview.symantec.com/", priority: 25 },
+      { name: "McAfee", contact_type: :security_vendor, method: :web_form, web_form_url: "https://sitelookup.mcafee.com/", priority: 25, notes: "Select real-time, click Check, and click Submit at the bottom." },
+      { name: "Bitdefender", contact_type: :security_vendor, method: :web_form, web_form_url: "https://www.bitdefender.com/consumer/support/answer/29358/", priority: 25 },
+      { name: "TrendMicro", contact_type: :security_vendor, method: :web_form, web_form_url: "https://global.sitesafety.trendmicro.com/index.php", priority: 25 },
+      { name: "ESET", contact_type: :security_vendor, method: :web_form, web_form_url: "https://phishing.eset.com/en-us/report", priority: 25 },
+      { name: "Palo Alto", contact_type: :security_vendor, method: :web_form, web_form_url: "https://urlfiltering.paloaltonetworks.com/", priority: 25 },
+      { name: "Netcraft", contact_type: :security_vendor, method: :web_form, web_form_url: "https://report.netcraft.com/report", priority: 25, notes: "Also supports API with registration." },
+      { name: "BrightCloud (Webroot)", contact_type: :security_vendor, method: :web_form, web_form_url: "https://www.brightcloud.com/tools/url-ip-lookup.php", priority: 25, notes: "Provides data to PaloAlto firewalls and many others." },
+      { name: "Fortiguard", contact_type: :security_vendor, method: :web_form, web_form_url: "https://www.fortiguard.com/webfilter", priority: 25 },
+      { name: "GOV.UK NCSC", contact_type: :security_vendor, method: :web_form, web_form_url: "https://www.ncsc.gov.uk/section/about-this-website/report-scam-website", priority: 25, notes: "UK National Cyber Security Centre." },
+      { name: "Scumware", contact_type: :security_vendor, method: :web_form, web_form_url: "https://scumware.org/add_url.php", priority: 25 },
+      { name: "Talos Intelligence", contact_type: :security_vendor, method: :web_form, web_form_url: "https://talosintelligence.com/", priority: 25, notes: "Cisco Talos threat intelligence." },
+      { name: "AlphaMountain", contact_type: :security_vendor, method: :web_form, web_form_url: "https://www.alphamountain.ai/contact/", priority: 25 },
+      { name: "Spam404", contact_type: :security_vendor, method: :web_form, web_form_url: "https://www.spam404.com/report.html", priority: 25 },
+      { name: "Forcepoint", contact_type: :security_vendor, method: :web_form, web_form_url: "https://csi.forcepoint.com/", priority: 25 },
+      { name: "CRDF ThreatCenter", contact_type: :security_vendor, method: :web_form, web_form_url: "https://threatcenter.crdf.fr/submit_url.html", priority: 25 },
+      { name: "MalwareURL", contact_type: :security_vendor, method: :web_form, web_form_url: "https://www.malwareurl.com/submit.php", priority: 25 },
+      { name: "Sucuri", contact_type: :security_vendor, method: :web_form, web_form_url: "https://abuse.sucuri.net/", priority: 25 },
+      { name: "Cybercrime Tracker", contact_type: :security_vendor, method: :web_form, web_form_url: "https://cybercrime-tracker.net/submit.php", priority: 25 },
+      { name: "Spamhaus", contact_type: :security_vendor, method: :web_form, web_form_url: "https://submit.spamhaus.org/submit", priority: 25 },
+      { name: "Cyren", contact_type: :security_vendor, method: :web_form, web_form_url: "https://www.cyren.com/security-center/url-category-check-gate", priority: 25 },
+      { name: "Bfore.ai", contact_type: :security_vendor, method: :web_form, web_form_url: "https://bfore.ai/support/", priority: 25 },
+      { name: "Avast", contact_type: :security_vendor, method: :web_form, web_form_url: "https://www.avast.com/report-false-negative#pc", priority: 25 },
+      { name: "CIRCL", contact_type: :security_vendor, method: :web_form, web_form_url: "https://www.circl.lu/urlabuse/", priority: 25, notes: "Luxembourg CERT. Shares with European partners." },
+      { name: "Blue Coat / Symantec WebPulse", contact_type: :security_vendor, method: :web_form, web_form_url: "http://sitereview.bluecoat.com/sitereview.jsp", priority: 25 },
+
+      # Crypto-specific (priority: 30)
+      { name: "ChainPatrol", contact_type: :security_vendor, method: :web_form, web_form_url: "https://app.chainpatrol.io/chainpatrol/report", priority: 30, notes: "For crypto/web3 phishing sites." },
+
       # Russian CERTs - Required for .ru domains due to legal constraints
       { name: "FACCT / CERT-GIB", contact_type: :security_vendor, method: :email, email: "response@cert-gib.com", priority: 25, notes: "Russian CERT for .ru domains. Alternative: response@facct.ru" },
       { name: "NCIRCC (Russian National CERT)", contact_type: :security_vendor, method: :email, email: "incident@cert.gov.ru", priority: 25, notes: "Russian National CERT. Required for instructing Russian registrars to suspend domains." }

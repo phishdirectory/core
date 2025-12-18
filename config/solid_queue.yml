@@ -67,30 +67,3 @@ production:
       threads: 2
       polling_interval: 1
       processes: 1
-
-  # Recurring jobs (replaces cron)
-  recurring:
-    # Session cleanup - remove expired sessions
-    session_cleanup:
-      class: SessionCleanupJob
-      schedule: every 1 hour
-
-    # Unverified account cleanup - remove stale signups
-    unverified_cleanup:
-      class: CleanupUnverifiedAccountsJob
-      schedule: every 6 hours
-
-    # Heartbeat for monitoring
-    heartbeat:
-      class: HeartbeatJob
-      schedule: every 5 minutes
-
-    # Batch API metrics for analytics
-    api_metrics_batch:
-      class: ApiMetricsBatchJob
-      schedule: every 15 minutes
-
-    # Sync FishFish domain list weekly
-    fishfish_sync:
-      class: FishFishSyncJob
-      schedule: every sunday at 3am
