@@ -89,10 +89,18 @@
             <span class="w-5 text-center opacity-80">&#128221;</span>
             <span>Console Audits</span>
           </a>
+          <a href="/admin/pghero" class="flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium text-slate-400 hover:bg-pd-tertiary hover:text-slate-100 transition-all">
+            <span class="w-5 text-center opacity-80">&#128024;</span>
+            <span>Database Monitor</span>
+          </a>
         </div>
 
         <div class="mb-6">
           <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-2">Navigation</div>
+          <%= link_to docs_path, class: "flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium text-slate-400 hover:bg-pd-tertiary hover:text-slate-100 transition-all" do %>
+            <span class="w-5 text-center opacity-80">&#128214;</span>
+            <span>Documentation</span>
+          <% end %>
           <%= link_to dashboard_root_path, class: "flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium text-slate-400 hover:bg-pd-tertiary hover:text-slate-100 transition-all" do %>
             <span class="w-5 text-center opacity-80">&#8592;</span>
             <span>Back to Dashboard</span>
