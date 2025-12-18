@@ -60,6 +60,18 @@
         </div>
 
         <div class="mb-6">
+          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-2">Reporting</div>
+          <%= link_to admin_report_abuse_contacts_path, class: "flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium transition-all #{controller_path == 'admin/report/abuse_contacts' ? 'bg-cyan-accent/15 text-cyan-accent' : 'text-slate-400 hover:bg-pd-tertiary hover:text-slate-100'}" do %>
+            <span class="w-5 text-center opacity-80">&#128203;</span>
+            <span>Abuse Contacts</span>
+          <% end %>
+          <%= link_to admin_report_cases_path, class: "flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium transition-all #{controller_path == 'admin/report/cases' ? 'bg-cyan-accent/15 text-cyan-accent' : 'text-slate-400 hover:bg-pd-tertiary hover:text-slate-100'}" do %>
+            <span class="w-5 text-center opacity-80">&#128193;</span>
+            <span>Report Cases</span>
+          <% end %>
+        </div>
+
+        <div class="mb-6">
           <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-2">Tools</div>
           <a href="/admin/flipper" class="flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium text-slate-400 hover:bg-pd-tertiary hover:text-slate-100 transition-all">
             <span class="w-5 text-center opacity-80">&#9873;</span>
