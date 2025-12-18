@@ -60,6 +60,15 @@ module Report
       @abuse_contact ||= submission.abuse_contact
     end
 
+    # Get API key from contact or fall back to credentials
+    def api_key_for(provider)
+      # First check if contact has an API key set
+      return abuse_contact.api_key if abuse_contact.api_key.present?
+
+      # Fall back to credentials
+      Rails.application.credentials.dig(provider, :api_key)
+    end
+
     def payload
       @payload ||= submission.payload || submission.build_payload
     end
@@ -89,11 +98,14 @@ module Report
     # Uses full XARF format for abuse reports
     # =========================================
     def submit_cleandns
+      api_key = api_key_for(:cleandns)
+      raise ServiceError, "CleanDNS API key not configured" if api_key.blank?
+
       conn = connection(
         base_url: "https://api.cleandns.dev",
         headers: {
           "Content-Type" => "application/json",
-          "Authorization" => abuse_contact.api_key
+          "Authorization" => api_key
         }
       )
 
@@ -207,6 +219,9 @@ module Report
     # https://developers.google.com/safe-browsing/v4/submission-api
     # =========================================
     def submit_google_safe_browsing
+      api_key = api_key_for(:google_safe_browsing)
+      raise ServiceError, "Google Safe Browsing API key not configured" if api_key.blank?
+
       conn = connection(
         base_url: "https://safebrowsing.googleapis.com",
         headers: { "Content-Type" => "application/json" }
@@ -221,7 +236,7 @@ module Report
         }
       }
 
-      response = conn.post("/v4/threatHits?key=#{abuse_contact.api_key}", body)
+      response = conn.post("/v4/threatHits?key=#{api_key}", body)
 
       submission.record_response!(
         status_code: 200,
@@ -243,6 +258,9 @@ module Report
     # https://phishtank.org/api_info.php
     # =========================================
     def submit_phishtank
+      api_key = api_key_for(:phishtank)
+      raise ServiceError, "PhishTank API key not configured" if api_key.blank?
+
       conn = connection(
         base_url: "https://checkurl.phishtank.com",
         headers: { "Content-Type" => "application/x-www-form-urlencoded" }
@@ -255,7 +273,7 @@ module Report
         req.body = URI.encode_www_form(
           url: Base64.strict_encode64(url_to_report),
           format: "json",
-          app_key: abuse_contact.api_key
+          app_key: api_key
         )
       end
 
@@ -279,11 +297,14 @@ module Report
     # https://urlscan.io/docs/api/
     # =========================================
     def submit_urlscan
+      api_key = api_key_for(:urlscan)
+      raise ServiceError, "URLScan API key not configured" if api_key.blank?
+
       conn = connection(
         base_url: "https://urlscan.io",
         headers: {
           "Content-Type" => "application/json",
-          "API-Key" => abuse_contact.api_key
+          "API-Key" => api_key
         }
       )
 
@@ -436,14 +457,14 @@ module Report
       def check_cleandns_status(submission)
         return nil unless submission.submission_reference.present?
 
-        abuse_contact = submission.abuse_contact
-        return nil unless abuse_contact.api_key.present?
+        api_key = cleandns_api_key(submission.abuse_contact)
+        return nil if api_key.blank?
 
         conn = Faraday.new(url: "https://api.cleandns.dev") do |f|
           f.request :json
           f.response :json
           f.response :raise_error
-          f.headers["Authorization"] = abuse_contact.api_key
+          f.headers["Authorization"] = api_key
           f.headers["Content-Type"] = "application/json"
         end
 
@@ -480,6 +501,14 @@ module Report
         end
 
         nil
+      end
+
+      private
+
+      def cleandns_api_key(abuse_contact)
+        return abuse_contact.api_key if abuse_contact.api_key.present?
+
+        Rails.application.credentials.dig(:cleandns, :api_key)
       end
     end
   end
