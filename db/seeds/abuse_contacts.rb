@@ -86,7 +86,15 @@ module Seeds
       { name: "SugarSync", contact_type: :other, method: :email, email: "support@sugarsync.zendesk.com", priority: 50 },
       { name: "OpenProvider", contact_type: :other, method: :web_form, web_form_url: "https://www.openprovider.com/company/contact-us/report-abuse", priority: 50 },
       { name: "Wix", contact_type: :other, method: :web_form, web_form_url: "http://www.wix.com/upgrade/abuse#!spam-report/c18hy", priority: 50 },
-      { name: "Weebly", contact_type: :other, method: :web_form, web_form_url: "https://www.weebly.com/spam", priority: 50 }
+      { name: "Weebly", contact_type: :other, method: :web_form, web_form_url: "https://www.weebly.com/spam", priority: 50 },
+
+      # Security Vendors (priority: 20) - These receive all high-confidence reports
+      # API keys must be configured in credentials or via admin UI
+      { name: "Google Safe Browsing", contact_type: :security_vendor, method: :api, priority: 20, trusted_reporter: true, notes: "Requires API key. Reports URLs to Google's threat database." },
+      { name: "URLScan.io", contact_type: :security_vendor, method: :api, priority: 20, notes: "Requires API key. Scans and archives phishing pages." },
+      { name: "PhishTank", contact_type: :security_vendor, method: :api, priority: 20, notes: "Requires API key. Community-driven phishing database." },
+      { name: "APWG eCrime", contact_type: :security_vendor, method: :email, email: "reportphishing@apwg.org", priority: 20, trusted_reporter: true, notes: "Anti-Phishing Working Group. Industry consortium for fighting phishing." },
+      { name: "Microsoft Security", contact_type: :security_vendor, method: :web_form, web_form_url: "https://www.microsoft.com/en-us/wdsi/support/report-unsafe-site", priority: 20, notes: "Reports to Microsoft Defender SmartScreen." }
     ].freeze
 
     def self.seed!

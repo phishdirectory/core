@@ -37,14 +37,11 @@ module Report
       success = case submission.abuse_contact.method
       when "email"
         Report::EmailSubmissionService.new(submission).submit!
-      when "web_form"
-        # Web form submission - not implemented in core infrastructure
-        Rails.logger.info("[Report::SubmitReportJob] Web form submission not yet implemented for #{submission.public_id}")
-        submission.skip!
-        true
       when "api"
-        # API submission - not implemented in core infrastructure
-        Rails.logger.info("[Report::SubmitReportJob] API submission not yet implemented for #{submission.public_id}")
+        Report::ApiSubmissionService.new(submission).submit!
+      when "web_form"
+        # Web form submission requires browser automation - skip for now
+        Rails.logger.info("[Report::SubmitReportJob] Web form submission not automated for #{submission.public_id}")
         submission.skip!
         true
       else

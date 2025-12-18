@@ -1,0 +1,308 @@
+# frozen_string_literal: true
+
+module Report
+  # Service for submitting abuse reports via API
+  # Supports multiple API types (Google Safe Browsing, PhishTank, generic REST)
+  class ApiSubmissionService < BaseService
+    attr_reader :submission
+
+    # Known API handlers
+    API_HANDLERS = {
+      "google_safe_browsing" => :submit_google_safe_browsing,
+      "phishtank" => :submit_phishtank,
+      "urlscan" => :submit_urlscan,
+      "generic" => :submit_generic
+    }.freeze
+
+    def initialize(submission, logger: Rails.logger)
+      super(logger: logger)
+      @submission = submission
+    end
+
+    def submit!
+      validate_submission!
+
+      log_info("Submitting API report to #{abuse_contact.name}")
+
+      # Determine which handler to use based on contact metadata or name
+      handler = determine_handler
+      success = send(handler)
+
+      if success
+        submission.mark_sent!
+        log_info("Successfully submitted report to #{abuse_contact.name} for case #{report_case.case_number}")
+      end
+
+      success
+    rescue ServiceError => e
+      handle_error(e)
+      false
+    rescue StandardError => e
+      handle_error(e)
+      false
+    end
+
+    private
+
+    def validate_submission!
+      raise ArgumentError, "Submission is nil" unless submission
+      raise ArgumentError, "Not an API contact" unless abuse_contact.contact_api?
+      raise ArgumentError, "API endpoint is blank" if abuse_contact.api_endpoint.blank?
+      raise ArgumentError, "Submission not in valid state" unless submission.status_pending? || submission.status_queued?
+    end
+
+    def report_case
+      @report_case ||= submission.case
+    end
+
+    def abuse_contact
+      @abuse_contact ||= submission.abuse_contact
+    end
+
+    def payload
+      @payload ||= submission.payload || submission.build_payload
+    end
+
+    def determine_handler
+      # Check for specific API type in web_form_fields (we reuse this for API config)
+      api_type = abuse_contact.web_form_fields&.dig("api_type")&.to_s&.downcase
+
+      if api_type.present? && API_HANDLERS.key?(api_type)
+        return API_HANDLERS[api_type]
+      end
+
+      # Try to detect from name
+      name = abuse_contact.name.downcase
+      return :submit_google_safe_browsing if name.include?("google") && name.include?("safe")
+      return :submit_phishtank if name.include?("phishtank")
+      return :submit_urlscan if name.include?("urlscan")
+
+      # Default to generic
+      :submit_generic
+    end
+
+    # =========================================
+    # Google Safe Browsing Submission
+    # https://developers.google.com/safe-browsing/v4/submission-api
+    # =========================================
+    def submit_google_safe_browsing
+      conn = connection(
+        base_url: "https://safebrowsing.googleapis.com",
+        headers: { "Content-Type" => "application/json" }
+      )
+
+      # Build threat entry
+      url_to_report = payload[:url] || "https://#{payload[:domain]}"
+
+      body = {
+        submission: {
+          uri: url_to_report
+        }
+      }
+
+      response = conn.post("/v4/threatHits?key=#{abuse_contact.api_key}", body)
+
+      submission.record_response!(
+        status_code: 200,
+        body: response.to_json,
+        reference: response.dig("submissionId")
+      )
+
+      true
+    rescue Faraday::ClientError => e
+      submission.record_response!(
+        status_code: e.response[:status],
+        body: e.response[:body].to_s
+      )
+      raise ServiceError, "Google Safe Browsing API error: #{e.response[:status]}"
+    end
+
+    # =========================================
+    # PhishTank Submission
+    # https://phishtank.org/api_info.php
+    # =========================================
+    def submit_phishtank
+      conn = connection(
+        base_url: "https://checkurl.phishtank.com",
+        headers: { "Content-Type" => "application/x-www-form-urlencoded" }
+      )
+
+      url_to_report = payload[:url] || "https://#{payload[:domain]}"
+
+      # PhishTank uses form-encoded data
+      response = conn.post("/checkurl/") do |req|
+        req.body = URI.encode_www_form(
+          url: Base64.strict_encode64(url_to_report),
+          format: "json",
+          app_key: abuse_contact.api_key
+        )
+      end
+
+      submission.record_response!(
+        status_code: 200,
+        body: response.to_json,
+        reference: response.dig("results", "phish_id")&.to_s
+      )
+
+      true
+    rescue Faraday::ClientError => e
+      submission.record_response!(
+        status_code: e.response[:status],
+        body: e.response[:body].to_s
+      )
+      raise ServiceError, "PhishTank API error: #{e.response[:status]}"
+    end
+
+    # =========================================
+    # URLScan.io Submission
+    # https://urlscan.io/docs/api/
+    # =========================================
+    def submit_urlscan
+      conn = connection(
+        base_url: "https://urlscan.io",
+        headers: {
+          "Content-Type" => "application/json",
+          "API-Key" => abuse_contact.api_key
+        }
+      )
+
+      url_to_report = payload[:url] || "https://#{payload[:domain]}"
+
+      body = {
+        url: url_to_report,
+        visibility: "unlisted",
+        tags: ["phishing", "phish.directory", report_case.case_number]
+      }
+
+      response = conn.post("/api/v1/scan/", body)
+
+      submission.record_response!(
+        status_code: 200,
+        body: response.to_json,
+        reference: response.dig("uuid")
+      )
+
+      true
+    rescue Faraday::ClientError => e
+      submission.record_response!(
+        status_code: e.response[:status],
+        body: e.response[:body].to_s
+      )
+      raise ServiceError, "URLScan API error: #{e.response[:status]}"
+    end
+
+    # =========================================
+    # Generic REST API Submission
+    # Uses configurable endpoint and payload mapping
+    # =========================================
+    def submit_generic
+      endpoint = abuse_contact.api_endpoint
+      api_key = abuse_contact.api_key
+
+      # Parse URL parts
+      uri = URI.parse(endpoint)
+      base_url = "#{uri.scheme}://#{uri.host}"
+      base_url += ":#{uri.port}" unless [80, 443].include?(uri.port)
+      path = uri.path.presence || "/"
+
+      # Build headers
+      headers = { "Content-Type" => "application/json" }
+
+      # Add API key - check config for where to put it
+      auth_config = abuse_contact.web_form_fields&.dig("auth") || {}
+      case auth_config["type"]
+      when "header"
+        headers[auth_config["header_name"] || "Authorization"] = api_key
+      when "bearer"
+        headers["Authorization"] = "Bearer #{api_key}"
+      when "query"
+        # Will be added to query params
+      else
+        # Default to Bearer token
+        headers["Authorization"] = "Bearer #{api_key}"
+      end
+
+      conn = connection(base_url: base_url, headers: headers)
+
+      # Build request body from payload
+      body = build_generic_body
+
+      response = conn.post(path, body)
+
+      # Try to extract a reference from the response
+      reference = extract_reference_from_response(response)
+
+      submission.record_response!(
+        status_code: 200,
+        body: response.to_json,
+        reference: reference
+      )
+
+      true
+    rescue Faraday::ClientError => e
+      submission.record_response!(
+        status_code: e.response[:status],
+        body: e.response[:body].to_s
+      )
+      raise ServiceError, "API error: #{e.response[:status]}"
+    end
+
+    def build_generic_body
+      # Use custom mapping if provided, otherwise use standard payload
+      mapping = abuse_contact.web_form_fields&.dig("payload_mapping")
+
+      if mapping.present?
+        mapping.transform_values do |key|
+          payload[key.to_sym] || payload[key.to_s]
+        end
+      else
+        {
+          url: payload[:url] || "https://#{payload[:domain]}",
+          domain: payload[:domain],
+          source: "phish.directory",
+          confidence: payload[:confidence],
+          classification: payload[:classification],
+          reference: payload[:case_reference],
+          detected_at: payload[:detected_at]
+        }.compact
+      end
+    end
+
+    def extract_reference_from_response(response)
+      return nil unless response.is_a?(Hash)
+
+      # Common reference field names
+      %w[id reference ticket_id submission_id uuid case_id].each do |key|
+        value = response[key] || response[key.to_sym]
+        return value.to_s if value.present?
+      end
+
+      nil
+    end
+
+    def handle_error(error)
+      log_error("Failed to submit API report", error)
+
+      submission.record_attempt!(error: error.message)
+
+      if error.is_a?(RateLimitError)
+        # Schedule retry after rate limit period
+        submission.update!(next_retry_at: error.retry_after.seconds.from_now)
+        log_info("Rate limited, will retry after #{error.retry_after}s")
+      elsif submission.retryable?
+        log_info("Submission will be retried (attempt #{submission.attempts}/#{submission.max_attempts})")
+      else
+        submission.fail!
+        log_error("Submission failed permanently after #{submission.attempts} attempts", error)
+      end
+    end
+
+    def log_error(message, error)
+      logger.error("[ApiSubmission] #{message}: #{error.message}")
+    end
+
+    def log_info(message)
+      logger.info("[ApiSubmission] #{message}")
+    end
+  end
+end
