@@ -341,8 +341,9 @@ module Report
     # Submits domains to FishFish via Lilly's yuri bot
     # =========================================
     def submit_fishfish
-      api_key = api_key_for(:fishfish)
-      raise ServiceError, "FishFish API key not configured" if api_key.blank?
+      # Yuri is the bot that submits to FishFish - check both credential keys
+      api_key = api_key_for(:yuri) || api_key_for(:fishfish)
+      raise ServiceError, "FishFish/Yuri API key not configured" if api_key.blank?
 
       conn = connection(
         base_url: "https://yuri.bots.lostluma.dev",
