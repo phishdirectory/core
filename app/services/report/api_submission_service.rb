@@ -8,6 +8,7 @@ module Report
 
     # Known API handlers
     API_HANDLERS = {
+      "cleandns" => :submit_cleandns,
       "google_safe_browsing" => :submit_google_safe_browsing,
       "phishtank" => :submit_phishtank,
       "urlscan" => :submit_urlscan,
@@ -73,12 +74,132 @@ module Report
 
       # Try to detect from name
       name = abuse_contact.name.downcase
+      return :submit_cleandns if name.include?("cleandns")
       return :submit_google_safe_browsing if name.include?("google") && name.include?("safe")
       return :submit_phishtank if name.include?("phishtank")
       return :submit_urlscan if name.include?("urlscan")
 
       # Default to generic
       :submit_generic
+    end
+
+    # =========================================
+    # CleanDNS Trusted Reporter API
+    # https://docs.cleandns.dev/
+    # Uses full XARF format for abuse reports
+    # =========================================
+    def submit_cleandns
+      conn = connection(
+        base_url: "https://api.cleandns.dev",
+        headers: {
+          "Content-Type" => "application/json",
+          "Authorization" => abuse_contact.api_key
+        }
+      )
+
+      # Build XARF-compliant report
+      xarf_report = build_cleandns_xarf_report
+
+      response = conn.post("/v2/abuse/report", xarf_report)
+
+      # Parse response to get report ID
+      report_id = nil
+      if response.is_a?(Hash)
+        # Single report response
+        if response["reports"]&.first&.dig("id")
+          report_id = response["reports"].first["id"]
+        elsif response["id"]
+          report_id = response["id"]
+        end
+
+        # Check for errors
+        if response["failure"]&.positive?
+          error_msg = response["reports"]&.find { |r| r["error"] }&.dig("error")
+          raise ServiceError, "CleanDNS rejected report: #{error_msg}" if error_msg
+        end
+      end
+
+      submission.record_response!(
+        status_code: 200,
+        body: response.to_json,
+        reference: report_id
+      )
+
+      log_info("CleanDNS report submitted with ID: #{report_id}")
+
+      # Schedule status check for 24 hours from now
+      Report::CheckCleandnsStatusJob.set(wait: 24.hours).perform_later(submission.id)
+
+      true
+    rescue Faraday::ClientError => e
+      submission.record_response!(
+        status_code: e.response[:status],
+        body: e.response[:body].to_s
+      )
+      raise ServiceError, "CleanDNS API error: #{e.response[:status]}"
+    end
+
+    # Build XARF-compliant report for CleanDNS /v2/abuse/report endpoint
+    # Based on: https://docs.cleandns.dev/
+    def build_cleandns_xarf_report
+      url_to_report = payload[:url] || "https://#{payload[:domain]}"
+      confidence_pct = (payload[:confidence].to_f * 100).round
+
+      # Build detection sources list for notes
+      sources_list = if payload[:sources].present?
+        payload[:sources].map { |s| s.is_a?(Hash) ? (s[:service] || s["service"]) : s.to_s }.join(", ")
+      else
+        "phish.directory aggregated threat intelligence"
+      end
+
+      {
+        "Disclosure" => true,
+        "Version" => 2,
+
+        # Reporter information
+        "ReporterInfo" => {
+          "ReporterOrg" => "phish.directory",
+          "ReporterOrgDomain" => "phish.directory",
+          "ReporterContactName" => "phish.directory Automated Reporting",
+          "ReporterContactEmail" => "reports@phish.directory"
+        },
+
+        # Report details
+        "Report" => {
+          "ReportClass" => "Content",
+          "ReportType" => "Phishing",
+          "ReporterNotes" => build_cleandns_notes(confidence_pct, sources_list),
+          "Ongoing" => true,
+          "Date" => format_cleandns_date(payload[:detected_at]),
+          "ThreatActor" => payload[:domain],
+          "SourceUrl" => url_to_report,
+
+          # Custom fields for additional phish.directory context
+          "Custom" => {
+            "CaseReference" => payload[:case_reference],
+            "Confidence" => confidence_pct,
+            "DetectionSources" => sources_list
+          }
+        }
+      }
+    end
+
+    def build_cleandns_notes(confidence_pct, sources_list)
+      "Phishing site detected by phish.directory with #{confidence_pct}% confidence. " \
+      "Detection sources: #{sources_list}. " \
+      "Case reference: #{payload[:case_reference]}. " \
+      "For case updates, contact #{report_case.email_address}."
+    end
+
+    def format_cleandns_date(date_string)
+      # CleanDNS expects format: "2021-11-12 01:23:45"
+      if date_string.present?
+        Time.parse(date_string).strftime("%Y-%m-%d %H:%M:%S")
+      else
+        Time.current.strftime("%Y-%m-%d %H:%M:%S")
+      end
+    rescue ArgumentError
+      Time.current.strftime("%Y-%m-%d %H:%M:%S")
     end
 
     # =========================================
@@ -303,6 +424,63 @@ module Report
 
     def log_info(message)
       logger.info("[ApiSubmission] #{message}")
+    end
+
+    # =========================================
+    # CleanDNS Status Checking
+    # https://docs.cleandns.dev/
+    # =========================================
+    class << self
+      # Check status of a CleanDNS submission
+      # Returns hash with :status, :tier, and :raw_response
+      def check_cleandns_status(submission)
+        return nil unless submission.submission_reference.present?
+
+        abuse_contact = submission.abuse_contact
+        return nil unless abuse_contact.api_key.present?
+
+        conn = Faraday.new(url: "https://api.cleandns.dev") do |f|
+          f.request :json
+          f.response :json
+          f.response :raise_error
+          f.headers["Authorization"] = abuse_contact.api_key
+          f.headers["Content-Type"] = "application/json"
+        end
+
+        response = conn.get("/v2/abuse/status/#{submission.submission_reference}")
+
+        {
+          id: response.body["id"],
+          tier: response.body["tier"],
+          status: response.body["status"] || [],
+          raw_response: response.body
+        }
+      rescue Faraday::Error => e
+        Rails.logger.error("[ApiSubmission] CleanDNS status check failed: #{e.message}")
+        nil
+      end
+
+      # Map CleanDNS status to our submission state
+      def cleandns_status_to_state(status_info)
+        return nil unless status_info
+
+        statuses = status_info[:status]
+        return nil if statuses.blank?
+
+        # Check for resolved indicators
+        resolved_keywords = ["Resolved", "Taken Down", "Suspended", "Removed"]
+        if statuses.any? { |s| resolved_keywords.any? { |kw| s.to_s.include?(kw) } }
+          return :resolved
+        end
+
+        # Check for acknowledged/in-progress indicators
+        acknowledged_keywords = ["With Target", "Escalated", "Processing", "Forwarded"]
+        if statuses.any? { |s| acknowledged_keywords.any? { |kw| s.to_s.include?(kw) } }
+          return :acknowledged
+        end
+
+        nil
+      end
     end
   end
 end

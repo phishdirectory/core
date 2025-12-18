@@ -90,9 +90,10 @@ module Seeds
 
       # Security Vendors (priority: 20) - These receive all high-confidence reports
       # API keys must be configured in credentials or via admin UI
-      { name: "Google Safe Browsing", contact_type: :security_vendor, method: :api, priority: 20, trusted_reporter: true, notes: "Requires API key. Reports URLs to Google's threat database." },
-      { name: "URLScan.io", contact_type: :security_vendor, method: :api, priority: 20, notes: "Requires API key. Scans and archives phishing pages." },
-      { name: "PhishTank", contact_type: :security_vendor, method: :api, priority: 20, notes: "Requires API key. Community-driven phishing database." },
+      { name: "CleanDNS", contact_type: :security_vendor, method: :api, api_endpoint: "https://api.cleandns.dev/v2/abuse/report", priority: 15, trusted_reporter: true, notes: "phish.directory is a CleanDNS trusted reporter. Uses XARF format. Forwards to NetBeacon for domains outside CleanDNS management." },
+      { name: "Google Safe Browsing", contact_type: :security_vendor, method: :api, api_endpoint: "https://safebrowsing.googleapis.com/v4/threatHits", priority: 20, trusted_reporter: true, notes: "Requires API key. Reports URLs to Google's threat database." },
+      { name: "URLScan.io", contact_type: :security_vendor, method: :api, api_endpoint: "https://urlscan.io/api/v1/scan/", priority: 20, notes: "Requires API key. Scans and archives phishing pages." },
+      { name: "PhishTank", contact_type: :security_vendor, method: :api, api_endpoint: "https://checkurl.phishtank.com/checkurl/", priority: 20, notes: "Requires API key. Community-driven phishing database." },
       { name: "APWG eCrime", contact_type: :security_vendor, method: :email, email: "reportphishing@apwg.org", priority: 20, trusted_reporter: true, notes: "Anti-Phishing Working Group. Industry consortium for fighting phishing." },
       { name: "Microsoft Security", contact_type: :security_vendor, method: :web_form, web_form_url: "https://www.microsoft.com/en-us/wdsi/support/report-unsafe-site", priority: 20, notes: "Reports to Microsoft Defender SmartScreen." }
     ].freeze
