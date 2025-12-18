@@ -15,6 +15,9 @@ module Report
 
       log_info("Submitting email report to #{abuse_contact.email}")
 
+      # Ensure submission is in queued state before attempting
+      submission.enqueue! if submission.status_pending?
+
       # Send the email
       mail = Report::AbuseReportMailer.with(
         submission: submission,

@@ -27,6 +27,9 @@ module Report
 
       log_info("Submitting API report to #{abuse_contact.name}")
 
+      # Ensure submission is in queued state before attempting
+      submission.enqueue! if submission.status_pending?
+
       # Determine which handler to use based on contact metadata or name
       handler = determine_handler
       success = send(handler)
@@ -37,6 +40,10 @@ module Report
       end
 
       success
+    rescue ArgumentError
+      # Validation errors should propagate up - don't call handle_error
+      # These indicate programmer error or invalid state, not submission failure
+      raise
     rescue ServiceError => e
       handle_error(e)
       false
@@ -72,7 +79,7 @@ module Report
     end
 
     def payload
-      @payload ||= submission.payload || submission.build_payload
+      @payload ||= (submission.payload || submission.build_payload).with_indifferent_access
     end
 
     def determine_handler
@@ -431,12 +438,19 @@ module Report
       response = conn.post("/api/v0/cases", body)
       response_body = response.body
 
+      # Parse JSON if not already parsed (content-type might not match middleware regex)
+      parsed_body = case response_body
+      when Hash then response_body
+      when String then JSON.parse(response_body) rescue {}
+      else {}
+      end
+
       # Extract case ID from response
-      case_id = response_body.is_a?(Hash) ? response_body["id"] : nil
+      case_id = parsed_body["id"]
 
       submission.record_response!(
         status_code: response.status,
-        body: response_body.to_json,
+        body: parsed_body.to_json,
         reference: case_id
       )
 
