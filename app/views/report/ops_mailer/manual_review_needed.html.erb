@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.5; color: #333; }
+    .header { background-color: #f59e0b; color: white; padding: 20px; }
+    .content { padding: 20px; }
+    .details { background-color: #f3f4f6; padding: 15px; border-radius: 4px; margin: 15px 0; }
+    code { background-color: #f3f4f6; padding: 2px 6px; border-radius: 3px; font-family: monospace; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Manual Review Required</h1>
+  </div>
+
+  <div class="content">
+    <p>A new phishing case requires manual review because no abuse contacts could be automatically identified.</p>
+
+    <div class="details">
+      <p><strong>Case Number:</strong> <code><%= @case.case_number %></code></p>
+      <p><strong>Domain:</strong> <code><%= @case.domain_name %></code></p>
+      <p><strong>Confidence:</strong> <%= (@case.confidence_at_creation * 100).round(1) %>%</p>
+      <p><strong>Created:</strong> <%= @case.created_at.strftime('%Y-%m-%d %H:%M UTC') %></p>
+      <% if @case.notes.present? %>
+        <p><strong>Notes:</strong> <%= @case.notes %></p>
+      <% end %>
+    </div>
+
+    <p>Please investigate this domain and add appropriate abuse contacts to the database.</p>
+
+    <p>
+      <a href="<%= Rails.application.routes.url_helpers.admin_report_case_url(@case) rescue '#' %>">View Case in Admin</a>
+    </p>
+  </div>
+</body>
+</html>

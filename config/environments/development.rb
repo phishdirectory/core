@@ -59,6 +59,14 @@ Rails.application.configure do
   config.active_job.queue_adapter = :solid_queue
   config.solid_queue.connects_to = { database: { writing: :queue } }
 
+  # Action Mailbox - use relay ingress for local testing
+  # Test at: /rails/conductor/action_mailbox/inbound_emails
+  config.action_mailbox.ingress = :postmark
+
+  # Allow ngrok hosts for local testing
+  config.hosts << /.*\.ngrok-free\.app/
+  config.hosts << /.*\.ngrok\.io/
+
   # Highlight code that triggered redirect in logs.
   config.action_dispatch.verbose_redirect_logs = true
 

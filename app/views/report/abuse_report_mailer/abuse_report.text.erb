@@ -1,0 +1,36 @@
+PHISHING REPORT
+===============
+
+Dear Abuse Team,
+
+We have detected a phishing site hosted on your infrastructure. We kindly request that you investigate and take appropriate action.
+
+DETAILS
+-------
+Domain: <%= @payload[:domain] %>
+<% if @payload[:url].present? %>
+Full URL: <%= @payload[:url] %>
+<% end %>
+Classification: <%= @payload[:classification]&.titleize %>
+Confidence: <%= (@payload[:confidence].to_f * 100).round(1) %>%
+Detected At: <%= @payload[:detected_at] %>
+Case Reference: <%= @payload[:case_reference] %>
+
+<% if @payload[:sources].present? %>
+DETECTION SOURCES
+-----------------
+This site was flagged by the following security services:
+<% @payload[:sources].each do |source| %>
+- <%= source[:service] || source['service'] %>
+<% end %>
+<% end %>
+
+Please reply to this email with any updates regarding your investigation.
+Include the case reference <%= @payload[:case_reference] %> in your response.
+
+Thank you for your cooperation in keeping the internet safe.
+
+---
+This is an automated report from phish.directory.
+For questions, contact us at <%= @payload[:reporter_email] %>.
+Case Reference: <%= @payload[:case_reference] %>

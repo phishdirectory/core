@@ -20,9 +20,23 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_17_233644) do
   # Custom types defined in this database.
   # Note that some types may not work with other database engines. Be careful if changing database.
   create_enum "access_level", ["owner", "superadmin", "admin", "trusted", "user"]
+  create_enum "report_case_status", ["pending", "submitting", "awaiting_response", "partially_resolved", "resolved", "escalated"]
+  create_enum "report_contact_method", ["email", "web_form", "api"]
+  create_enum "report_contact_type", ["registrar", "hosting", "security_vendor", "other"]
+  create_enum "report_email_direction", ["inbound", "outbound"]
+  create_enum "report_submission_status", ["pending", "queued", "sent", "acknowledged", "resolved", "failed", "skipped"]
   create_enum "service_key_status", ["active", "deprecated", "revoked"]
   create_enum "service_status", ["active", "suspended", "decommissioned"]
   create_enum "status", ["active", "suspended", "deactivated"]
+
+  create_table "action_mailbox_inbound_emails", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "message_checksum", null: false
+    t.string "message_id", null: false
+    t.integer "status", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["message_id", "message_checksum"], name: "index_action_mailbox_inbound_emails_uniqueness", unique: true
+  end
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
@@ -343,6 +357,136 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_17_233644) do
     t.index ["verdict_id"], name: "index_phish_urls_on_verdict_id"
   end
 
+  create_table "report_abuse_contacts", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.boolean "accepts_bulk", default: false, null: false
+    t.boolean "active", default: true, null: false
+    t.text "api_endpoint_ciphertext"
+    t.text "api_key_ciphertext"
+    t.float "avg_response_hours"
+    t.enum "contact_type", null: false, enum_type: "report_contact_type"
+    t.datetime "created_at", null: false
+    t.datetime "discarded_at"
+    t.string "email"
+    t.jsonb "ip_ranges", default: []
+    t.enum "method", null: false, enum_type: "report_contact_method"
+    t.string "name", null: false
+    t.jsonb "nameserver_patterns", default: []
+    t.string "organization"
+    t.integer "priority", default: 50, null: false
+    t.jsonb "registrar_patterns", default: []
+    t.integer "reports_acknowledged", default: 0, null: false
+    t.integer "reports_sent", default: 0, null: false
+    t.boolean "trusted_reporter", default: false, null: false
+    t.datetime "updated_at", null: false
+    t.jsonb "web_form_fields", default: {}
+    t.string "web_form_url"
+    t.index ["active"], name: "index_report_abuse_contacts_on_active"
+    t.index ["contact_type"], name: "index_report_abuse_contacts_on_contact_type"
+    t.index ["discarded_at"], name: "index_report_abuse_contacts_on_discarded_at"
+    t.index ["name"], name: "index_report_abuse_contacts_on_name"
+  end
+
+  create_table "report_case_emails", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "action_mailbox_inbound_email_id"
+    t.text "body_html"
+    t.text "body_text"
+    t.uuid "case_id", null: false
+    t.jsonb "cc_addresses", default: []
+    t.datetime "created_at", null: false
+    t.enum "direction", null: false, enum_type: "report_email_direction"
+    t.string "from_address"
+    t.jsonb "parsed_data", default: {}
+    t.datetime "received_at"
+    t.string "subject"
+    t.uuid "submission_id"
+    t.jsonb "to_addresses", default: []
+    t.datetime "updated_at", null: false
+    t.index ["action_mailbox_inbound_email_id"], name: "index_report_case_emails_on_action_mailbox_inbound_email_id"
+    t.index ["case_id"], name: "index_report_case_emails_on_case_id"
+    t.index ["direction"], name: "index_report_case_emails_on_direction"
+    t.index ["submission_id"], name: "index_report_case_emails_on_submission_id"
+  end
+
+  create_table "report_cases", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "case_number", null: false
+    t.float "confidence_at_creation", null: false
+    t.datetime "created_at", null: false
+    t.datetime "discarded_at"
+    t.jsonb "domain_info", default: {}
+    t.datetime "first_submitted_at"
+    t.datetime "last_activity_at"
+    t.text "notes"
+    t.uuid "reportable_id", null: false
+    t.string "reportable_type", null: false
+    t.boolean "requires_manual_review", default: false, null: false
+    t.datetime "resolved_at"
+    t.enum "status", default: "pending", null: false, enum_type: "report_case_status"
+    t.integer "submissions_count", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.uuid "verdict_snapshot_id", null: false
+    t.index ["case_number"], name: "index_report_cases_on_case_number", unique: true
+    t.index ["discarded_at"], name: "index_report_cases_on_discarded_at"
+    t.index ["reportable_type", "reportable_id"], name: "index_report_cases_on_reportable_type_and_reportable_id"
+    t.index ["requires_manual_review"], name: "index_report_cases_on_requires_manual_review"
+    t.index ["status"], name: "index_report_cases_on_status"
+  end
+
+  create_table "report_domain_lookups", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.jsonb "a_records", default: []
+    t.datetime "created_at", null: false
+    t.string "domain", null: false
+    t.datetime "domain_created_at"
+    t.datetime "domain_expires_at"
+    t.datetime "expires_at"
+    t.string "hosting_provider"
+    t.datetime "looked_up_at"
+    t.string "lookup_source"
+    t.uuid "matched_hosting_contact_id"
+    t.uuid "matched_registrar_contact_id"
+    t.jsonb "nameservers", default: []
+    t.jsonb "raw_rdap", default: {}
+    t.jsonb "raw_whois", default: {}
+    t.string "registrar_abuse_email"
+    t.string "registrar_abuse_phone"
+    t.string "registrar_iana_id"
+    t.string "registrar_name"
+    t.datetime "updated_at", null: false
+    t.index ["domain"], name: "index_report_domain_lookups_on_domain", unique: true
+    t.index ["expires_at"], name: "index_report_domain_lookups_on_expires_at"
+    t.index ["registrar_iana_id"], name: "index_report_domain_lookups_on_registrar_iana_id"
+  end
+
+  create_table "report_submissions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "abuse_contact_id", null: false
+    t.datetime "acknowledged_at"
+    t.integer "attempts", default: 0, null: false
+    t.uuid "case_id", null: false
+    t.datetime "created_at", null: false
+    t.uuid "depends_on_submission_id"
+    t.datetime "discarded_at"
+    t.datetime "last_attempt_at"
+    t.text "last_error"
+    t.integer "max_attempts", default: 5, null: false
+    t.datetime "next_retry_at"
+    t.jsonb "payload", default: {}
+    t.string "payload_hash"
+    t.datetime "queued_at"
+    t.datetime "resolved_at"
+    t.jsonb "response", default: {}
+    t.text "response_body"
+    t.integer "response_status_code"
+    t.datetime "sent_at"
+    t.enum "status", default: "pending", null: false, enum_type: "report_submission_status"
+    t.string "submission_reference"
+    t.datetime "updated_at", null: false
+    t.index ["abuse_contact_id"], name: "index_report_submissions_on_abuse_contact_id"
+    t.index ["case_id", "abuse_contact_id"], name: "index_report_submissions_on_case_id_and_abuse_contact_id", unique: true
+    t.index ["case_id"], name: "index_report_submissions_on_case_id"
+    t.index ["depends_on_submission_id"], name: "index_report_submissions_on_depends_on_submission_id"
+    t.index ["discarded_at"], name: "index_report_submissions_on_discarded_at"
+    t.index ["status"], name: "index_report_submissions_on_status"
+  end
+
   create_table "rollups", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.jsonb "dimensions", default: {}, null: false
     t.string "interval", null: false
@@ -531,6 +675,15 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_17_233644) do
   add_foreign_key "oauth_access_tokens", "users", column: "resource_owner_id"
   add_foreign_key "phish_domains", "verdicts"
   add_foreign_key "phish_urls", "verdicts"
+  add_foreign_key "report_case_emails", "action_mailbox_inbound_emails"
+  add_foreign_key "report_case_emails", "report_cases", column: "case_id"
+  add_foreign_key "report_case_emails", "report_submissions", column: "submission_id"
+  add_foreign_key "report_cases", "verdicts", column: "verdict_snapshot_id"
+  add_foreign_key "report_domain_lookups", "report_abuse_contacts", column: "matched_hosting_contact_id"
+  add_foreign_key "report_domain_lookups", "report_abuse_contacts", column: "matched_registrar_contact_id"
+  add_foreign_key "report_submissions", "report_abuse_contacts", column: "abuse_contact_id"
+  add_foreign_key "report_submissions", "report_cases", column: "case_id"
+  add_foreign_key "report_submissions", "report_submissions", column: "depends_on_submission_id"
   add_foreign_key "service_key_usages", "service_keys", column: "key_id"
   add_foreign_key "service_key_usages", "users", on_delete: :nullify
   add_foreign_key "service_keys", "services"

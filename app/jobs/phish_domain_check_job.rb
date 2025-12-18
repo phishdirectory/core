@@ -36,6 +36,11 @@ class PhishDomainCheckJob < ApplicationJob
     # Notify webhooks if phishing detected
     if result[:verdict] == "phishing"
       WebhookService.notify_domain_verdict(domain, verdict)
+
+      # Trigger automated reporting if enabled
+      if Flipper.enabled?(:auto_reporting)
+        Report::CreateCaseJob.perform_later("Phish::Domain", domain.id)
+      end
     end
 
     result

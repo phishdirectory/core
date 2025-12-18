@@ -139,6 +139,23 @@ Rails.application.routes.draw do
     resources :domains, controller: "phish_domains", only: [:index, :show]
     resources :urls, controller: "phish_urls", only: [:index, :show]
 
+    # Report/Abuse system
+    namespace :report do
+      resources :abuse_contacts do
+        collection do
+          get :import
+          post :import, action: :perform_import
+        end
+      end
+      resources :cases, only: [:index, :show] do
+        member do
+          post :retry_submission
+          post :escalate
+          post :resolve
+        end
+      end
+    end
+
     # Stop impersonation
     delete "stop_impersonating", to: "impersonation#destroy", as: :stop_impersonating
   end

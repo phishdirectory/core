@@ -58,6 +58,13 @@
         </div>
 
         <div class="mb-6">
+          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-2">Features</div>
+          <%= link_to docs_page_path(page: 'reporting'), class: "flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all #{params[:page] == 'reporting' ? 'bg-cyan-accent/15 text-cyan-accent' : 'text-slate-400 hover:bg-pd-tertiary hover:text-slate-100'}" do %>
+            <span>Automated Reporting</span>
+          <% end %>
+        </div>
+
+        <div class="mb-6">
           <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-2">Resources</div>
           <%= link_to docs_page_path(page: 'changelog'), class: "flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all #{params[:page] == 'changelog' ? 'bg-cyan-accent/15 text-cyan-accent' : 'text-slate-400 hover:bg-pd-tertiary hover:text-slate-100'}" do %>
             <span>Changelog</span>

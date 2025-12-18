@@ -1,0 +1,14 @@
+MANUAL REVIEW REQUIRED
+======================
+
+A new phishing case requires manual review because no abuse contacts could be automatically identified.
+
+Case Number: <%= @case.case_number %>
+Domain: <%= @case.domain_name %>
+Confidence: <%= (@case.confidence_at_creation * 100).round(1) %>%
+Created: <%= @case.created_at.strftime('%Y-%m-%d %H:%M UTC') %>
+<% if @case.notes.present? %>
+Notes: <%= @case.notes %>
+<% end %>
+
+Please investigate this domain and add appropriate abuse contacts to the database.

@@ -1,0 +1,78 @@
+<% content_for :title, "Import Abuse Contacts" %>
+
+<header class="px-10 py-6 border-b border-slate-700/20 flex items-center justify-between bg-pd-secondary sticky top-0 z-40">
+  <div>
+    <h1 class="text-2xl font-bold text-slate-100">Import Abuse Contacts</h1>
+    <p class="text-sm text-slate-500 mt-1">Upload a CSV file to import or update contacts</p>
+  </div>
+  <div class="flex items-center gap-3">
+    <%= link_to "&larr; Back to Contacts".html_safe, admin_report_abuse_contacts_path, class: "px-4 py-2 text-sm font-medium text-slate-400 bg-pd-elevated border border-slate-700/30 rounded-xl hover:bg-pd-hover transition-all" %>
+  </div>
+</header>
+
+<div class="p-8 px-10">
+  <div class="max-w-2xl">
+    <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl p-8">
+      <%= form_with url: import_admin_report_abuse_contacts_path, method: :post, multipart: true, class: "space-y-6" do |f| %>
+        <div>
+          <label class="block text-sm font-semibold text-slate-300 mb-2">CSV File</label>
+          <%= f.file_field :file, accept: ".csv", class: "block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-cyan-accent file:text-pd-primary hover:file:bg-cyan-accent/90 cursor-pointer" %>
+          <p class="text-xs text-slate-500 mt-2">
+            Upload a CSV file with columns: Name, Type, Report Method, Report Email, Report Contact Form, Notes
+          </p>
+        </div>
+
+        <div class="bg-pd-elevated border border-slate-700/30 rounded-xl p-4">
+          <h4 class="text-sm font-semibold text-slate-300 mb-2">Expected CSV Format</h4>
+          <pre class="text-xs text-slate-500 overflow-x-auto">Name,Type,Report Method,Report Email,Report Contact Form,Notes
+Cloudflare,Registrar,Contact Form,,https://abuse.cloudflare.com/,
+Google Safe Browsing,Other,Contact Form,,https://safebrowsing.google.com/,</pre>
+        </div>
+
+        <div class="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4">
+          <h4 class="text-sm font-semibold text-amber-400 mb-1">Smart Merge</h4>
+          <p class="text-xs text-slate-400">
+            Existing contacts with the same name will be updated with new non-empty values.
+            Blank fields in the CSV will not overwrite existing data.
+          </p>
+        </div>
+
+        <div class="flex justify-end">
+          <%= f.submit "Import Contacts", class: "px-6 py-2.5 text-sm font-semibold text-pd-primary bg-cyan-accent rounded-xl hover:shadow-[0_0_20px_rgba(63,196,224,0.4)] transition-all cursor-pointer" %>
+        </div>
+      <% end %>
+    </div>
+
+    <% if @import_stats.present? %>
+      <div class="mt-8 bg-pd-secondary border border-slate-700/20 rounded-2xl p-8">
+        <h3 class="text-lg font-bold text-slate-100 mb-4">Import Results</h3>
+
+        <div class="grid grid-cols-3 gap-4 mb-6">
+          <div class="bg-pd-elevated border border-slate-700/30 rounded-xl p-4 text-center">
+            <div class="text-2xl font-bold text-emerald-400"><%= @import_stats[:created] %></div>
+            <div class="text-xs text-slate-500 uppercase tracking-wide">Created</div>
+          </div>
+          <div class="bg-pd-elevated border border-slate-700/30 rounded-xl p-4 text-center">
+            <div class="text-2xl font-bold text-blue-400"><%= @import_stats[:updated] %></div>
+            <div class="text-xs text-slate-500 uppercase tracking-wide">Updated</div>
+          </div>
+          <div class="bg-pd-elevated border border-slate-700/30 rounded-xl p-4 text-center">
+            <div class="text-2xl font-bold text-slate-400"><%= @import_stats[:skipped] %></div>
+            <div class="text-xs text-slate-500 uppercase tracking-wide">Skipped</div>
+          </div>
+        </div>
+
+        <% if @import_stats[:errors].any? %>
+          <div class="bg-red-500/10 border border-red-500/20 rounded-xl p-4">
+            <h4 class="text-sm font-semibold text-red-400 mb-2">Errors (<%= @import_stats[:errors].length %>)</h4>
+            <ul class="text-xs text-slate-400 space-y-1 max-h-40 overflow-y-auto">
+              <% @import_stats[:errors].each do |error| %>
+                <li>Line <%= error[:line] %>: <%= error[:name] %> - <%= error[:error] %></li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>

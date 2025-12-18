@@ -38,7 +38,12 @@ Flipper.register(:beta_users) do |actor, context|
   actor.respond_to?(:id) && (actor.id.hash % 100) < 10
 end
 
-# Initialize default feature flags (run once in production)
-# Rails.application.config.after_initialize do
-#   Flipper.enable(:new_dashboard) if Flipper.exist?(:new_dashboard)
-# end
+# Initialize default feature flags
+Rails.application.config.after_initialize do
+  # Auto-reporting: Enable automated abuse reporting when phishing is detected
+  # Start disabled - enable via admin UI when ready
+  unless Flipper.exist?(:auto_reporting)
+    Flipper.add(:auto_reporting)
+    # Flipper.disable(:auto_reporting) # Disabled by default
+  end
+end

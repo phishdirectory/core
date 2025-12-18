@@ -1,0 +1,157 @@
+<% content_for :title, "Automated Reporting" %>
+
+<div class="prose prose-invert max-w-none">
+  <h1 class="text-4xl font-bold text-slate-100 mb-4">Automated Reporting</h1>
+  <p class="text-xl text-slate-400 mb-8">
+    How phish.directory automatically reports phishing sites to registrars, hosting providers, and security vendors.
+  </p>
+
+  <div class="bg-cyan-500/10 border border-cyan-500/20 rounded-xl p-6 not-prose mb-8">
+    <div class="flex items-start gap-3">
+      <span class="text-cyan-accent text-xl">ℹ️</span>
+      <div>
+        <h4 class="font-semibold text-cyan-accent mb-1">Automatic Protection</h4>
+        <p class="text-sm text-slate-300">When our system detects a phishing domain with high confidence, we automatically file abuse reports to help get it taken down faster.</p>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-12 mb-4">How It Works</h2>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 not-prose mb-8">
+    <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl p-6">
+      <div class="text-3xl mb-3">1️⃣</div>
+      <h3 class="text-lg font-semibold text-slate-100 mb-2">Detection</h3>
+      <p class="text-sm text-slate-400">Our API aggregates threat intelligence from multiple sources and assigns a confidence score to each domain.</p>
+    </div>
+
+    <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl p-6">
+      <div class="text-3xl mb-3">2️⃣</div>
+      <h3 class="text-lg font-semibold text-slate-100 mb-2">Case Creation</h3>
+      <p class="text-sm text-slate-400">When confidence exceeds our threshold, we automatically create a case and identify the appropriate abuse contacts.</p>
+    </div>
+
+    <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl p-6">
+      <div class="text-3xl mb-3">3️⃣</div>
+      <h3 class="text-lg font-semibold text-slate-100 mb-2">Reporting</h3>
+      <p class="text-sm text-slate-400">We submit reports to registrars, hosting providers, and security vendors, then track responses until resolution.</p>
+    </div>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-12 mb-4">What We Report</h2>
+
+  <p class="text-slate-300 mb-4">
+    Each abuse report includes comprehensive evidence to help recipients take action quickly:
+  </p>
+
+  <ul class="text-slate-300 space-y-2 mb-8">
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">•</span>
+      <span><strong class="text-slate-100">Domain/URL</strong> — The specific phishing resource</span>
+    </li>
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">•</span>
+      <span><strong class="text-slate-100">Confidence Score</strong> — Our assessment of maliciousness</span>
+    </li>
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">•</span>
+      <span><strong class="text-slate-100">Detection Sources</strong> — Which threat feeds flagged the domain</span>
+    </li>
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">•</span>
+      <span><strong class="text-slate-100">WHOIS/RDAP Data</strong> — Registration and hosting information</span>
+    </li>
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">•</span>
+      <span><strong class="text-slate-100">Timestamps</strong> — When the threat was first and last detected</span>
+    </li>
+  </ul>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-12 mb-4">Who Receives Reports</h2>
+
+  <p class="text-slate-300 mb-4">
+    We maintain a database of abuse contacts and automatically route reports to the right recipients:
+  </p>
+
+  <div class="overflow-x-auto not-prose mb-8">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="border-b border-slate-700/30">
+          <th class="text-left py-3 px-4 text-slate-400 font-semibold">Contact Type</th>
+          <th class="text-left py-3 px-4 text-slate-400 font-semibold">Examples</th>
+          <th class="text-left py-3 px-4 text-slate-400 font-semibold">Purpose</th>
+        </tr>
+      </thead>
+      <tbody class="text-slate-300">
+        <tr class="border-b border-slate-700/20">
+          <td class="py-3 px-4 font-medium text-slate-100">Registrars</td>
+          <td class="py-3 px-4">GoDaddy, Namecheap, Cloudflare</td>
+          <td class="py-3 px-4">Suspend or delete the domain registration</td>
+        </tr>
+        <tr class="border-b border-slate-700/20">
+          <td class="py-3 px-4 font-medium text-slate-100">Hosting Providers</td>
+          <td class="py-3 px-4">AWS, DigitalOcean, Hetzner</td>
+          <td class="py-3 px-4">Take down the phishing content</td>
+        </tr>
+        <tr class="border-b border-slate-700/20">
+          <td class="py-3 px-4 font-medium text-slate-100">Security Vendors</td>
+          <td class="py-3 px-4">Google Safe Browsing, Microsoft, APWG</td>
+          <td class="py-3 px-4">Add to blocklists and warn users</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-12 mb-4">Case Tracking</h2>
+
+  <p class="text-slate-300 mb-4">
+    Every report is assigned a unique case number (e.g., <code class="bg-pd-tertiary px-2 py-0.5 rounded text-cyan-accent">case_t7fvupxzpt2a0b</code>) for tracking.
+    We monitor email replies and update case status automatically when providers acknowledge or resolve reports.
+  </p>
+
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 not-prose mb-8">
+    <div class="bg-pd-secondary border border-slate-700/20 rounded-xl p-4 text-center">
+      <div class="text-slate-500 text-xs uppercase tracking-wide mb-1">Pending</div>
+      <div class="text-slate-400 font-semibold">Queued</div>
+    </div>
+    <div class="bg-pd-secondary border border-slate-700/20 rounded-xl p-4 text-center">
+      <div class="text-blue-400 text-xs uppercase tracking-wide mb-1">Submitting</div>
+      <div class="text-blue-400 font-semibold">In Progress</div>
+    </div>
+    <div class="bg-pd-secondary border border-slate-700/20 rounded-xl p-4 text-center">
+      <div class="text-amber-400 text-xs uppercase tracking-wide mb-1">Awaiting</div>
+      <div class="text-amber-400 font-semibold">Response</div>
+    </div>
+    <div class="bg-pd-secondary border border-slate-700/20 rounded-xl p-4 text-center">
+      <div class="text-emerald-400 text-xs uppercase tracking-wide mb-1">Resolved</div>
+      <div class="text-emerald-400 font-semibold">Taken Down</div>
+    </div>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-12 mb-4">Trusted Reporter Status</h2>
+
+  <p class="text-slate-300 mb-4">
+    phish.directory has established trusted reporter relationships with several providers, which means:
+  </p>
+
+  <ul class="text-slate-300 space-y-2 mb-8">
+    <li class="flex items-start gap-3">
+      <span class="text-emerald-400 mt-1">✓</span>
+      <span>Faster response times on abuse reports</span>
+    </li>
+    <li class="flex items-start gap-3">
+      <span class="text-emerald-400 mt-1">✓</span>
+      <span>Higher priority handling</span>
+    </li>
+    <li class="flex items-start gap-3">
+      <span class="text-emerald-400 mt-1">✓</span>
+      <span>Direct communication channels</span>
+    </li>
+  </ul>
+
+  <div class="bg-pd-secondary border border-slate-700/20 rounded-xl p-6 not-prose">
+    <h4 class="font-semibold text-slate-100 mb-2">Report a Phishing Site</h4>
+    <p class="text-sm text-slate-400 mb-4">Want to report a phishing site you've discovered? Use our API to check and report domains.</p>
+    <%= link_to "View API Docs", docs_page_path(page: 'endpoints'), class: "px-4 py-2 bg-cyan-accent text-pd-primary font-semibold rounded-xl text-sm hover:shadow-[0_0_20px_rgba(63,196,224,0.4)] transition-all inline-block" %>
+  </div>
+</div>

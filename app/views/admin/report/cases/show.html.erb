@@ -1,0 +1,182 @@
+<% content_for :title, "Case #{@case.case_number}" %>
+
+<header class="px-10 py-6 border-b border-slate-700/20 flex items-center justify-between bg-pd-secondary sticky top-0 z-40">
+  <div>
+    <h1 class="text-2xl font-bold text-slate-100">Case <%= @case.case_number %></h1>
+    <p class="text-sm text-slate-500 mt-1">
+      <%= @case.domain_name %> &middot;
+      <%= @case.status.titleize %> &middot;
+      <span class="font-mono"><%= @case.public_id %></span>
+    </p>
+  </div>
+  <div class="flex items-center gap-3">
+    <% if @case.may_escalate? %>
+      <%= button_to "Escalate", escalate_admin_report_case_path(@case), method: :post, class: "px-4 py-2 text-sm font-medium text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-xl hover:bg-amber-500/20 transition-all" %>
+    <% end %>
+    <% if @case.may_resolve? %>
+      <%= button_to "Mark Resolved", resolve_admin_report_case_path(@case), method: :post, class: "px-4 py-2 text-sm font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-xl hover:bg-emerald-500/20 transition-all" %>
+    <% end %>
+    <%= link_to "&larr; Back".html_safe, admin_report_cases_path, class: "px-4 py-2 text-sm font-medium text-slate-400 bg-pd-elevated border border-slate-700/30 rounded-xl hover:bg-pd-hover transition-all" %>
+  </div>
+</header>
+
+<div class="p-8 px-10">
+  <% if @case.requires_manual_review? %>
+    <div class="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 mb-6">
+      <h4 class="text-sm font-semibold text-amber-400 mb-1">Manual Review Required</h4>
+      <p class="text-sm text-slate-400">No abuse contacts could be automatically identified. Please investigate and add appropriate contacts.</p>
+    </div>
+  <% end %>
+
+  <div class="grid grid-cols-4 gap-6 mb-8">
+    <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl p-6">
+      <div class="text-sm text-slate-500 mb-1">Status</div>
+      <% status_colors = { "pending" => "text-slate-400", "submitting" => "text-blue-400", "awaiting_response" => "text-amber-400", "partially_resolved" => "text-emerald-400", "resolved" => "text-emerald-500", "escalated" => "text-red-400" } %>
+      <div class="text-2xl font-bold <%= status_colors[@case.status] %>"><%= @case.status.titleize %></div>
+    </div>
+    <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl p-6">
+      <div class="text-sm text-slate-500 mb-1">Confidence</div>
+      <div class="text-2xl font-bold text-cyan-accent"><%= (@case.confidence_at_creation * 100).round(1) %>%</div>
+    </div>
+    <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl p-6">
+      <div class="text-sm text-slate-500 mb-1">Submissions</div>
+      <div class="text-2xl font-bold text-slate-100"><%= @case.submissions_count %></div>
+    </div>
+    <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl p-6">
+      <div class="text-sm text-slate-500 mb-1">Created</div>
+      <div class="text-lg font-semibold text-slate-300"><%= @case.created_at.strftime("%b %d, %Y") %></div>
+      <div class="text-xs text-slate-500"><%= time_ago_in_words(@case.created_at) %> ago</div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 gap-6 mb-8">
+    <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl p-6">
+      <h3 class="text-lg font-semibold text-slate-100 mb-4">Domain Details</h3>
+      <dl class="space-y-3 text-sm">
+        <div class="flex justify-between">
+          <dt class="text-slate-500">Domain</dt>
+          <dd class="text-slate-300 font-mono"><%= @case.domain_name %></dd>
+        </div>
+        <% if @case.url_value.present? %>
+          <div class="flex justify-between">
+            <dt class="text-slate-500">URL</dt>
+            <dd class="text-slate-300 font-mono text-xs truncate max-w-xs"><%= @case.url_value %></dd>
+          </div>
+        <% end %>
+        <div class="flex justify-between">
+          <dt class="text-slate-500">Type</dt>
+          <dd class="text-slate-300"><%= @case.reportable_type.demodulize %></dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-slate-500">Email CC</dt>
+          <dd class="text-slate-300 font-mono text-xs"><%= @case.email_address %></dd>
+        </div>
+      </dl>
+    </div>
+
+    <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl p-6">
+      <h3 class="text-lg font-semibold text-slate-100 mb-4">WHOIS/RDAP Info</h3>
+      <% if @case.domain_info.present? %>
+        <dl class="space-y-3 text-sm">
+          <% @case.domain_info.each do |key, value| %>
+            <% next if value.blank? %>
+            <div class="flex justify-between">
+              <dt class="text-slate-500"><%= key.to_s.humanize %></dt>
+              <dd class="text-slate-300 text-xs truncate max-w-xs"><%= value.is_a?(Array) ? value.join(", ") : value %></dd>
+            </div>
+          <% end %>
+        </dl>
+      <% else %>
+        <p class="text-sm text-slate-500 italic">No domain info available</p>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="mb-8">
+    <h3 class="text-lg font-semibold text-slate-100 mb-4">Submissions</h3>
+    <% if @submissions.any? %>
+      <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl overflow-hidden">
+        <table class="w-full">
+          <thead>
+            <tr>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Contact</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Method</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Status</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Attempts</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Sent</th>
+              <th class="px-6 py-4 text-right text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @submissions.each do |submission| %>
+              <tr class="hover:bg-pd-tertiary transition-colors">
+                <td class="px-6 py-4 border-b border-slate-700/20">
+                  <%= link_to submission.abuse_contact.name, admin_report_abuse_contact_path(submission.abuse_contact), class: "text-cyan-accent hover:underline" %>
+                </td>
+                <td class="px-6 py-4 border-b border-slate-700/20 text-slate-400 text-sm">
+                  <%= submission.abuse_contact.method.titleize %>
+                </td>
+                <td class="px-6 py-4 border-b border-slate-700/20">
+                  <% sub_colors = { "pending" => "bg-slate-600/30 text-slate-400", "queued" => "bg-blue-500/15 text-blue-400", "sent" => "bg-cyan-500/15 text-cyan-400", "acknowledged" => "bg-emerald-500/15 text-emerald-400", "resolved" => "bg-emerald-500/15 text-emerald-500", "failed" => "bg-red-500/15 text-red-400", "skipped" => "bg-slate-600/30 text-slate-500" } %>
+                  <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold <%= sub_colors[submission.status] %>">
+                    <%= submission.status.titleize %>
+                  </span>
+                  <% if submission.submission_reference.present? %>
+                    <div class="text-xs text-slate-500 mt-1 font-mono">Ref: <%= submission.submission_reference %></div>
+                  <% end %>
+                </td>
+                <td class="px-6 py-4 border-b border-slate-700/20 text-slate-400 text-sm font-mono">
+                  <%= submission.attempts %>/<%= submission.max_attempts %>
+                </td>
+                <td class="px-6 py-4 border-b border-slate-700/20 text-slate-400 text-sm">
+                  <%= submission.sent_at ? time_ago_in_words(submission.sent_at) + " ago" : "Not sent" %>
+                </td>
+                <td class="px-6 py-4 border-b border-slate-700/20 text-right">
+                  <% if submission.status_failed? %>
+                    <%= button_to "Retry", retry_submission_admin_report_case_path(@case, submission_id: submission.public_id), method: :post, class: "px-3 py-1.5 text-xs font-medium text-slate-400 bg-pd-elevated border border-slate-700/30 rounded-lg hover:bg-pd-hover transition-all" %>
+                  <% end %>
+                </td>
+              </tr>
+              <% if submission.last_error.present? %>
+                <tr>
+                  <td colspan="6" class="px-6 py-2 border-b border-slate-700/20 bg-red-500/5">
+                    <div class="text-xs text-red-400">Error: <%= submission.last_error %></div>
+                  </td>
+                </tr>
+              <% end %>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl p-8 text-center">
+        <p class="text-slate-500">No submissions created yet.</p>
+      </div>
+    <% end %>
+  </div>
+
+  <% if @emails.any? %>
+    <div>
+      <h3 class="text-lg font-semibold text-slate-100 mb-4">Email History</h3>
+      <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl overflow-hidden">
+        <div class="divide-y divide-slate-700/20">
+          <% @emails.each do |email| %>
+            <div class="p-4 hover:bg-pd-tertiary transition-colors">
+              <div class="flex items-center justify-between mb-2">
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold <%= email.direction_inbound? ? 'bg-emerald-500/15 text-emerald-400' : 'bg-blue-500/15 text-blue-400' %>">
+                  <%= email.direction.titleize %>
+                </span>
+                <span class="text-xs text-slate-500"><%= email.received_at&.strftime("%b %d, %Y %H:%M") %></span>
+              </div>
+              <div class="text-sm text-slate-300 font-medium"><%= email.subject %></div>
+              <div class="text-xs text-slate-500 mt-1">From: <%= email.from_address %></div>
+              <% if email.body_preview.present? %>
+                <div class="text-xs text-slate-400 mt-2 line-clamp-2"><%= email.body_preview %></div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
