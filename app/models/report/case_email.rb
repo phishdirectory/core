@@ -14,6 +14,9 @@ class Report::CaseEmail < ApplicationRecord
              class_name: "ActionMailbox::InboundEmail",
              optional: true
 
+  # Attachments - preserved before Action Mailbox incineration
+  has_many_attached :attachments
+
   # Enum
   enum :direction, {
     inbound: "inbound",
@@ -28,6 +31,7 @@ class Report::CaseEmail < ApplicationRecord
   scope :outbound, -> { where(direction: "outbound") }
   scope :recent, -> { order(received_at: :desc, created_at: :desc) }
   scope :for_submission, ->(submission_id) { where(submission_id: submission_id) }
+  scope :with_attachments, -> { joins(:attachments_attachments).distinct }
 
   # Callbacks
   before_validation :set_received_at, on: :create
@@ -37,6 +41,21 @@ class Report::CaseEmail < ApplicationRecord
   # Check if this is an inbound reply
   def reply?
     direction_inbound? && from_address.present?
+  end
+
+  # Check if email has attachments
+  def has_attachments?
+    attachments.attached?
+  end
+
+  # Get message ID from parsed headers
+  def message_id
+    parsed_data&.dig("message_id")
+  end
+
+  # Get the original email this is replying to
+  def in_reply_to
+    parsed_data&.dig("in_reply_to")
   end
 
   # Get a preview of the body
@@ -92,6 +111,7 @@ class Report::CaseEmail < ApplicationRecord
   end
 
   # Create from an inbound Action Mailbox email
+  # Preserves all content before Action Mailbox incineration
   def self.create_from_inbound!(case_record:, submission: nil, inbound_email:)
     mail = inbound_email.mail
 
@@ -104,13 +124,58 @@ class Report::CaseEmail < ApplicationRecord
       to_addresses: Array(mail.to),
       cc_addresses: Array(mail.cc),
       subject: mail.subject,
-      body_text: mail.text_part&.body&.decoded || mail.body&.decoded,
+      body_text: extract_text_body(mail),
       body_html: mail.html_part&.body&.decoded,
-      received_at: mail.date || Time.current
+      received_at: mail.date || Time.current,
+      parsed_data: extract_headers(mail)
     )
+
+    # Preserve attachments before incineration
+    preserve_attachments!(email, mail)
 
     email.update_submission_reference!
     email
+  end
+
+  # Extract text body, handling multipart and plain emails
+  def self.extract_text_body(mail)
+    if mail.multipart?
+      mail.text_part&.body&.decoded
+    else
+      mail.body&.decoded if mail.content_type&.start_with?("text/plain")
+    end
+  end
+
+  # Extract important headers for reference
+  def self.extract_headers(mail)
+    {
+      message_id: mail.message_id,
+      in_reply_to: mail.in_reply_to,
+      references: mail.references,
+      reply_to: mail.reply_to&.first,
+      return_path: mail.return_path,
+      content_type: mail.content_type,
+      x_mailer: mail.header["X-Mailer"]&.to_s,
+      received_spf: mail.header["Received-SPF"]&.to_s
+    }.compact
+  end
+
+  # Preserve attachments to Active Storage
+  def self.preserve_attachments!(email, mail)
+    return unless mail.attachments.any?
+
+    mail.attachments.each do |attachment|
+      # Skip inline images that are part of HTML body
+      next if attachment.content_disposition&.include?("inline") && attachment.content_type&.start_with?("image/")
+
+      email.attachments.attach(
+        io: StringIO.new(attachment.body.decoded),
+        filename: attachment.filename.presence || "attachment",
+        content_type: attachment.content_type&.split(";")&.first || "application/octet-stream"
+      )
+    rescue => e
+      Rails.logger.warn("[CaseEmail] Failed to preserve attachment #{attachment.filename}: #{e.message}")
+    end
   end
 
   private
