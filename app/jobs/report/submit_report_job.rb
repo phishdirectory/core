@@ -5,8 +5,14 @@ module Report
   class SubmitReportJob < ApplicationJob
     queue_as QUEUE_DEFAULT
 
-    # Retry with exponential backoff
-    retry_on StandardError, wait: :polynomially_longer, attempts: 5
+    # Don't use ActiveJob retry - we manage retries ourselves via submission state
+    discard_on StandardError do |job, error|
+      submission = Report::Submission.find_by(id: job.arguments.first)
+      if submission
+        Rails.logger.error("[Report::SubmitReportJob] Submission #{submission.public_id} failed: #{error.message}")
+        schedule_retry(submission, error)
+      end
+    end
 
     def perform(submission_id)
       submission = Report::Submission.find_by(id: submission_id)
@@ -75,6 +81,23 @@ module Report
       end
 
       report_case.update_status_from_submissions!
+    end
+
+    # Schedule a retry for failed submissions
+    def self.schedule_retry(submission, error)
+      submission.record_response!(
+        status_code: 0,
+        body: error.message
+      )
+
+      if submission.retryable?
+        wait_time = submission.retry_delay
+        Report::SubmitReportJob.set(wait: wait_time).perform_later(submission.id)
+        Rails.logger.info("[Report::SubmitReportJob] Scheduled retry for #{submission.public_id} in #{wait_time.inspect}")
+      else
+        submission.fail!("Max attempts reached: #{error.message}") if submission.may_fail?
+        Rails.logger.error("[Report::SubmitReportJob] Submission #{submission.public_id} failed permanently after #{submission.attempts} attempts")
+      end
     end
   end
 end

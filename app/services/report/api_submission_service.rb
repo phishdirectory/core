@@ -239,11 +239,12 @@ module Report
       }
 
       response = conn.post("/v4/threatHits?key=#{api_key}", body)
+      response_body = response.body
 
       submission.record_response!(
-        status_code: 200,
-        body: response.to_json,
-        reference: response.dig("submissionId")
+        status_code: response.status,
+        body: response_body.to_json,
+        reference: response_body.is_a?(Hash) ? response_body.dig("submissionId") : nil
       )
 
       true
