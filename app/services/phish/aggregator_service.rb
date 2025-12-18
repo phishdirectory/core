@@ -9,6 +9,7 @@ module Phish
       walshy
       google_safe_browsing
       virustotal
+      fish_fish
     ].freeze
 
     attr_reader :services
@@ -108,6 +109,7 @@ module Phish
       when :google_safe_browsing then GoogleSafeBrowsingService
       when :virustotal then VirustotalService
       when :urlscan then UrlscanService
+      when :fish_fish then FishFishService
       else
         log_info("Unknown service: #{name}")
         return nil

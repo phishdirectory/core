@@ -89,3 +89,8 @@ production:
     api_metrics_batch:
       class: ApiMetricsBatchJob
       schedule: every 15 minutes
+
+    # Sync FishFish domain list weekly
+    fishfish_sync:
+      class: FishFishSyncJob
+      schedule: every sunday at 3am
