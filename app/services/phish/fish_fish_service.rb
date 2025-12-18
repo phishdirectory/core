@@ -26,13 +26,14 @@ module Phish
       # FishFish API is unauthenticated for reads
       with_rate_limit do
         conn = public_connection
-        response = get(conn, "/domains/#{normalized}")
+        response = get(conn, "domains/#{normalized}")
 
-        if response && response["domain"]
+        if response && response["name"]
           build_result(
             verdict: "phishing",
             confidence: category_confidence(response["category"]),
             details: {
+              domain: response["name"],
               category: response["category"],
               added: response["added"],
               source: "fishfish"
@@ -65,7 +66,7 @@ module Phish
       conn = public_connection
 
       # Get full domain list (unauthenticated, returns domain names only)
-      response = get(conn, "/domains")
+      response = get(conn, "domains")
 
       unless response.is_a?(Array)
         log_error("Unexpected response format from FishFish", StandardError.new(response.inspect))
