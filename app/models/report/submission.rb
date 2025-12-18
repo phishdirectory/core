@@ -86,7 +86,7 @@ class Report::Submission < ApplicationRecord
     event :mark_sent do
       transitions from: :queued, to: :sent
       after do
-        update!(sent_at: Time.current, attempts: attempts + 1)
+        update!(sent_at: Time.current, attempts: attempts + 1, last_error: nil)
         abuse_contact.record_submission_sent!
         self.case.update_activity!
       end
