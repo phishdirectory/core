@@ -124,6 +124,26 @@ module Phish
 
       return build_unknown_result(context) if results.empty?
 
+      # Check for authoritative sources first
+      # FishFish maintains a curated list with high standards for inclusion -
+      # if a domain is in their list, it's confirmed phishing
+      authoritative_result = check_authoritative_sources(results)
+      if authoritative_result
+        service_results = results.map do |r|
+          { service: r[:service], verdict: r[:verdict], confidence: r[:confidence] }
+        end
+        return build_result(
+          verdict: authoritative_result[:verdict],
+          confidence: authoritative_result[:confidence],
+          details: context.merge(
+            service_results: service_results,
+            services_checked: results.size,
+            authoritative_source: authoritative_result[:service],
+            reason: "Authoritative source detection"
+          )
+        )
+      end
+
       # Calculate weighted scores
       phishing_score = 0.0
       clean_score = 0.0
@@ -205,6 +225,20 @@ module Phish
           reason: "No services returned results"
         )
       )
+    end
+
+    # Authoritative sources that override weighted scoring when they detect phishing
+    # These are curated lists with high standards for inclusion
+    AUTHORITATIVE_SOURCES = %w[fish_fish].freeze
+
+    # Check if any authoritative source flagged as phishing
+    # Returns the result if found, nil otherwise
+    def check_authoritative_sources(results)
+      results.find do |result|
+        AUTHORITATIVE_SOURCES.include?(result[:service]) &&
+          result[:verdict] == "phishing" &&
+          result[:confidence] && result[:confidence] >= 0.9
+      end
     end
 
     # Scoring configuration from encrypted credentials
