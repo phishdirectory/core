@@ -14,6 +14,7 @@ class Service::Key < ApplicationRecord
   # Associations
   belongs_to :service, counter_cache: :keys_count
   has_many :usages, class_name: "Service::KeyUsage", foreign_key: :key_id, dependent: :destroy
+  has_many :api_requests, as: :authenticatable, dependent: :destroy
 
   # Callbacks
   before_validation :generate_credentials, on: :create

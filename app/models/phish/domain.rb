@@ -30,6 +30,16 @@ class Phish::Domain < ApplicationRecord
   scope :suspicious, -> { joins(:verdict).where(verdicts: { classification: "suspicious" }) }
   scope :clean, -> { joins(:verdict).where(verdicts: { classification: "clean" }) }
 
+  # Availability tracking scopes
+  scope :seen_recently, ->(threshold = 7.days) { where("last_seen_at > ?", threshold.ago) }
+  scope :not_seen_recently, ->(threshold = 7.days) { where("last_seen_at IS NULL OR last_seen_at <= ?", threshold.ago) }
+  scope :needs_availability_check, ->(threshold = 1.hour) {
+    where("availability_checked_at IS NULL OR availability_checked_at < ?", threshold.ago)
+  }
+  scope :resolvable, -> { where(dns_resolvable: true) }
+  scope :reachable, -> { where(http_reachable: true) }
+  scope :active_domains, -> { resolvable.reachable }
+
   # Delegations
   delegate :classification, :confidence_score, :phishing?, :suspicious?, :clean?, :dangerous?, :safe?,
            to: :verdict, allow_nil: true
@@ -60,6 +70,30 @@ class Phish::Domain < ApplicationRecord
 
   def mark_checked!
     update!(last_checked_at: Time.current)
+  end
+
+  # ===========================================
+  # Availability tracking
+  # ===========================================
+
+  def touch_last_seen!
+    update!(last_seen_at: Time.current)
+  end
+
+  def update_availability!(dns_resolvable:, http_reachable:)
+    update!(
+      dns_resolvable: dns_resolvable,
+      http_reachable: http_reachable,
+      availability_checked_at: Time.current
+    )
+  end
+
+  def available?
+    dns_resolvable? && http_reachable?
+  end
+
+  def needs_availability_check?(threshold = 1.hour)
+    availability_checked_at.nil? || availability_checked_at < threshold.ago
   end
 
   # ===========================================

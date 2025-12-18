@@ -18,13 +18,14 @@ module Api
           # Find or create the domain record
           phish_domain = Phish::Domain.find_or_create_by(domain: normalized_domain)
 
+          # Track that this domain was queried
+          phish_domain.touch_last_seen!
+
           # Check if we need to refresh the verdict
           if phish_domain.needs_recheck?
             # Queue background check
             # PhishDomainCheckJob.perform_later(phish_domain.id)
           end
-
-          log_service_usage(response_code: 200)
 
           render json: serialize_domain(phish_domain)
         end
@@ -44,10 +45,9 @@ module Api
           results = domains.map do |domain|
             normalized = normalize_domain(domain)
             phish_domain = Phish::Domain.find_or_create_by(domain: normalized)
+            phish_domain.touch_last_seen!
             serialize_domain(phish_domain)
           end
-
-          log_service_usage(response_code: 200)
 
           render json: {
             results: results,

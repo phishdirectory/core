@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_18_005652) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_18_061612) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "fuzzystrmatch"
   enable_extension "pg_catalog.plpgsql"
@@ -127,6 +127,30 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_18_005652) do
     t.index ["user_id"], name: "index_ahoy_visits_on_user_id"
     t.index ["visit_token"], name: "index_ahoy_visits_on_visit_token", unique: true
     t.index ["visitor_token", "started_at"], name: "index_ahoy_visits_on_visitor_token_and_started_at"
+  end
+
+  create_table "api_requests", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "authenticatable_id"
+    t.string "authenticatable_type"
+    t.datetime "created_at", null: false
+    t.integer "duration_ms"
+    t.string "ip_address"
+    t.text "request_body"
+    t.text "request_headers"
+    t.string "request_method", limit: 10, null: false
+    t.string "request_path", null: false
+    t.datetime "requested_at", null: false
+    t.text "response_body"
+    t.integer "response_code"
+    t.datetime "updated_at", null: false
+    t.text "user_agent"
+    t.uuid "user_id"
+    t.index ["authenticatable_type", "authenticatable_id", "requested_at"], name: "idx_api_requests_auth_time"
+    t.index ["authenticatable_type", "authenticatable_id"], name: "index_api_requests_on_authenticatable"
+    t.index ["duration_ms"], name: "index_api_requests_on_duration_ms"
+    t.index ["requested_at"], name: "index_api_requests_on_requested_at"
+    t.index ["response_code"], name: "index_api_requests_on_response_code"
+    t.index ["user_id"], name: "index_api_requests_on_user_id"
   end
 
   create_table "audits1984_audits", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -332,15 +356,21 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_18_005652) do
   end
 
   create_table "phish_domains", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "availability_checked_at"
     t.datetime "created_at", null: false
     t.datetime "discarded_at"
+    t.boolean "dns_resolvable"
     t.string "domain", null: false
+    t.boolean "http_reachable"
     t.datetime "last_checked_at"
+    t.datetime "last_seen_at"
     t.datetime "updated_at", null: false
     t.uuid "verdict_id"
+    t.index ["availability_checked_at"], name: "index_phish_domains_on_availability_checked_at"
     t.index ["discarded_at"], name: "index_phish_domains_on_discarded_at"
     t.index ["domain"], name: "index_phish_domains_on_domain", unique: true
     t.index ["last_checked_at"], name: "index_phish_domains_on_last_checked_at"
+    t.index ["last_seen_at"], name: "index_phish_domains_on_last_seen_at"
     t.index ["verdict_id"], name: "index_phish_domains_on_verdict_id"
   end
 
@@ -611,6 +641,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_18_005652) do
     t.boolean "email_verified", default: false
     t.datetime "email_verified_at"
     t.string "first_name", null: false
+    t.datetime "last_api_activity_at"
     t.string "last_name", null: false
     t.datetime "locked_at"
     t.datetime "magic_link_expires_at"
@@ -627,6 +658,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_18_005652) do
     t.string "username", null: false
     t.index ["discarded_at"], name: "index_users_on_discarded_at"
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["last_api_activity_at"], name: "index_users_on_last_api_activity_at"
     t.index ["locked_at"], name: "index_users_on_locked_at"
     t.index ["magic_link_token"], name: "index_users_on_magic_link_token", unique: true
     t.index ["pd_id"], name: "index_users_on_pd_id", unique: true
@@ -670,6 +702,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_18_005652) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "api_requests", "users", on_delete: :nullify
   add_foreign_key "oauth_access_grants", "oauth_applications", column: "application_id"
   add_foreign_key "oauth_access_grants", "users", column: "resource_owner_id"
   add_foreign_key "oauth_access_tokens", "oauth_applications", column: "application_id"

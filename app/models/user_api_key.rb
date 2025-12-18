@@ -10,6 +10,7 @@ class UserApiKey < ApplicationRecord
 
   # Associations
   belongs_to :user
+  has_many :api_requests, as: :authenticatable, dependent: :destroy
 
   # Callbacks
   before_validation :generate_key, on: :create

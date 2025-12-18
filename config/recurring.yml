@@ -37,3 +37,9 @@ heartbeat:
 api_metrics_batch:
   class: ApiMetricsBatchJob
   schedule: every 15 minutes
+
+# Domain availability checks - check if domains are still active
+domain_availability_check:
+  class: DomainAvailabilityCheckJob
+  queue: maintenance
+  schedule: every hour at minute 30

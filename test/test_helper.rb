@@ -24,8 +24,12 @@ module ActiveSupport
       session
     end
 
-    def api_headers(api_key: nil)
-      headers = { "Content-Type" => "application/json", "Accept" => "application/json" }
+    def api_headers(api_key: nil, user_agent: "TestClient/1.0.0")
+      headers = {
+        "Content-Type" => "application/json",
+        "Accept" => "application/json",
+        "User-Agent" => user_agent
+      }
       headers["Authorization"] = "Bearer #{api_key}" if api_key
       headers
     end

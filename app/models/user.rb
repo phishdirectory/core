@@ -271,6 +271,14 @@ class User < ApplicationRecord
     last_seen_at && last_seen_at >= 30.days.ago
   end
 
+  def touch_api_activity!
+    update!(last_api_activity_at: Time.current)
+  end
+
+  def recently_active_via_api?(threshold = 30.days)
+    last_api_activity_at && last_api_activity_at >= threshold.ago
+  end
+
   # ===========================================
   # Impersonation logic
   # ===========================================
