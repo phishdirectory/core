@@ -118,7 +118,8 @@ class ApplicationController < ActionController::Base
   # ===========================================
 
   def store_location_for_redirect
-    session[:return_to] = request.fullpath if request.get?
+    # Include HEAD requests (Rails routes HEAD to GET actions, but request.get? returns false for HEAD)
+    session[:return_to] = request.fullpath if request.get? || request.head?
   end
 
   def redirect_back_or(default)

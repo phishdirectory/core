@@ -67,7 +67,13 @@
         <% if @abuse_contact.web_form_url.present? %>
           <div class="flex justify-between">
             <dt class="text-slate-500">Web Form</dt>
-            <dd class="text-slate-300 font-mono text-xs"><%= link_to truncate(@abuse_contact.web_form_url, length: 40), @abuse_contact.web_form_url, target: "_blank", class: "text-cyan-accent hover:underline" %></dd>
+            <dd class="text-slate-300 font-mono text-xs">
+              <% if (url = safe_external_url(@abuse_contact.web_form_url)) %>
+                <%= link_to truncate(url, length: 40), url, target: "_blank", rel: "noopener noreferrer", class: "text-cyan-accent hover:underline" %>
+              <% else %>
+                <span class="text-slate-500"><%= truncate(@abuse_contact.web_form_url, length: 40) %> (invalid URL)</span>
+              <% end %>
+            </dd>
           </div>
         <% end %>
         <div class="flex justify-between">

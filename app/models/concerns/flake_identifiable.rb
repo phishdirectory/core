@@ -57,7 +57,9 @@ module FlakeIdentifiable
 
       return nil unless normalized.start_with?("#{prefix}#{SEPARATOR}")
 
-      where("LOWER(#{flake_column}) = ?", normalized).first
+      # Use Arel to safely reference the column (avoids SQL injection warning)
+      column = arel_table[flake_column]
+      where(column.lower.eq(normalized)).first
     end
 
     # Find a record by flake ID, raising if not found
