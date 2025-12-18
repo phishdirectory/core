@@ -15,10 +15,6 @@ module Phish
     rate_limit :minute, requests: 60, period: 1.minute
     rate_limit :hourly, requests: 1000, period: 1.hour
 
-    # Session token cache (valid for 1 hour per docs)
-    SESSION_TOKEN_CACHE_KEY = "fishfish:session_token"
-    SESSION_TOKEN_TTL = 55.minutes # Refresh 5 min before expiry
-
     def check_domain(domain)
       normalized = normalize_domain(domain)
       log_info("Checking domain against FishFish: #{normalized}")
@@ -27,12 +23,9 @@ module Phish
       cached_result = check_local_cache(normalized)
       return cached_result if cached_result
 
-      # Fall back to API
+      # FishFish API is unauthenticated for reads
       with_rate_limit do
-        token = get_session_token
-        return nil unless token
-
-        conn = authenticated_connection(token)
+        conn = public_connection
         response = get(conn, "/domains/#{normalized}")
 
         if response && response["domain"]
@@ -65,29 +58,26 @@ module Phish
 
     # Sync the full FishFish domain list to local cache
     # Called by FishFishSyncJob
+    # Uses unauthenticated endpoint - no API key needed
     def sync_domain_list
       log_info("Syncing FishFish domain list...")
 
-      token = get_session_token
-      raise ServiceError, "Could not obtain FishFish session token" unless token
+      conn = public_connection
 
-      conn = authenticated_connection(token)
-
-      # Get full domain list
-      response = get(conn, "/domains?full=true")
+      # Get full domain list (unauthenticated, returns domain names only)
+      response = get(conn, "/domains")
 
       unless response.is_a?(Array)
         log_error("Unexpected response format from FishFish", StandardError.new(response.inspect))
         return { success: false, error: "Unexpected response format" }
       end
 
-      # Cache each domain
+      # Cache each domain - for simple list, we just mark as phishing
       cached = 0
-      response.each do |domain_data|
-        domain = domain_data["domain"]
-        next unless domain
+      response.each do |domain|
+        next unless domain.is_a?(String)
 
-        cache_domain(domain, domain_data)
+        cache_domain(domain, { "domain" => domain, "category" => "phishing" })
         cached += 1
       end
 
@@ -97,6 +87,15 @@ module Phish
     end
 
     private
+
+    def public_connection
+      Faraday.new(url: BASE_URL) do |f|
+        f.request :json
+        f.response :json, content_type: /\bjson$/
+        f.headers["User-Agent"] = user_agent
+        f.adapter Faraday.default_adapter
+      end
+    end
 
     def check_local_cache(domain)
       data = Rails.cache.read(cache_key_for(domain))
@@ -141,52 +140,5 @@ module Phish
       end
     end
 
-    def get_session_token
-      # Check cache first
-      cached = Rails.cache.read(SESSION_TOKEN_CACHE_KEY)
-      return cached if cached
-
-      # Get new session token
-      api_key = credentials[:api_key]
-      unless api_key
-        log_error("FishFish API key not configured", StandardError.new("missing credentials"))
-        return nil
-      end
-
-      conn = Faraday.new(url: BASE_URL) do |f|
-        f.request :json
-        f.response :json, content_type: /\bjson$/
-        f.headers["Authorization"] = api_key
-        f.headers["User-Agent"] = user_agent
-      end
-
-      response = conn.post("/users/@me/tokens")
-
-      if response.success? && response.body["token"]
-        token = response.body["token"]
-        Rails.cache.write(SESSION_TOKEN_CACHE_KEY, token, expires_in: SESSION_TOKEN_TTL)
-        token
-      else
-        log_error("Failed to get FishFish session token", StandardError.new(response.body.to_s))
-        nil
-      end
-    rescue Faraday::Error => e
-      log_error("FishFish token request failed", e)
-      nil
-    end
-
-    def authenticated_connection(token)
-      Faraday.new(url: BASE_URL) do |f|
-        f.request :json
-        f.response :json, content_type: /\bjson$/
-        f.headers["Authorization"] = token
-        f.headers["User-Agent"] = user_agent
-        f.adapter Faraday.default_adapter
-      end
-    end
-
-    def credentials
-      Rails.application.credentials.fishfish || {}
-    end
   end
 end

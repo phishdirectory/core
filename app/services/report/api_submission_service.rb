@@ -12,6 +12,7 @@ module Report
       "google_safe_browsing" => :submit_google_safe_browsing,
       "phishtank" => :submit_phishtank,
       "urlscan" => :submit_urlscan,
+      "fishfish" => :submit_fishfish,
       "generic" => :submit_generic
     }.freeze
 
@@ -87,6 +88,7 @@ module Report
       return :submit_google_safe_browsing if name.include?("google") && name.include?("safe")
       return :submit_phishtank if name.include?("phishtank")
       return :submit_urlscan if name.include?("urlscan")
+      return :submit_fishfish if name.include?("fishfish") || name.include?("yuri")
 
       # Default to generic
       :submit_generic
@@ -331,6 +333,71 @@ module Report
         body: e.response[:body].to_s
       )
       raise ServiceError, "URLScan API error: #{e.response[:status]}"
+    end
+
+    # =========================================
+    # FishFish / Yuri Submission
+    # https://yuri.bots.lostluma.dev/phish/report
+    # Submits domains to FishFish via Lilly's yuri bot
+    # =========================================
+    def submit_fishfish
+      api_key = api_key_for(:fishfish)
+      raise ServiceError, "FishFish API key not configured" if api_key.blank?
+
+      conn = connection(
+        base_url: "https://yuri.bots.lostluma.dev",
+        headers: {
+          "Content-Type" => "application/json",
+          "Authorization" => api_key  # No Bearer prefix
+        }
+      )
+
+      url_to_report = payload[:url] || payload[:domain]
+
+      body = {
+        url: url_to_report,
+        reason: build_fishfish_reason
+      }
+
+      response = conn.post("/phish/report", body)
+
+      accepted = response.is_a?(Hash) && response["accepted"]
+      reason = response.is_a?(Hash) ? response["reason"] : response.to_s
+
+      submission.record_response!(
+        status_code: accepted ? 200 : 400,
+        body: response.to_json,
+        reference: nil
+      )
+
+      if accepted
+        log_info("FishFish report accepted")
+        true
+      else
+        # Not accepted but not an error - might be already known or protected
+        log_info("FishFish report not accepted: #{reason}")
+        true  # Still mark as sent since we successfully communicated
+      end
+    rescue Faraday::ClientError => e
+      submission.record_response!(
+        status_code: e.response[:status],
+        body: e.response[:body].to_s
+      )
+      raise ServiceError, "FishFish API error: #{e.response[:status]}"
+    end
+
+    def build_fishfish_reason
+      sources = payload[:sources]
+      source_text = if sources.present?
+        sources.map { |s| s.is_a?(Hash) ? (s[:service] || s["service"]) : s.to_s }.join(", ")
+      else
+        "phish.directory detection"
+      end
+
+      "Reported by phish.directory. " \
+      "Confidence: #{(payload[:confidence].to_f * 100).round}%. " \
+      "Sources: #{source_text}. " \
+      "Case: #{payload[:case_reference]}"
     end
 
     # =========================================
