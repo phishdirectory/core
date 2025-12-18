@@ -157,6 +157,13 @@ module Report
         return "email" if row["Report Email"].present?
       end
 
+      # If no method specified, infer from available contact info
+      if csv_method.blank? || csv_method == "Unknown"
+        return "email" if row["Report Email"].present?
+        return "web_form" if row["Report Contact Form"].present?
+        return "email" # fallback
+      end
+
       METHOD_MAPPING[csv_method] || "email"
     end
 

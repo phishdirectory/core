@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_17_233644) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_18_005652) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "fuzzystrmatch"
   enable_extension "pg_catalog.plpgsql"
@@ -371,6 +371,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_17_233644) do
     t.enum "method", null: false, enum_type: "report_contact_method"
     t.string "name", null: false
     t.jsonb "nameserver_patterns", default: []
+    t.text "notes"
     t.string "organization"
     t.integer "priority", default: 50, null: false
     t.jsonb "registrar_patterns", default: []
