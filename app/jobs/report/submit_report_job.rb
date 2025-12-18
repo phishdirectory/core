@@ -40,10 +40,7 @@ module Report
       when "api"
         Report::ApiSubmissionService.new(submission).submit!
       when "web_form"
-        # Web form submission requires browser automation - skip for now
-        Rails.logger.info("[Report::SubmitReportJob] Web form submission not automated for #{submission.public_id}")
-        submission.skip!
-        true
+        Report::WebFormSubmissionService.new(submission).submit!
       else
         Rails.logger.error("[Report::SubmitReportJob] Unknown contact method: #{submission.abuse_contact.method}")
         false

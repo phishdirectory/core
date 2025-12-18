@@ -52,6 +52,18 @@ class OpsMailer < ApplicationMailer
     mail(subject: env_subject("[USERNAME] Conflict for #{@email}"))
   end
 
+  def web_form_failure
+    @contact = params[:contact]
+    @submission = params[:submission]
+    @error_message = params[:error_message]
+    @timestamp = Time.current
+
+    mail(
+      to: "jasper@phish.directory",
+      subject: env_subject("[WEB FORM BROKEN] #{@contact.name} form submission failed")
+    )
+  end
+
   private
 
   def ops_email

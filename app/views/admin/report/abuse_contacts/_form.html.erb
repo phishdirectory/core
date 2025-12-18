@@ -1,4 +1,4 @@
-<%= form_with model: [:admin, :report, @abuse_contact], class: "space-y-6" do |f| %>
+<%= form_with model: @abuse_contact, url: @abuse_contact.new_record? ? admin_report_abuse_contacts_path : admin_report_abuse_contact_path(@abuse_contact), class: "space-y-6" do |f| %>
   <% if @abuse_contact.errors.any? %>
     <div class="bg-red-500/10 border border-red-500/20 rounded-xl p-4">
       <h4 class="text-sm font-semibold text-red-400 mb-2"><%= pluralize(@abuse_contact.errors.count, "error") %> prohibited this contact from being saved:</h4>

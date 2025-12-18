@@ -13,7 +13,11 @@ module Report
       mail(
         to: @contact.email,
         cc: @case.email_address, # case_xxx@cases.phish.directory for reply threading
-        subject: env_subject("[Phishing Report] #{@case.domain_name} - Case #{@case.case_number}")
+        reply_to: [
+          "support@phish.directory",
+          @case.email_address
+        ],
+        subject: env_subject("[Automated] [Phishing Report] #{@case.domain_name} - Case #{@case.case_number}")
       )
     end
   end

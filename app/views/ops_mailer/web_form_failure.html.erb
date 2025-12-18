@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+    h1 { color: #dc2626; }
+    h2 { color: #1e40af; margin-top: 24px; }
+    .alert { background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 16px; margin: 16px 0; }
+    .info { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 16px; margin: 16px 0; }
+    .code { background: #f3f4f6; border-radius: 4px; padding: 12px; font-family: monospace; font-size: 13px; overflow-x: auto; white-space: pre-wrap; }
+    .label { font-weight: 600; color: #6b7280; }
+    table { width: 100%; border-collapse: collapse; }
+    td { padding: 8px 0; vertical-align: top; }
+    .btn { display: inline-block; background: #2563eb; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <h1>Web Form Submission Failed</h1>
+
+  <div class="alert">
+    <strong>Action Required:</strong> The automated web form submission to <strong><%= @contact.name %></strong> failed.
+    You may need to manually submit this report and/or fix the automation.
+  </div>
+
+  <h2>Error Details</h2>
+  <div class="code"><%= @error_message %></div>
+
+  <h2>Form Information</h2>
+  <table>
+    <tr>
+      <td class="label">Contact:</td>
+      <td><%= @contact.name %></td>
+    </tr>
+    <tr>
+      <td class="label">Form URL:</td>
+      <td><a href="<%= @contact.web_form_url %>"><%= @contact.web_form_url %></a></td>
+    </tr>
+    <tr>
+      <td class="label">Case Number:</td>
+      <td><%= @submission.case.case_number %></td>
+    </tr>
+    <tr>
+      <td class="label">Submission ID:</td>
+      <td><%= @submission.public_id %></td>
+    </tr>
+    <tr>
+      <td class="label">Timestamp:</td>
+      <td><%= @timestamp.strftime("%Y-%m-%d %H:%M:%S UTC") %></td>
+    </tr>
+  </table>
+
+  <h2>Report to Submit Manually</h2>
+  <div class="info">
+    <p><strong>Copy this information to submit manually:</strong></p>
+  </div>
+
+  <table>
+    <tr>
+      <td class="label">Domain:</td>
+      <td><%= @submission.payload&.dig(:domain) || @submission.payload&.dig("domain") %></td>
+    </tr>
+    <tr>
+      <td class="label">URL:</td>
+      <td><%= @submission.payload&.dig(:url) || @submission.payload&.dig("url") || "https://#{@submission.payload&.dig(:domain) || @submission.payload&.dig("domain")}" %></td>
+    </tr>
+    <tr>
+      <td class="label">Classification:</td>
+      <td><%= @submission.payload&.dig(:classification) || @submission.payload&.dig("classification") || "phishing" %></td>
+    </tr>
+    <tr>
+      <td class="label">Confidence:</td>
+      <td><%= ((@submission.payload&.dig(:confidence) || @submission.payload&.dig("confidence")).to_f * 100).round %>%</td>
+    </tr>
+    <tr>
+      <td class="label">Case Reference:</td>
+      <td><%= @submission.payload&.dig(:case_reference) || @submission.payload&.dig("case_reference") %></td>
+    </tr>
+    <tr>
+      <td class="label">Contact Email:</td>
+      <td><%= @submission.case.email_address %></td>
+    </tr>
+  </table>
+
+  <h2>Suggested Report Text</h2>
+  <div class="code">Phishing site detected by phish.directory.
+
+Domain: <%= @submission.payload&.dig(:domain) || @submission.payload&.dig("domain") %>
+URL: <%= @submission.payload&.dig(:url) || @submission.payload&.dig("url") || "https://#{@submission.payload&.dig(:domain) || @submission.payload&.dig("domain")}" %>
+Confidence: <%= ((@submission.payload&.dig(:confidence) || @submission.payload&.dig("confidence")).to_f * 100).round %>%
+Case Reference: <%= @submission.payload&.dig(:case_reference) || @submission.payload&.dig("case_reference") %>
+
+This is an automated report from phish.directory.
+For questions, contact: support@phish.directory</div>
+
+  <a href="<%= @contact.web_form_url %>" class="btn">Open Form</a>
+
+  <hr style="margin-top: 32px; border: none; border-top: 1px solid #e5e7eb;">
+  <p style="color: #6b7280; font-size: 12px;">
+    This is an automated alert from phish.directory ops.
+  </p>
+</body>
+</html>

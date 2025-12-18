@@ -59,6 +59,11 @@ gem "rswag-api"                     # Serve OpenAPI JSON
 gem "rswag-ui"                      # Swagger UI for API docs
 
 # ============================================
+# Browser Automation (for web form submissions)
+# ============================================
+gem "ferrum"                        # Headless Chrome driver
+
+# ============================================
 # Background Jobs
 # ============================================
 gem "mission_control-jobs"          # Job dashboard
