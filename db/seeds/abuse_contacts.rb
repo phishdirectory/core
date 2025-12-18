@@ -94,7 +94,11 @@ module Seeds
       { name: "Google Safe Browsing", contact_type: :security_vendor, method: :api, api_endpoint: "https://safebrowsing.googleapis.com/v4/threatHits", priority: 20, trusted_reporter: true, notes: "Requires API key. Reports URLs to Google's threat database." },
       { name: "URLScan.io", contact_type: :security_vendor, method: :api, api_endpoint: "https://urlscan.io/api/v1/scan/", priority: 20, notes: "Requires API key. Scans and archives phishing pages." },
       { name: "APWG eCrime", contact_type: :security_vendor, method: :email, email: "reportphishing@apwg.org", priority: 20, trusted_reporter: true, notes: "Anti-Phishing Working Group. Industry consortium for fighting phishing." },
-      { name: "Microsoft Security", contact_type: :security_vendor, method: :web_form, web_form_url: "https://www.microsoft.com/en-us/wdsi/support/report-unsafe-site", priority: 20, notes: "Reports to Microsoft Defender SmartScreen." }
+      { name: "Microsoft Security", contact_type: :security_vendor, method: :web_form, web_form_url: "https://www.microsoft.com/en-us/wdsi/support/report-unsafe-site", priority: 20, notes: "Reports to Microsoft Defender SmartScreen." },
+
+      # Russian CERTs - Required for .ru domains due to legal constraints
+      { name: "FACCT / CERT-GIB", contact_type: :security_vendor, method: :email, email: "response@cert-gib.com", priority: 25, notes: "Russian CERT for .ru domains. Alternative: response@facct.ru" },
+      { name: "NCIRCC (Russian National CERT)", contact_type: :security_vendor, method: :email, email: "incident@cert.gov.ru", priority: 25, notes: "Russian National CERT. Required for instructing Russian registrars to suspend domains." }
     ].freeze
 
     def self.seed!
