@@ -1,0 +1,31 @@
+MANUAL REVIEW REQUIRED
+======================
+
+A phishing case requires manual review.
+
+CASE DETAILS
+------------
+Case Number: <%= @case.case_number %>
+Domain: <%= @domain %>
+<% if @case.url_value.present? -%>
+URL: <%= @case.url_value %>
+<% end -%>
+Status: <%= @case.status.humanize %>
+Created: <%= @case.created_at.strftime("%Y-%m-%d %H:%M UTC") %>
+
+REASON FOR MANUAL REVIEW
+------------------------
+<%= @reason %>
+
+ACTION REQUIRED
+---------------
+1. Research the registrar and hosting provider for this domain
+2. Find the appropriate abuse contact information
+3. Add the contact to the phish.directory database
+4. Re-trigger reporting for this case
+
+<% if @case.manual_review_pdf.attached? -%>
+Note: A detailed PDF report is attached to this email.
+
+<% end -%>
+View Case: <%= admin_report_case_url(@case) %>

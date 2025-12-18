@@ -1,0 +1,38 @@
+<h1>Web Form Submission Failed</h1>
+
+<p>An automated web form submission has failed and requires manual intervention.</p>
+
+<h2>Contact Details</h2>
+<ul>
+  <li><strong>Contact:</strong> <%= @contact.name %></li>
+  <li><strong>Web Form URL:</strong> <a href="<%= @contact.web_form_url %>"><%= @contact.web_form_url %></a></li>
+</ul>
+
+<h2>Case Details</h2>
+<ul>
+  <li><strong>Case Number:</strong> <%= @case.case_number %></li>
+  <li><strong>Domain:</strong> <%= @domain %></li>
+  <% if @case.url_value.present? %>
+  <li><strong>URL:</strong> <%= @case.url_value %></li>
+  <% end %>
+</ul>
+
+<h2>Error</h2>
+<pre><%= @error %></pre>
+
+<h2>Action Required</h2>
+<ol>
+  <li>Visit the web form URL above</li>
+  <li>Manually submit the phishing report for this domain</li>
+  <li>Update the submission status in the admin panel</li>
+  <li>If the form has changed, update the web form handler</li>
+</ol>
+
+<% if @contact.notes.present? %>
+<h2>Contact Notes</h2>
+<p><%= @contact.notes %></p>
+<% end %>
+
+<p>
+  <a href="<%= admin_report_case_url(@case) %>">View Case in Admin</a>
+</p>

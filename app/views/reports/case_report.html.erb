@@ -1,0 +1,139 @@
+<%# PDF Case Report Template %>
+<div class="case-report">
+  <header>
+    <h1>Phishing Case Report</h1>
+    <p class="case-number">Case: <%= @report_case.case_number %></p>
+    <p class="generated">Generated: <%= @generated_at.strftime("%Y-%m-%d %H:%M UTC") %></p>
+  </header>
+
+  <section class="summary">
+    <h2>Summary</h2>
+    <table>
+      <tr>
+        <th>Domain</th>
+        <td><%= @domain %></td>
+      </tr>
+      <% if @url.present? %>
+      <tr>
+        <th>URL</th>
+        <td><%= @url %></td>
+      </tr>
+      <% end %>
+      <tr>
+        <th>Status</th>
+        <td><%= @report_case.status.humanize %></td>
+      </tr>
+      <tr>
+        <th>Requires Manual Review</th>
+        <td><%= @report_case.requires_manual_review? ? "Yes" : "No" %></td>
+      </tr>
+      <tr>
+        <th>Created</th>
+        <td><%= @report_case.created_at.strftime("%Y-%m-%d %H:%M UTC") %></td>
+      </tr>
+    </table>
+  </section>
+
+  <% if @verdict.present? %>
+  <section class="verdict">
+    <h2>Detection Verdict</h2>
+    <table>
+      <tr>
+        <th>Classification</th>
+        <td><%= @verdict.classification %></td>
+      </tr>
+      <tr>
+        <th>Confidence Score</th>
+        <td><%= number_to_percentage(@verdict.confidence_score * 100, precision: 1) %></td>
+      </tr>
+      <% if @verdict.sources.present? %>
+      <tr>
+        <th>Detection Sources</th>
+        <td>
+          <ul>
+            <% @verdict.sources.each do |source| %>
+              <li><%= source %></li>
+            <% end %>
+          </ul>
+        </td>
+      </tr>
+      <% end %>
+      <tr>
+        <th>Detected At</th>
+        <td><%= @verdict.created_at.strftime("%Y-%m-%d %H:%M UTC") %></td>
+      </tr>
+    </table>
+  </section>
+  <% end %>
+
+  <% if @domain_info.present? %>
+  <section class="domain-info">
+    <h2>Domain Information</h2>
+    <table>
+      <% if @domain_info["registrar"].present? %>
+      <tr>
+        <th>Registrar</th>
+        <td><%= @domain_info["registrar"] %></td>
+      </tr>
+      <% end %>
+      <% if @domain_info["registrar_abuse_email"].present? %>
+      <tr>
+        <th>Registrar Abuse Email</th>
+        <td><%= @domain_info["registrar_abuse_email"] %></td>
+      </tr>
+      <% end %>
+      <% if @domain_info["hosting_provider"].present? %>
+      <tr>
+        <th>Hosting Provider</th>
+        <td><%= @domain_info["hosting_provider"] %></td>
+      </tr>
+      <% end %>
+      <% if @domain_info["nameservers"].present? %>
+      <tr>
+        <th>Nameservers</th>
+        <td>
+          <ul>
+            <% @domain_info["nameservers"].each do |ns| %>
+              <li><%= ns %></li>
+            <% end %>
+          </ul>
+        </td>
+      </tr>
+      <% end %>
+      <% if @domain_info["a_records"].present? %>
+      <tr>
+        <th>A Records</th>
+        <td>
+          <ul>
+            <% @domain_info["a_records"].each do |ip| %>
+              <li><%= ip %></li>
+            <% end %>
+          </ul>
+        </td>
+      </tr>
+      <% end %>
+    </table>
+  </section>
+  <% end %>
+
+  <section class="action-required">
+    <h2>Action Required</h2>
+    <p>
+      This case requires manual review because no matching abuse contacts were found
+      in our database. Please:
+    </p>
+    <ol>
+      <li>Research the registrar and hosting provider for this domain</li>
+      <li>Find the appropriate abuse contact information</li>
+      <li>Add the contact to the phish.directory database</li>
+      <li>Re-trigger reporting for this case</li>
+    </ol>
+  </section>
+
+  <footer>
+    <p>
+      phish.directory - Automated Phishing Takedown Service<br>
+      Report issues: support@phish.directory
+    </p>
+  </footer>
+</div>

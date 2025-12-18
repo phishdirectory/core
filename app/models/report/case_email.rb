@@ -94,6 +94,53 @@ class Report::CaseEmail < ApplicationRecord
     submission.update!(submission_reference: refs.first) unless submission.submission_reference.present?
   end
 
+  # Check if this email is from Cloudflare
+  def from_cloudflare?
+    return false unless from_address.present?
+
+    cloudflare_domains = %w[cloudflare.com cloudflare.net]
+    domain = from_address.split("@").last&.downcase
+    cloudflare_domains.any? { |cf| domain&.end_with?(cf) }
+  end
+
+  # Extract real hosting provider info from Cloudflare response
+  # Cloudflare abuse responses typically include:
+  #   "The actual host of this site appears to be:"
+  #   "IP Address: x.x.x.x"
+  #   "Hosting Provider: Example Hosting Inc"
+  #   "Abuse Email: abuse@example.com"
+  def extract_hosting_info
+    return nil unless from_cloudflare?
+
+    text = body_text.presence || ActionController::Base.helpers.strip_tags(body_html)
+    return nil if text.blank?
+
+    info = {}
+
+    # Extract IP Address
+    if (match = text.match(/IP\s*Address:\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/i))
+      info[:ip_address] = match[1]
+    end
+
+    # Extract Hosting Provider name
+    if (match = text.match(/Hosting\s*Provider:\s*(.+?)(?:\n|$)/i))
+      info[:hosting_provider] = match[1].strip
+    end
+
+    # Extract Abuse Email
+    if (match = text.match(/Abuse\s*(?:Email|Contact):\s*([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/i))
+      info[:abuse_email] = match[1].downcase
+    end
+
+    # Alternative patterns Cloudflare might use
+    if info[:abuse_email].blank? && (match = text.match(/contact\s+([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\s+for\s+abuse/i))
+      info[:abuse_email] = match[1].downcase
+    end
+
+    # Only return if we have at least the abuse email
+    info[:abuse_email].present? ? info : nil
+  end
+
   # Create from an outbound mailer
   def self.create_from_outbound!(case_record:, submission: nil, mail:)
     create!(

@@ -34,6 +34,9 @@ module Report
       # Check for resolution patterns
       check_for_resolution(case_email)
 
+      # Check for Cloudflare response with real hosting provider
+      check_for_cloudflare_hosting_info(case_email)
+
       Rails.logger.info("[Report::CasesMailbox] Recorded email #{case_email.public_id} for case #{@report_case.case_number}")
     end
 
@@ -121,6 +124,92 @@ module Report
           end
         end
       end
+    end
+
+    # Check for Cloudflare responses that reveal the real hosting provider
+    def check_for_cloudflare_hosting_info(case_email)
+      hosting_info = case_email.extract_hosting_info
+      return unless hosting_info
+
+      Rails.logger.info(
+        "[Report::CasesMailbox] Cloudflare revealed hosting info for case #{@report_case.case_number}: " \
+        "#{hosting_info[:hosting_provider]} (#{hosting_info[:abuse_email]})"
+      )
+
+      # Find or create abuse contact for the hosting provider
+      contact = find_or_create_hosting_contact(hosting_info)
+      return unless contact
+
+      # Check if we already have a submission to this contact
+      existing = @report_case.submissions.find_by(abuse_contact: contact)
+      if existing
+        Rails.logger.info(
+          "[Report::CasesMailbox] Already have submission to #{contact.name} for case #{@report_case.case_number}"
+        )
+        return
+      end
+
+      # Create new submission to the real hosting provider
+      create_hosting_submission(contact, hosting_info)
+    end
+
+    def find_or_create_hosting_contact(hosting_info)
+      email = hosting_info[:abuse_email]
+      provider_name = hosting_info[:hosting_provider].presence || email_to_provider_name(email)
+
+      # Try to find existing contact by email
+      contact = Report::AbuseContact.find_by(email: email)
+      return contact if contact
+
+      # Create new hosting provider contact
+      Report::AbuseContact.create!(
+        name: provider_name,
+        contact_type: :hosting,
+        method: :email,
+        email: email,
+        priority: 5, # High priority for direct hosting providers
+        active: true,
+        notes: "Auto-discovered from Cloudflare response on #{Time.current.strftime('%Y-%m-%d')}"
+      )
+    rescue ActiveRecord::RecordInvalid => e
+      Rails.logger.error("[Report::CasesMailbox] Failed to create hosting contact: #{e.message}")
+      nil
+    end
+
+    def email_to_provider_name(email)
+      # Convert abuse@example.com to "Example" as a fallback name
+      domain = email.split("@").last
+      domain.split(".").first.titleize
+    end
+
+    def create_hosting_submission(contact, hosting_info)
+      # Build payload similar to original case creation
+      payload = {
+        domain: @report_case.domain_name,
+        url: @report_case.url_value,
+        classification: @report_case.verdict_snapshot&.classification,
+        confidence: @report_case.confidence_at_creation,
+        sources: @report_case.verdict_snapshot&.sources,
+        detected_at: @report_case.created_at&.iso8601,
+        case_reference: @report_case.case_number,
+        reporter: "phish.directory",
+        reporter_email: @report_case.email_address,
+        discovered_ip: hosting_info[:ip_address],
+        discovered_via: "Cloudflare abuse response"
+      }.compact
+
+      submission = @report_case.submissions.create!(
+        abuse_contact: contact,
+        payload: payload
+      )
+
+      Rails.logger.info(
+        "[Report::CasesMailbox] Created submission #{submission.public_id} to #{contact.name} " \
+        "for case #{@report_case.case_number}"
+      )
+
+      # Queue for processing
+      Report::ProcessCaseJob.perform_later(@report_case.id)
     end
   end
 end

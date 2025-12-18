@@ -1,0 +1,33 @@
+<h1>Manual Review Required</h1>
+
+<p>A phishing case requires manual review.</p>
+
+<h2>Case Details</h2>
+<ul>
+  <li><strong>Case Number:</strong> <%= @case.case_number %></li>
+  <li><strong>Domain:</strong> <%= @domain %></li>
+  <% if @case.url_value.present? %>
+  <li><strong>URL:</strong> <%= @case.url_value %></li>
+  <% end %>
+  <li><strong>Status:</strong> <%= @case.status.humanize %></li>
+  <li><strong>Created:</strong> <%= @case.created_at.strftime("%Y-%m-%d %H:%M UTC") %></li>
+</ul>
+
+<h2>Reason for Manual Review</h2>
+<p><%= @reason %></p>
+
+<h2>Action Required</h2>
+<ol>
+  <li>Research the registrar and hosting provider for this domain</li>
+  <li>Find the appropriate abuse contact information</li>
+  <li>Add the contact to the phish.directory database</li>
+  <li>Re-trigger reporting for this case</li>
+</ol>
+
+<% if @case.manual_review_pdf.attached? %>
+<p><strong>Note:</strong> A detailed PDF report is attached to this email.</p>
+<% end %>
+
+<p>
+  <a href="<%= admin_report_case_url(@case) %>">View Case in Admin</a>
+</p>

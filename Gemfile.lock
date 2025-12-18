@@ -510,6 +510,14 @@ GEM
       base64
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.5)
+    whois (6.0.3)
+    whois-parser (2.0.0)
+      activesupport (>= 4)
+      whois (>= 4.1.0)
+    wicked_pdf (2.8.2)
+      activesupport
+      ostruct
+    wkhtmltopdf-binary (0.12.6.10)
     zeitwerk (2.7.3)
 
 PLATFORMS
@@ -583,6 +591,10 @@ DEPENDENCIES
   tzinfo-data
   valid_email2
   validates_email_format_of
+  whois
+  whois-parser
+  wicked_pdf
+  wkhtmltopdf-binary
 
 BUNDLED WITH
    2.7.2

@@ -1,0 +1,36 @@
+WEB FORM SUBMISSION FAILED
+==========================
+
+An automated web form submission has failed and requires manual intervention.
+
+CONTACT DETAILS
+---------------
+Contact: <%= @contact.name %>
+Web Form URL: <%= @contact.web_form_url %>
+
+CASE DETAILS
+------------
+Case Number: <%= @case.case_number %>
+Domain: <%= @domain %>
+<% if @case.url_value.present? -%>
+URL: <%= @case.url_value %>
+<% end -%>
+
+ERROR
+-----
+<%= @error %>
+
+ACTION REQUIRED
+---------------
+1. Visit the web form URL above
+2. Manually submit the phishing report for this domain
+3. Update the submission status in the admin panel
+4. If the form has changed, update the web form handler
+
+<% if @contact.notes.present? -%>
+CONTACT NOTES
+-------------
+<%= @contact.notes %>
+
+<% end -%>
+View Case: <%= admin_report_case_url(@case) %>

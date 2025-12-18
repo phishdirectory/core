@@ -57,11 +57,19 @@ gem "faraday"                       # HTTP client (per CLAUDE.md)
 gem "faraday-retry"                 # Retry middleware
 gem "rswag-api"                     # Serve OpenAPI JSON
 gem "rswag-ui"                      # Swagger UI for API docs
+gem "whois"                         # WHOIS lookups for domain info
+gem "whois-parser"                  # Parse WHOIS responses
 
 # ============================================
 # Browser Automation (for web form submissions)
 # ============================================
 gem "ferrum"                        # Headless Chrome driver
+
+# ============================================
+# PDF Generation
+# ============================================
+gem "wicked_pdf"                    # PDF generation from HTML
+gem "wkhtmltopdf-binary"            # wkhtmltopdf binary
 
 # ============================================
 # Background Jobs
