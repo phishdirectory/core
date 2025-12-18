@@ -10,6 +10,8 @@ module Report
       @contact = params[:contact]
       @payload = @submission.payload
 
+      # No env_subject - reports are always sent to real external contacts
+      # regardless of environment (only legit phishing domains are reported)
       mail(
         to: @contact.email,
         cc: @case.email_address, # case_xxx@cases.phish.directory for reply threading
@@ -17,7 +19,7 @@ module Report
           "support@phish.directory",
           @case.email_address
         ],
-        subject: env_subject("[Automated] [Phishing Report] #{@case.domain_name} - Case #{@case.case_number}")
+        subject: "[Automated] [Phishing Report] #{@case.domain_name} - Case #{@case.case_number}"
       )
     end
   end
