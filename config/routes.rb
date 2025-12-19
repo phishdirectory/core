@@ -150,7 +150,16 @@ Rails.application.routes.draw do
 
     resources :domains, controller: "phish_domains", only: [:index, :show]
     resources :urls, controller: "phish_urls", only: [:index, :show]
+    resources :verdicts, only: [:index, :show, :edit, :update]
     resources :protections, only: [:index, :show, :new, :create, :destroy]
+
+    # Monitoring
+    resources :api_requests, only: [:index, :show]
+    resources :webhook_deliveries, only: [:index, :show] do
+      member do
+        post :retry
+      end
+    end
 
     # Report/Abuse system
     namespace :report do
