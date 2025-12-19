@@ -15,6 +15,11 @@ module Api
           # Normalize domain (remove protocol, path, etc.)
           normalized_domain = normalize_domain(domain)
 
+          # Validate domain format before database access
+          unless valid_domain?(normalized_domain)
+            return render json: { error: "Invalid domain format" }, status: :bad_request
+          end
+
           # Find or create the domain record
           phish_domain = Phish::Domain.find_or_create_by(domain: normalized_domain)
 
@@ -42,12 +47,35 @@ module Api
             return render json: { error: "Maximum 100 domains per request" }, status: :bad_request
           end
 
-          results = domains.map do |domain|
-            normalized = normalize_domain(domain)
-            phish_domain = Phish::Domain.find_or_create_by(domain: normalized)
-            phish_domain.touch_last_seen!
-            serialize_domain(phish_domain)
+          # Normalize all domains first
+          normalized_domains = domains.map { |d| normalize_domain(d) }
+
+          # Validate all domains before database access
+          invalid_domains = normalized_domains.reject { |d| valid_domain?(d) }
+          if invalid_domains.any?
+            return render json: {
+              error: "Invalid domain format",
+              invalid_domains: invalid_domains.first(10)
+            }, status: :bad_request
           end
+
+          # Find existing domains
+          existing = Phish::Domain.where(domain: normalized_domains).index_by(&:domain)
+
+          # Create missing domains
+          missing_domains = normalized_domains - existing.keys
+          missing_domains.each do |domain|
+            existing[domain] = Phish::Domain.create!(domain: domain)
+          end
+
+          # Update last_seen_at for all domains in bulk
+          Phish::Domain.where(domain: normalized_domains).update_all(last_seen_at: Time.current)
+
+          # Reload all domains with verdict eager loading to avoid N+1
+          phish_domains = Phish::Domain.includes(:verdict).where(domain: normalized_domains).index_by(&:domain)
+
+          # Serialize in original order
+          results = normalized_domains.map { |d| serialize_domain(phish_domains[d]) }
 
           render json: {
             results: results,
@@ -79,6 +107,11 @@ module Api
           # Remove www prefix (optional, based on requirements)
           # domain = domain.sub(/\Awww\./, "")
           domain
+        end
+
+        # Matches Phish::Domain validation regex
+        def valid_domain?(domain)
+          domain.present? && domain.match?(/\A[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,}\z/i)
         end
       end
     end

@@ -119,31 +119,53 @@ module Phish
     end
 
     def instantiate_service(name)
-      klass = case name.to_sym
-      when :walshy then WalshyService
-      when :google_safe_browsing then GoogleSafeBrowsingService
-      when :virustotal then VirustotalService
-      when :urlscan then UrlscanService
-      when :fish_fish then FishFishService
-      when :sinking_yachts then SinkingYachtsService
-      when :openphish then OpenphishService
-      else
-        log_info("Unknown service: #{name}")
-        return nil
-      end
-
-      klass.new(logger: logger)
+      service = ServiceFactory.build(name, logger: logger)
+      log_info("Unknown service: #{name}") unless service
+      service
     end
 
+    # Aggregates results from multiple detection services into a single verdict.
+    #
+    # ## Scoring Algorithm
+    #
+    # The algorithm works in two phases:
+    #
+    # ### Phase 1: Authoritative Source Check
+    # If an authoritative source (fish_fish, sinking_yachts) detects phishing with
+    # confidence >= 0.9, their verdict is used immediately without further processing.
+    # These sources maintain curated lists with high inclusion standards.
+    #
+    # ### Phase 2: Weighted Scoring
+    # If no authoritative source triggered, we use weighted confidence scoring:
+    #
+    # 1. Filter results below min_confidence threshold (default: 0.3)
+    # 2. For each result, calculate: weighted_confidence = confidence * service_weight
+    # 3. Sum weighted confidences by verdict type (phishing vs clean)
+    # 4. Normalize scores: normalized_score = sum(weighted_confidence) / sum(weights)
+    #
+    # ### Final Verdict Decision
+    # - If normalized_phishing > normalized_clean AND >= min_confidence → "phishing"
+    # - If normalized_clean > normalized_phishing AND >= min_confidence → "clean"
+    # - Otherwise → "suspicious" (inconclusive or conflicting signals)
+    # - If no results meet confidence threshold → "unknown"
+    #
+    # ### Configuration
+    # Service weights and min_confidence can be configured in credentials:
+    #   scoring:
+    #     min_confidence: 0.3
+    #     default_weight: 1.0
+    #     weights:
+    #       virustotal: 1.2
+    #       google_safe_browsing: 1.5
+    #
     def aggregate_results(results, rate_limited_services: [], **context)
       # Include rate limited info in context
       context[:rate_limited_services] = rate_limited_services if rate_limited_services.any?
 
       return build_unknown_result(context) if results.empty?
 
-      # Check for authoritative sources first
-      # FishFish maintains a curated list with high standards for inclusion -
-      # if a domain is in their list, it's confirmed phishing
+      # Phase 1: Check for authoritative sources first
+      # These curated lists override weighted scoring when they detect phishing
       authoritative_result = check_authoritative_sources(results)
       if authoritative_result
         service_results = results.map do |r|
@@ -161,13 +183,14 @@ module Phish
         )
       end
 
-      # Calculate weighted scores
+      # Phase 2: Calculate weighted scores from all services
       phishing_score = 0.0
       clean_score = 0.0
       total_weight = 0.0
       service_results = []
 
       results.each do |result|
+        # Skip results below minimum confidence threshold
         next unless result[:confidence] && result[:confidence] >= min_confidence
 
         weight = service_weight(result[:service])
@@ -189,10 +212,11 @@ module Phish
         }
       end
 
-      # Determine final verdict
+      # Determine final verdict based on normalized scores
       if total_weight.zero?
         build_unknown_result(context.merge(service_results: service_results))
       else
+        # Normalize scores to 0-1 range by dividing by total weight
         normalized_phishing = phishing_score / total_weight
         normalized_clean = clean_score / total_weight
 
@@ -219,6 +243,7 @@ module Phish
             )
           )
         else
+          # Scores are close or below threshold - mark as suspicious
           build_result(
             verdict: "suspicious",
             confidence: [normalized_phishing, normalized_clean].max.round(2),

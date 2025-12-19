@@ -73,24 +73,38 @@ module Phish
         return { success: false, error: "Unexpected response format" }
       end
 
+      # Track domains in the new list for cache invalidation
+      new_domains = Set.new
+
       # Cache and import each domain
       cached = 0
       imported = 0
       response.each do |domain|
         next unless domain.is_a?(String)
 
-        cache_domain(domain, { "domain" => domain, "category" => "phishing" })
+        normalized = domain.downcase
+        new_domains.add(normalized)
+        cache_domain(normalized, { "domain" => normalized, "category" => "phishing" })
         cached += 1
 
         # Import domain to database and schedule verdict check
-        if import_domain(domain)
+        if import_domain(normalized)
           imported += 1
         end
       end
 
-      log_info("Synced #{cached} domains from FishFish (#{imported} new imports)")
+      # Invalidate cache entries for domains no longer in the list
+      invalidated = invalidate_stale_cache(new_domains)
 
-      { success: true, count: cached, imported: imported }
+      log_info("Synced #{cached} domains from FishFish (#{imported} new imports, #{invalidated} cache entries invalidated)")
+
+      { success: true, count: cached, imported: imported, invalidated: invalidated }
+    end
+
+    # Invalidate cache for a specific domain
+    # Call this when a domain's verdict changes
+    def invalidate_cache(domain)
+      Rails.cache.delete(cache_key_for(domain.downcase))
     end
 
     private
@@ -124,12 +138,33 @@ module Phish
       Rails.cache.write(
         cache_key_for(domain),
         data,
-        expires_in: 1.week # Cache for 1 week, sync weekly
+        expires_in: 48.hours # Reduced from 1 week for fresher data
       )
     end
 
     def cache_key_for(domain)
       "fishfish:domain:#{domain.downcase}"
+    end
+
+    # Track all cached domains in a set for invalidation
+    CACHED_DOMAINS_KEY = "fishfish:cached_domains"
+
+    def invalidate_stale_cache(current_domains)
+      # Get previously cached domains
+      previous_domains = Rails.cache.read(CACHED_DOMAINS_KEY) || Set.new
+
+      # Find domains that were removed from the list
+      stale_domains = previous_domains - current_domains
+
+      # Invalidate each stale domain
+      stale_domains.each do |domain|
+        Rails.cache.delete(cache_key_for(domain))
+      end
+
+      # Update the tracked domains set
+      Rails.cache.write(CACHED_DOMAINS_KEY, current_domains, expires_in: 1.week)
+
+      stale_domains.size
     end
 
     def category_confidence(category)

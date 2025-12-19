@@ -50,6 +50,12 @@ class Phish::Url < ApplicationRecord
     !checked? || stale?(threshold)
   end
 
+  # Returns true if URL has been checked before but verdict may need refreshing.
+  # Uses a shorter threshold than needs_check? since this is for actively-queried URLs.
+  def needs_recheck?(threshold = 4.hours)
+    checked? && stale?(threshold)
+  end
+
   # ===========================================
   # URL parsing helpers
   # ===========================================

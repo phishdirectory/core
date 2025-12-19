@@ -53,14 +53,19 @@ class Phish::Tld < ApplicationRecord
     end
 
     # Find or create TLD record from domain string
+    # Uses upsert to handle race conditions atomically
     def find_or_create_from_domain(domain_string)
       tld_name = extract_from_domain(domain_string)
       return nil if tld_name.blank?
 
-      find_or_create_by!(name: tld_name)
-    rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotUnique
-      # Handle race condition - another thread created it
-      find_by(name: tld_name)
+      # Use upsert for atomic find-or-create that handles race conditions
+      result = upsert(
+        { name: tld_name },
+        unique_by: :name,
+        returning: [:id]
+      )
+
+      find(result.rows.first.first)
     end
   end
 

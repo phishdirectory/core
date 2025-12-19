@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_19_100010) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_19_174845) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "fuzzystrmatch"
   enable_extension "pg_catalog.plpgsql"
@@ -661,6 +661,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_19_100010) do
     t.uuid "user_id", null: false
     t.index ["impersonated_by_id"], name: "index_user_sessions_on_impersonated_by_id"
     t.index ["session_token_bidx"], name: "index_user_sessions_on_session_token_bidx"
+    t.index ["user_id", "last_seen_at"], name: "index_user_sessions_on_user_id_and_last_seen_at"
     t.index ["user_id"], name: "index_user_sessions_on_user_id"
   end
 

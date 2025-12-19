@@ -3,9 +3,17 @@
 class PhishDomainCheckJob < ApplicationJob
   queue_as QUEUE_DEFAULT
 
+  # Retry with exponential backoff for transient errors
+  retry_on Phish::BaseService::RateLimitError, wait: :polynomially_longer, attempts: 5
+  retry_on Faraday::TimeoutError, wait: 30.seconds, attempts: 3
+  retry_on Faraday::ConnectionFailed, wait: 1.minute, attempts: 3
+
+  # Don't retry on auth errors - those need manual intervention
+  discard_on Phish::BaseService::AuthenticationError
+  discard_on ActiveRecord::RecordNotFound
+
   def perform(domain_id)
-    domain = Phish::Domain.find_by(id: domain_id)
-    return unless domain
+    domain = Phish::Domain.find(domain_id)
 
     Rails.logger.info("[PhishCheck] Checking domain: #{domain.domain}")
 

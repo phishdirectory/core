@@ -13,7 +13,7 @@ class Verdict < ApplicationRecord
   has_many :phish_urls, class_name: "Phish::Url", dependent: :nullify
 
   # Validations
-  validates :classification, inclusion: { in: CLASSIFICATIONS }, allow_nil: true
+  validates :classification, presence: true, inclusion: { in: CLASSIFICATIONS }
   validates :confidence_score, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 1 }, allow_nil: true
 
   # Scopes
