@@ -1,12 +1,20 @@
 # frozen_string_literal: true
 
 module Phish
-  # IPQualityScore Email Validation API
+  # IPQualityScore API
+  # https://www.ipqualityscore.com/documentation/malicious-url-scanner-api/overview
   # https://www.ipqualityscore.com/documentation/email-validation-api/overview
   #
   # Rate Limits vary by plan, using conservative defaults
   #
-  # Response includes:
+  # URL/Domain Response includes:
+  #   - unsafe: boolean
+  #   - risk_score: 0-100
+  #   - phishing: boolean
+  #   - malware: boolean
+  #   - suspicious: boolean
+  #
+  # Email Response includes:
   #   - valid: boolean
   #   - disposable: boolean
   #   - fraud_score: 0-100
@@ -14,16 +22,61 @@ module Phish
   #   - leaked: boolean
   #
   class IpqualityscoreService < BaseService
-    BASE_URL = "https://ipqualityscore.com/api/json/email"
+    EMAIL_BASE_URL = "https://ipqualityscore.com/api/json/email"
+    URL_BASE_URL = "https://ipqualityscore.com/api/json/url"
 
     # Conservative rate limits (adjust based on plan)
     rate_limit :minute, requests: 60,   period: 1.minute
     rate_limit :daily,  requests: 5000, period: 1.day
 
-    # Fraud score thresholds
+    # Fraud/risk score thresholds
     HIGH_RISK_THRESHOLD = 85
     MEDIUM_RISK_THRESHOLD = 75
     SUSPICIOUS_THRESHOLD = 50
+
+    # ===========================================
+    # Domain Checking
+    # ===========================================
+
+    def check_domain(domain)
+      normalized = normalize_domain(domain)
+      log_info("Checking domain: #{normalized}")
+
+      api_key = credentials[:api_key]
+      raise AuthenticationError, "IPQualityScore API key not configured" unless api_key
+
+      with_rate_limit do
+        conn = connection(base_url: URL_BASE_URL)
+        response = get(conn, "/#{api_key}/#{CGI.escape(normalized)}", url_request_params)
+        parse_url_response(response, domain: normalized)
+      end
+    rescue RateLimitable::RateLimitExceeded => e
+      raise RateLimitError.new("#{service_name} rate limit exceeded", retry_after: e.retry_after)
+    end
+
+    # ===========================================
+    # URL Checking
+    # ===========================================
+
+    def check_url(url)
+      normalized = normalize_url(url)
+      log_info("Checking URL: #{normalized}")
+
+      api_key = credentials[:api_key]
+      raise AuthenticationError, "IPQualityScore API key not configured" unless api_key
+
+      with_rate_limit do
+        conn = connection(base_url: URL_BASE_URL)
+        response = get(conn, "/#{api_key}/#{CGI.escape(normalized)}", url_request_params)
+        parse_url_response(response, url: normalized)
+      end
+    rescue RateLimitable::RateLimitExceeded => e
+      raise RateLimitError.new("#{service_name} rate limit exceeded", retry_after: e.retry_after)
+    end
+
+    # ===========================================
+    # Email Checking
+    # ===========================================
 
     def check_email(email)
       normalized = normalize_email(email)
@@ -33,21 +86,34 @@ module Phish
       raise AuthenticationError, "IPQualityScore API key not configured" unless api_key
 
       with_rate_limit do
-        conn = connection(base_url: BASE_URL)
-        response = get(conn, "/#{api_key}/#{CGI.escape(normalized)}", request_params)
-        parse_response(response, normalized)
+        conn = connection(base_url: EMAIL_BASE_URL)
+        response = get(conn, "/#{api_key}/#{CGI.escape(normalized)}", email_request_params)
+        parse_email_response(response, normalized)
       end
     rescue RateLimitable::RateLimitExceeded => e
       raise RateLimitError.new("#{service_name} rate limit exceeded", retry_after: e.retry_after)
     end
 
-    # This service doesn't support domain/URL checks (use their separate APIs)
-    def check_domain(_domain)
-      nil
-    end
+    # ===========================================
+    # Phone Number Checking
+    # ===========================================
 
-    def check_url(_url)
-      nil
+    PHONE_BASE_URL = "https://ipqualityscore.com/api/json/phone"
+
+    def check_phone(phone_number)
+      normalized = normalize_phone(phone_number)
+      log_info("Checking phone: #{normalized}")
+
+      api_key = credentials[:api_key]
+      raise AuthenticationError, "IPQualityScore API key not configured" unless api_key
+
+      with_rate_limit do
+        conn = connection(base_url: PHONE_BASE_URL)
+        response = get(conn, "/#{api_key}/#{CGI.escape(normalized)}", phone_request_params)
+        parse_phone_response(response, normalized)
+      end
+    rescue RateLimitable::RateLimitExceeded => e
+      raise RateLimitError.new("#{service_name} rate limit exceeded", retry_after: e.retry_after)
     end
 
     private
@@ -56,7 +122,19 @@ module Phish
       Rails.application.credentials.ipqualityscore || {}
     end
 
-    def request_params
+    # ===========================================
+    # Request Parameters
+    # ===========================================
+
+    def url_request_params
+      {
+        strictness: 1,         # Medium strictness (0-2)
+        fast: false,           # Full lookup for better accuracy
+        timeout: 7
+      }
+    end
+
+    def email_request_params
       {
         fast: false,           # Full lookup
         timeout: 7,            # Timeout in seconds
@@ -66,11 +144,111 @@ module Phish
       }
     end
 
+    def phone_request_params
+      {
+        strictness: 1,         # Medium strictness (0-2)
+        country: []            # Auto-detect country
+      }
+    end
+
+    # ===========================================
+    # Normalization
+    # ===========================================
+
     def normalize_email(email)
       email.to_s.strip.downcase
     end
 
-    def parse_response(response, email)
+    def normalize_phone(phone)
+      # Strip everything except + and digits, then ensure E.164 format
+      cleaned = phone.to_s.gsub(/[^\d+]/, "")
+      cleaned.start_with?("+") ? cleaned : "+#{cleaned}"
+    end
+
+    # ===========================================
+    # Response Parsing - URL/Domain
+    # ===========================================
+
+    def parse_url_response(response, domain: nil, url: nil)
+      response = ensure_hash_response(response)
+      target = url || domain
+
+      # Check for API errors
+      if response["success"] == false
+        log_error("API error: #{response['message']}", StandardError.new(response.to_json))
+        return build_result(
+          verdict: "unknown",
+          confidence: 0.0,
+          details: { domain: domain, url: url, error: response["message"], source: "ipqualityscore" }
+        )
+      end
+
+      risk_score = response["risk_score"].to_i
+      is_phishing = response["phishing"] == true
+      is_malware = response["malware"] == true
+      is_suspicious = response["suspicious"] == true
+      is_unsafe = response["unsafe"] == true
+      is_parking = response["parking"] == true
+      is_spamming = response["spamming"] == true
+
+      # Determine verdict based on risk score and flags
+      verdict = if is_phishing || is_malware || risk_score >= HIGH_RISK_THRESHOLD
+        "phishing"
+      elsif is_unsafe || is_spamming || risk_score >= MEDIUM_RISK_THRESHOLD
+        "phishing"
+      elsif is_suspicious || is_parking || risk_score >= SUSPICIOUS_THRESHOLD
+        "suspicious"
+      else
+        "clean"
+      end
+
+      # Calculate confidence based on risk score
+      base_confidence = if verdict == "clean"
+        (100 - risk_score) / 100.0
+      else
+        risk_score / 100.0
+      end
+
+      # Boost confidence for strong signals
+      confidence = base_confidence
+      confidence += 0.15 if is_phishing || is_malware
+      confidence += 0.1 if is_unsafe
+      confidence -= 0.1 if is_parking # Parked domains are less certain
+      confidence = confidence.clamp(0.0, 1.0)
+
+      build_result(
+        verdict: verdict,
+        confidence: confidence.round(2),
+        details: {
+          domain: domain,
+          url: url,
+          risk_score: risk_score,
+          phishing: is_phishing,
+          malware: is_malware,
+          suspicious: is_suspicious,
+          unsafe: is_unsafe,
+          parking: is_parking,
+          spamming: is_spamming,
+          adult: response["adult"],
+          category: response["category"],
+          dns_valid: response["dns_valid"],
+          domain_rank: response["domain_rank"],
+          domain_age: response.dig("domain_age", "human"),
+          page_size: response["page_size"],
+          redirected: response["redirected"],
+          final_url: response["final_url"],
+          server: response["server"],
+          content_type: response["content_type"],
+          source: "ipqualityscore"
+        }
+      )
+    end
+
+    # ===========================================
+    # Response Parsing - Email
+    # ===========================================
+
+    def parse_email_response(response, email)
       response = ensure_hash_response(response)
 
       # Check for API errors
@@ -147,6 +325,93 @@ module Phish
         }
       )
     end
+
+    # ===========================================
+    # Response Parsing - Phone
+    # ===========================================
+
+    def parse_phone_response(response, phone_number)
+      response = ensure_hash_response(response)
+
+      # Check for API errors
+      if response["success"] == false
+        log_error("API error: #{response['message']}", StandardError.new(response.to_json))
+        return build_result(
+          verdict: "unknown",
+          confidence: 0.0,
+          details: { phone_number: phone_number, error: response["message"], source: "ipqualityscore" }
+        )
+      end
+
+      fraud_score = response["fraud_score"].to_i
+      valid = response["valid"] == true
+      active = response["active"] == true
+      risky = response["risky"] == true
+      recent_abuse = response["recent_abuse"] == true
+      voip = response["VOIP"] == true || response["voip"] == true
+      prepaid = response["prepaid"] == true
+      leaked = response["leaked"] == true
+      spammer = response["spammer"] == true
+
+      # Determine verdict based on fraud score and flags
+      verdict = if fraud_score >= HIGH_RISK_THRESHOLD || spammer
+        "phishing"
+      elsif fraud_score >= MEDIUM_RISK_THRESHOLD || recent_abuse || (voip && risky)
+        "phishing"
+      elsif fraud_score >= SUSPICIOUS_THRESHOLD || risky || leaked
+        "suspicious"
+      elsif !valid || !active
+        "suspicious"
+      else
+        "clean"
+      end
+
+      # Calculate confidence
+      base_confidence = if verdict == "clean"
+        (100 - fraud_score) / 100.0
+      else
+        fraud_score / 100.0
+      end
+
+      # Boost confidence for strong signals
+      confidence = base_confidence
+      confidence += 0.15 if spammer
+      confidence += 0.1 if recent_abuse
+      confidence -= 0.1 if voip && !risky # VOIP alone reduces certainty
+      confidence = confidence.clamp(0.0, 1.0)
+
+      build_result(
+        verdict: verdict,
+        confidence: confidence.round(2),
+        details: {
+          phone_number: phone_number,
+          fraud_score: fraud_score,
+          valid: valid,
+          active: active,
+          risky: risky,
+          voip: voip,
+          prepaid: prepaid,
+          recent_abuse: recent_abuse,
+          leaked: leaked,
+          spammer: spammer,
+          carrier: response["carrier"],
+          line_type: response["line_type"],
+          country: response["country"],
+          region: response["region"],
+          city: response["city"],
+          zip_code: response["zip_code"],
+          timezone: response["timezone"],
+          do_not_call: response["do_not_call"],
+          formatted: response["formatted"],
+          local_format: response["local_format"],
+          source: "ipqualityscore"
+        }
+      )
+    end
+
+    # ===========================================
+    # Utilities
+    # ===========================================
 
     def ensure_hash_response(response)
       return response if response.is_a?(Hash)

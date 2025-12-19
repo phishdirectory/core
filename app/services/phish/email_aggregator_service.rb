@@ -4,13 +4,15 @@ module Phish
   # Aggregates results from multiple email reputation services
   #
   # Services checked:
-  #   - EmailRep.io (reputation, suspicious flags, breach data)
+  #   - EmailRep.io (reputation, suspicious flags, breach data) - DISABLED pending API key
   #   - IPQualityScore (fraud score, abuse detection)
   #
   # Scoring uses weighted confidence from each service.
   #
   class EmailAggregatorService < BaseService
-    DEFAULT_SERVICES = %i[emailrep ipqualityscore].freeze
+    # NOTE: emailrep temporarily disabled while waiting for API key
+    # Re-enable by adding :emailrep back to this array
+    DEFAULT_SERVICES = %i[ipqualityscore].freeze
 
     SERVICE_WEIGHTS = {
       emailrep: 1.0,

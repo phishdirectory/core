@@ -13,7 +13,8 @@ module Phish
       urlscan: "Phish::UrlscanService",
       fish_fish: "Phish::FishFishService",
       sinking_yachts: "Phish::SinkingYachtsService",
-      openphish: "Phish::OpenphishService"
+      openphish: "Phish::OpenphishService",
+      ipqualityscore: "Phish::IpqualityscoreService"
     }.freeze
 
     class << self
