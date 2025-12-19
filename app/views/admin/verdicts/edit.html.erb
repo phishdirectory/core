@@ -1,0 +1,72 @@
+<% content_for :title, "Edit Verdict" %>
+
+<header class="px-8 py-6 border-b border-surface-200/50 flex items-center justify-between bg-surface-50/50 sticky top-0 z-40 backdrop-blur-sm">
+  <div class="flex items-center gap-4">
+    <%= link_to admin_verdict_path(@verdict), class: "text-surface-500 hover:text-surface-900 transition-colors" do %>
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19l-7-7 7-7"/></svg>
+    <% end %>
+    <div>
+      <h1 class="text-xl font-semibold text-surface-900">Edit Verdict</h1>
+      <p class="text-sm text-surface-500 mt-0.5 font-mono"><%= @verdict.public_id %></p>
+    </div>
+  </div>
+</header>
+
+<div class="p-8 max-w-2xl">
+  <div class="bg-surface-100 rounded-lg overflow-hidden">
+    <div class="px-5 py-4 border-b border-surface-200/50">
+      <h2 class="text-sm font-semibold text-surface-900">Verdict Details</h2>
+    </div>
+    <div class="p-5">
+      <%= form_with model: [:admin, @verdict], class: "space-y-5" do |f| %>
+        <% if @verdict.errors.any? %>
+          <div class="bg-danger/10 text-danger rounded-md p-3 text-sm">
+            <div class="font-medium mb-2"><%= pluralize(@verdict.errors.count, "error") %> prevented this verdict from being saved:</div>
+            <ul class="list-disc pl-4 space-y-1">
+              <% @verdict.errors.full_messages.each do |message| %>
+                <li><%= message %></li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+
+        <div>
+          <label class="block text-xs font-medium text-surface-600 mb-1.5">Classification</label>
+          <%= f.select :classification, Verdict::CLASSIFICATIONS.map { |c| [c.titleize, c] },
+              {},
+              class: "w-full px-3 py-2.5 bg-surface-200 border border-surface-300/50 rounded-md text-surface-900 text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-colors" %>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-surface-600 mb-1.5">Confidence Score</label>
+          <div class="flex items-center gap-3">
+            <%= f.range_field :confidence_score, min: 0, max: 1, step: 0.01,
+                class: "flex-1 h-2 bg-surface-200 rounded-full appearance-none cursor-pointer",
+                data: { controller: "range-preview", action: "input->range-preview#update" } %>
+            <%= f.number_field :confidence_score, min: 0, max: 1, step: 0.01,
+                class: "w-20 px-3 py-2.5 bg-surface-200 border border-surface-300/50 rounded-md text-surface-900 text-sm font-mono text-center focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-colors" %>
+          </div>
+          <p class="text-xs text-surface-500 mt-1.5">Enter a value between 0 and 1 (e.g., 0.85 for 85% confidence)</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-medium text-surface-600 mb-1.5">Scam Category</label>
+            <%= f.text_field :scam_category, placeholder: "e.g., crypto, banking",
+                class: "w-full px-3 py-2.5 bg-surface-200 border border-surface-300/50 rounded-md text-surface-900 placeholder-surface-500 text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-colors" %>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-surface-600 mb-1.5">Scam Subcategory</label>
+            <%= f.text_field :scam_subcategory, placeholder: "e.g., wallet drainer",
+                class: "w-full px-3 py-2.5 bg-surface-200 border border-surface-300/50 rounded-md text-surface-900 placeholder-surface-500 text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-colors" %>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-4 border-t border-surface-200/50">
+          <%= link_to "Cancel", admin_verdict_path(@verdict), class: "px-5 py-2.5 text-sm font-medium text-surface-600 bg-surface-200 rounded-md hover:bg-surface-300 transition-colors" %>
+          <%= f.submit "Save Changes", class: "px-5 py-2.5 bg-surface-900 text-surface-0 font-medium text-sm rounded-md hover:bg-surface-800 transition-colors cursor-pointer" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

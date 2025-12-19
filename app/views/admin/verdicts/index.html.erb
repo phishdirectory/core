@@ -1,0 +1,155 @@
+<% content_for :title, "Verdicts" %>
+
+<header class="px-8 py-6 border-b border-surface-200/50 flex items-center justify-between bg-surface-50/50 sticky top-0 z-40 backdrop-blur-sm">
+  <div>
+    <h1 class="text-xl font-semibold text-surface-900">Verdicts</h1>
+    <p class="text-sm text-surface-500 mt-0.5"><%= Verdict.count %> verdicts</p>
+  </div>
+  <div class="flex items-center gap-4">
+    <div class="flex items-center gap-2 text-sm">
+      <span class="px-2 py-0.5 rounded bg-danger/10 text-danger font-mono text-xs"><%= Verdict.phishing.count %></span>
+      <span class="text-surface-500">phishing</span>
+      <span class="px-2 py-0.5 rounded bg-warning/10 text-warning font-mono text-xs ml-2"><%= Verdict.suspicious.count %></span>
+      <span class="text-surface-500">suspicious</span>
+      <span class="px-2 py-0.5 rounded bg-success/10 text-success font-mono text-xs ml-2"><%= Verdict.clean.count %></span>
+      <span class="text-surface-500">clean</span>
+    </div>
+  </div>
+</header>
+
+<div class="p-8">
+  <%# Filters %>
+  <div class="mb-6 flex items-center gap-4 flex-wrap">
+    <%# Classification filter tabs %>
+    <div class="flex items-center gap-1 bg-surface-100 rounded-lg p-1">
+      <%= link_to "All", admin_verdicts_path(confidence: params[:confidence], scam_category: params[:scam_category]),
+          class: "px-3 py-1.5 text-sm font-medium rounded-md transition-colors #{params[:classification].blank? ? 'bg-surface-0 text-surface-900 shadow-sm' : 'text-surface-600 hover:text-surface-800'}" %>
+      <% Verdict::CLASSIFICATIONS.each do |classification| %>
+        <%= link_to classification.titleize, admin_verdicts_path(classification: classification, confidence: params[:confidence], scam_category: params[:scam_category]),
+            class: "px-3 py-1.5 text-sm font-medium rounded-md transition-colors #{params[:classification] == classification ? 'bg-surface-0 text-surface-900 shadow-sm' : 'text-surface-600 hover:text-surface-800'}" %>
+      <% end %>
+    </div>
+
+    <%# Confidence filter %>
+    <div class="flex items-center gap-1 bg-surface-100 rounded-lg p-1">
+      <%= link_to "Any", admin_verdicts_path(classification: params[:classification], scam_category: params[:scam_category]),
+          class: "px-3 py-1.5 text-sm font-medium rounded-md transition-colors #{params[:confidence].blank? ? 'bg-surface-0 text-surface-900 shadow-sm' : 'text-surface-600 hover:text-surface-800'}" %>
+      <%= link_to "High", admin_verdicts_path(classification: params[:classification], confidence: "high", scam_category: params[:scam_category]),
+          class: "px-3 py-1.5 text-sm font-medium rounded-md transition-colors #{params[:confidence] == 'high' ? 'bg-surface-0 text-surface-900 shadow-sm' : 'text-surface-600 hover:text-surface-800'}" %>
+      <%= link_to "Low", admin_verdicts_path(classification: params[:classification], confidence: "low", scam_category: params[:scam_category]),
+          class: "px-3 py-1.5 text-sm font-medium rounded-md transition-colors #{params[:confidence] == 'low' ? 'bg-surface-0 text-surface-900 shadow-sm' : 'text-surface-600 hover:text-surface-800'}" %>
+    </div>
+  </div>
+
+  <% if @verdicts.any? %>
+    <div class="bg-surface-100 rounded-lg overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="border-b border-surface-200/50">
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">ID</th>
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Classification</th>
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Confidence</th>
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Scam Category</th>
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Sources</th>
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Associated</th>
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Created</th>
+              <th class="px-5 py-2.5 text-right text-xs font-medium text-surface-500">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @verdicts.each do |verdict| %>
+              <tr class="border-b border-surface-200/50 hover:bg-surface-200/30 transition-colors">
+                <td class="px-5 py-3">
+                  <code class="text-xs text-surface-600 font-mono"><%= verdict.public_id %></code>
+                </td>
+                <td class="px-5 py-3">
+                  <% case verdict.classification %>
+                  <% when 'phishing' %>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-danger/10 text-danger">Phishing</span>
+                  <% when 'suspicious' %>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-warning/10 text-warning">Suspicious</span>
+                  <% when 'clean' %>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-success/10 text-success">Clean</span>
+                  <% when 'unknown' %>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-surface-300 text-surface-600">Unknown</span>
+                  <% when 'protected' %>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-info/10 text-info">Protected</span>
+                  <% end %>
+                </td>
+                <td class="px-5 py-3">
+                  <% if verdict.confidence_score %>
+                    <div class="flex items-center gap-2">
+                      <div class="w-16 h-1.5 bg-surface-200 rounded-full overflow-hidden">
+                        <div class="h-full rounded-full <%= verdict.confidence_score >= 0.8 ? 'bg-success' : verdict.confidence_score >= 0.5 ? 'bg-warning' : 'bg-danger' %>" style="width: <%= (verdict.confidence_score * 100).to_i %>%"></div>
+                      </div>
+                      <span class="text-surface-600 text-sm font-mono"><%= (verdict.confidence_score * 100).to_i %>%</span>
+                    </div>
+                  <% else %>
+                    <span class="text-surface-500">—</span>
+                  <% end %>
+                </td>
+                <td class="px-5 py-3">
+                  <% if verdict.scam_category.present? %>
+                    <span class="text-sm text-surface-700"><%= verdict.scam_category %></span>
+                    <% if verdict.scam_subcategory.present? %>
+                      <span class="text-xs text-surface-500 block"><%= verdict.scam_subcategory %></span>
+                    <% end %>
+                  <% else %>
+                    <span class="text-surface-500">—</span>
+                  <% end %>
+                </td>
+                <td class="px-5 py-3">
+                  <span class="text-sm text-surface-600"><%= verdict.sources_list.count %> sources</span>
+                </td>
+                <td class="px-5 py-3">
+                  <div class="flex items-center gap-2 text-sm text-surface-600">
+                    <span><%= verdict.phish_domains.count %> domains</span>
+                    <span class="text-surface-400">|</span>
+                    <span><%= verdict.phish_urls.count %> URLs</span>
+                  </div>
+                </td>
+                <td class="px-5 py-3 text-surface-600 text-sm">
+                  <%= verdict.created_at.strftime("%b %d, %Y") %>
+                </td>
+                <td class="px-5 py-3 text-right">
+                  <div class="flex items-center justify-end gap-2">
+                    <%= link_to "View", admin_verdict_path(verdict), class: "px-2.5 py-1.5 text-xs font-medium text-surface-600 bg-surface-200 rounded-md hover:bg-surface-300 transition-colors" %>
+                    <%= link_to "Edit", edit_admin_verdict_path(verdict), class: "px-2.5 py-1.5 text-xs font-medium text-surface-600 bg-surface-200 rounded-md hover:bg-surface-300 transition-colors" %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <%# Pagination %>
+    <% if @verdicts.respond_to?(:total_pages) && @verdicts.total_pages > 1 %>
+      <div class="mt-6 flex items-center justify-center gap-2">
+        <% if @verdicts.current_page > 1 %>
+          <%= link_to "&larr; Previous".html_safe, admin_verdicts_path(page: @verdicts.current_page - 1, classification: params[:classification], confidence: params[:confidence], scam_category: params[:scam_category]), class: "px-4 py-2 text-sm font-medium text-surface-600 bg-surface-200 rounded-md hover:bg-surface-300 transition-colors" %>
+        <% end %>
+        <span class="px-4 py-2 text-sm text-surface-500">
+          Page <%= @verdicts.current_page %> of <%= @verdicts.total_pages %>
+        </span>
+        <% if @verdicts.current_page < @verdicts.total_pages %>
+          <%= link_to "Next &rarr;".html_safe, admin_verdicts_path(page: @verdicts.current_page + 1, classification: params[:classification], confidence: params[:confidence], scam_category: params[:scam_category]), class: "px-4 py-2 text-sm font-medium text-surface-600 bg-surface-200 rounded-md hover:bg-surface-300 transition-colors" %>
+        <% end %>
+      </div>
+    <% end %>
+  <% else %>
+    <div class="bg-surface-100 rounded-lg p-12 text-center">
+      <svg class="w-10 h-10 mx-auto text-surface-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <div class="text-sm font-medium text-surface-600 mb-1">No verdicts found</div>
+      <p class="text-xs text-surface-500">
+        <% if params[:classification].present? || params[:confidence].present? %>
+          Try adjusting your filters
+        <% else %>
+          Verdicts will appear here as domains and URLs are checked
+        <% end %>
+      </p>
+    </div>
+  <% end %>
+</div>

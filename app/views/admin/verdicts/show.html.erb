@@ -1,0 +1,219 @@
+<% content_for :title, @verdict.public_id %>
+
+<header class="px-8 py-6 border-b border-surface-200/50 flex items-center justify-between bg-surface-50/50 sticky top-0 z-40 backdrop-blur-sm">
+  <div class="flex items-center gap-4">
+    <%= link_to admin_verdicts_path, class: "text-surface-500 hover:text-surface-900 transition-colors" do %>
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19l-7-7 7-7"/></svg>
+    <% end %>
+    <div>
+      <h1 class="text-xl font-semibold text-surface-900">Verdict Details</h1>
+      <p class="text-sm text-surface-500 mt-0.5 font-mono"><%= @verdict.public_id %></p>
+    </div>
+  </div>
+  <div>
+    <%= link_to "Edit", edit_admin_verdict_path(@verdict), class: "px-4 py-2.5 text-sm font-medium text-surface-0 bg-surface-900 rounded-md hover:bg-surface-800 transition-colors" %>
+  </div>
+</header>
+
+<div class="p-8">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <%# Left column - Verdict details %>
+    <div class="lg:col-span-2 space-y-6">
+      <%# Classification card %>
+      <div class="bg-surface-100 rounded-lg overflow-hidden">
+        <div class="px-5 py-4 border-b border-surface-200/50">
+          <h2 class="text-sm font-semibold text-surface-900">Classification</h2>
+        </div>
+        <div class="p-5">
+          <div class="flex items-center gap-6 mb-6">
+            <div>
+              <div class="text-xs font-medium text-surface-500 mb-1.5">Verdict</div>
+              <% case @verdict.classification %>
+              <% when 'phishing' %>
+                <span class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium bg-danger/10 text-danger">Phishing</span>
+              <% when 'suspicious' %>
+                <span class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium bg-warning/10 text-warning">Suspicious</span>
+              <% when 'clean' %>
+                <span class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium bg-success/10 text-success">Clean</span>
+              <% when 'unknown' %>
+                <span class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium bg-surface-300 text-surface-600">Unknown</span>
+              <% when 'protected' %>
+                <span class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium bg-info/10 text-info">Protected</span>
+              <% end %>
+            </div>
+            <div>
+              <div class="text-xs font-medium text-surface-500 mb-1.5">Confidence</div>
+              <div class="flex items-center gap-3">
+                <div class="w-24 h-2 bg-surface-200 rounded-full overflow-hidden">
+                  <% score = @verdict.confidence_score || 0 %>
+                  <div class="h-full rounded-full <%= score >= 0.8 ? 'bg-success' : score >= 0.5 ? 'bg-warning' : 'bg-danger' %>" style="width: <%= (score * 100).to_i %>%"></div>
+                </div>
+                <span class="text-xl font-semibold font-mono text-surface-800"><%= @verdict.confidence_score ? "#{(@verdict.confidence_score * 100).to_i}%" : "—" %></span>
+              </div>
+            </div>
+          </div>
+
+          <% if @verdict.scam_category.present? %>
+            <div class="border-t border-surface-200/50 pt-5">
+              <div class="text-xs font-medium text-surface-500 mb-3">Scam Classification</div>
+              <div class="flex items-center gap-4">
+                <div>
+                  <div class="text-xs text-surface-500">Category</div>
+                  <div class="text-sm font-medium text-surface-800"><%= @verdict.scam_category %></div>
+                </div>
+                <% if @verdict.scam_subcategory.present? %>
+                  <div>
+                    <div class="text-xs text-surface-500">Subcategory</div>
+                    <div class="text-sm font-medium text-surface-800"><%= @verdict.scam_subcategory %></div>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <%# Sources card %>
+      <div class="bg-surface-100 rounded-lg overflow-hidden">
+        <div class="px-5 py-4 border-b border-surface-200/50 flex items-center justify-between">
+          <h2 class="text-sm font-semibold text-surface-900">Detection Sources</h2>
+          <span class="text-xs text-surface-500"><%= @verdict.sources_list.count %> sources</span>
+        </div>
+        <div class="p-5">
+          <% if @verdict.sources_list.any? %>
+            <div class="space-y-3">
+              <% @verdict.sources_list.each do |source| %>
+                <%
+                  # Handle both old format (service/verdict) and new format (name/result)
+                  source_name = source["name"] || source[:name] || source["service"] || source[:service]
+                  source_result = source["result"] || source[:result] || source["verdict"] || source[:verdict]
+                  source_confidence = source["confidence"] || source[:confidence]
+                  checked_at = source["checked_at"] || source[:checked_at]
+                %>
+                <div class="bg-surface-200 rounded-md p-4 flex items-center justify-between">
+                  <div>
+                    <div class="font-medium text-sm text-surface-800"><%= source_name&.titleize&.gsub('_', ' ') || "Unknown Source" %></div>
+                    <% if checked_at %>
+                      <div class="text-xs text-surface-500 mt-0.5">
+                        Checked <%= time_ago_in_words(Time.parse(checked_at)) %> ago
+                      </div>
+                    <% end %>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <% if source_confidence %>
+                      <span class="text-xs text-surface-500"><%= (source_confidence * 100).to_i %>% confidence</span>
+                    <% end %>
+                    <span class="text-sm font-medium <%= source_result == 'clean' ? 'text-success' : source_result == 'phishing' ? 'text-danger' : 'text-surface-600' %>">
+                      <%= source_result&.titleize || "—" %>
+                    </span>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          <% else %>
+            <div class="text-center py-8">
+              <div class="text-sm text-surface-500">No detection sources recorded</div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <%# Metadata card %>
+      <% if @verdict.metadata_hash.any? %>
+        <div class="bg-surface-100 rounded-lg overflow-hidden">
+          <div class="px-5 py-4 border-b border-surface-200/50">
+            <h2 class="text-sm font-semibold text-surface-900">Metadata</h2>
+          </div>
+          <div class="p-5">
+            <div class="bg-surface-200 rounded-md p-4 font-mono text-xs overflow-x-auto">
+              <pre class="text-surface-700"><%= JSON.pretty_generate(@verdict.metadata_hash) %></pre>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <%# Associated domains %>
+      <% if @associated_domains.any? %>
+        <div class="bg-surface-100 rounded-lg overflow-hidden">
+          <div class="px-5 py-4 border-b border-surface-200/50 flex items-center justify-between">
+            <h2 class="text-sm font-semibold text-surface-900">Associated Domains</h2>
+            <span class="text-xs text-surface-500"><%= @verdict.phish_domains.count %> total</span>
+          </div>
+          <div class="divide-y divide-surface-200/50">
+            <% @associated_domains.each do |domain| %>
+              <div class="px-5 py-3 flex items-center justify-between hover:bg-surface-200/30 transition-colors">
+                <div>
+                  <code class="text-sm text-surface-800 font-mono"><%= domain.domain %></code>
+                  <div class="text-xs text-surface-500 font-mono"><%= domain.public_id %></div>
+                </div>
+                <%= link_to "View", admin_domain_path(domain), class: "px-2.5 py-1.5 text-xs font-medium text-surface-600 bg-surface-200 rounded-md hover:bg-surface-300 transition-colors" %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <%# Associated URLs %>
+      <% if @associated_urls.any? %>
+        <div class="bg-surface-100 rounded-lg overflow-hidden">
+          <div class="px-5 py-4 border-b border-surface-200/50 flex items-center justify-between">
+            <h2 class="text-sm font-semibold text-surface-900">Associated URLs</h2>
+            <span class="text-xs text-surface-500"><%= @verdict.phish_urls.count %> total</span>
+          </div>
+          <div class="divide-y divide-surface-200/50">
+            <% @associated_urls.each do |url| %>
+              <div class="px-5 py-3 flex items-center justify-between hover:bg-surface-200/30 transition-colors">
+                <div class="min-w-0 flex-1 mr-4">
+                  <code class="text-sm text-surface-800 font-mono truncate block"><%= truncate(url.url, length: 60) %></code>
+                  <div class="text-xs text-surface-500 font-mono"><%= url.public_id %></div>
+                </div>
+                <%= link_to "View", admin_url_path(url), class: "px-2.5 py-1.5 text-xs font-medium text-surface-600 bg-surface-200 rounded-md hover:bg-surface-300 transition-colors" %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <%# Right column - Details %>
+    <div class="space-y-6">
+      <%# Info card %>
+      <div class="bg-surface-100 rounded-lg overflow-hidden">
+        <div class="px-5 py-4 border-b border-surface-200/50">
+          <h2 class="text-sm font-semibold text-surface-900">Details</h2>
+        </div>
+        <div class="p-5 space-y-4">
+          <div>
+            <div class="text-xs font-medium text-surface-500 mb-1">Public ID</div>
+            <code class="text-xs text-surface-600 font-mono break-all"><%= @verdict.public_id %></code>
+          </div>
+          <div>
+            <div class="text-xs font-medium text-surface-500 mb-1">Created</div>
+            <div class="text-sm text-surface-700"><%= @verdict.created_at.strftime("%B %d, %Y at %I:%M %p") %></div>
+          </div>
+          <div>
+            <div class="text-xs font-medium text-surface-500 mb-1">Last Updated</div>
+            <div class="text-sm text-surface-700"><%= @verdict.updated_at.strftime("%B %d, %Y at %I:%M %p") %></div>
+          </div>
+          <div>
+            <div class="text-xs font-medium text-surface-500 mb-1">Associated Items</div>
+            <div class="text-sm text-surface-700"><%= @verdict.phish_domains.count %> domains, <%= @verdict.phish_urls.count %> URLs</div>
+          </div>
+        </div>
+      </div>
+
+      <%# Actions card %>
+      <div class="bg-surface-100 rounded-lg overflow-hidden">
+        <div class="px-5 py-4 border-b border-surface-200/50">
+          <h2 class="text-sm font-semibold text-surface-900">Actions</h2>
+        </div>
+        <div class="p-5 space-y-2">
+          <%= link_to edit_admin_verdict_path(@verdict), class: "w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-surface-700 bg-surface-200 rounded-md hover:bg-surface-300 transition-colors" do %>
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+            Edit Verdict
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
