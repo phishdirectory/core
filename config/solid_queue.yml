@@ -5,9 +5,10 @@
 # Queue Priority (highest to lowest):
 #   1. critical     - Security incidents, ops alerts (immediate processing)
 #   2. webhooks     - External notifications (time-sensitive)
-#   3. default      - Normal operations (phish checks, emails, metrics)
-#   4. maintenance  - Cleanup jobs (can be delayed)
-#   5. low_priority - Retry jobs, background processing (lowest urgency)
+#   3. emails       - User-facing emails (magic links, welcome - users waiting)
+#   4. default      - Normal operations (phish checks, reports)
+#   5. maintenance  - Cleanup jobs (can be delayed)
+#   6. low_priority - Retry jobs, background processing (lowest urgency)
 #
 # Jobs are assigned to queues via `queue_as :queue_name` in the job class.
 
@@ -22,6 +23,7 @@ default: &default
     - queues:
         - critical
         - webhooks
+        - emails
         - default
         - maintenance
         - low_priority
@@ -45,10 +47,11 @@ production:
       concurrency_maintenance_interval: 30
 
   workers:
-    # Dedicated worker for critical + webhooks (fast response)
+    # Dedicated worker for critical + webhooks + emails (fast response)
     - queues:
         - critical
         - webhooks
+        - emails
       threads: 2
       polling_interval: 0.1
       processes: 1

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class ApiMetricsBatchJob < ApplicationJob
-  queue_as QUEUE_DEFAULT
+  queue_as QUEUE_MAINTENANCE
 
   def perform
     # Flush any batched metrics

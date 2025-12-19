@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class HeartbeatJob < ApplicationJob
-  queue_as QUEUE_DEFAULT
+  queue_as QUEUE_MAINTENANCE
 
   def perform
     # Record that the app is alive

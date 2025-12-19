@@ -11,12 +11,14 @@ class ApplicationJob < ActiveJob::Base
   # Queue Descriptions:
   #   CRITICAL     - Security incidents, ops alerts. Processed immediately.
   #   WEBHOOKS     - External notifications. Time-sensitive delivery.
-  #   DEFAULT      - Normal operations (phish checks, emails, metrics).
+  #   EMAILS       - User-facing emails (magic links, welcome). Users are waiting.
+  #   DEFAULT      - Normal operations (phish checks, reports).
   #   MAINTENANCE  - Cleanup jobs. Can be delayed during high load.
   #   LOW_PRIORITY - Retry jobs, background processing. Lowest urgency.
   #
   QUEUE_CRITICAL     = :critical
   QUEUE_WEBHOOKS     = :webhooks
+  QUEUE_EMAILS       = :emails
   QUEUE_DEFAULT      = :default
   QUEUE_MAINTENANCE  = :maintenance
   QUEUE_LOW_PRIORITY = :low_priority
