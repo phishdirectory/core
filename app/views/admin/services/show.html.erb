@@ -211,7 +211,12 @@
 
           <div class="border-t border-surface-200/50 pt-3 mt-3">
             <div class="text-xs font-medium text-danger/70 mb-3">Danger Zone</div>
-            <%= button_to "Delete Service", admin_service_path(@service), method: :delete, class: "w-full px-4 py-2.5 text-sm font-medium text-danger bg-danger/10 rounded-md hover:bg-danger/20 transition-colors cursor-pointer text-left", data: { turbo_confirm: "Are you sure you want to permanently delete this service? All API keys and webhooks will also be deleted." } %>
+            <% if @service.decommissioned? %>
+              <%= button_to "Delete Service", admin_service_path(@service), method: :delete, class: "w-full px-4 py-2.5 text-sm font-medium text-danger bg-danger/10 rounded-md hover:bg-danger/20 transition-colors cursor-pointer text-left", data: { turbo_confirm: "Are you sure you want to permanently delete this service? All API keys and webhooks will also be deleted." } %>
+            <% else %>
+              <div class="w-full px-4 py-2.5 text-sm font-medium text-surface-400 bg-surface-200 rounded-md cursor-not-allowed text-left" title="Service must be decommissioned before deletion">Delete Service</div>
+              <p class="text-xs text-surface-500 mt-2">Decommission the service first to enable deletion.</p>
+            <% end %>
           </div>
         </div>
       </div>

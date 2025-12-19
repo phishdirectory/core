@@ -39,10 +39,15 @@ module Admin
     end
 
     def destroy
+      unless @service.decommissioned?
+        redirect_to admin_service_path(@service), alert: "Service must be decommissioned before deletion."
+        return
+      end
+
       if @service.destroy
         redirect_to admin_services_path, notice: "Service deleted."
       else
-        redirect_to admin_service_path(@service), alert: "Unable to delete service."
+        redirect_to admin_service_path(@service), alert: "Unable to delete service: #{@service.errors.full_messages.join(', ')}"
       end
     end
 

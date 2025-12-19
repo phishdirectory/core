@@ -17,6 +17,9 @@ class Service < ApplicationRecord
   # Validations
   validates :name, presence: true, uniqueness: true
 
+  # Callbacks
+  before_destroy :require_decommissioned
+
   # Counter cache for keys
   # Note: keys_count is managed by Service::Key callbacks
 
@@ -94,5 +97,14 @@ class Service < ApplicationRecord
 
       key.service
     end
+  end
+
+  private
+
+  def require_decommissioned
+    return if decommissioned?
+
+    errors.add(:base, "Service must be decommissioned before deletion")
+    throw(:abort)
   end
 end
