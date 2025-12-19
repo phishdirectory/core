@@ -56,7 +56,7 @@ module Admin
         if @case.may_escalate?
           @case.escalate!
 
-          ::Report::OpsMailer.with(case: @case, reason: "Manual escalation by #{current_user.email}")
+          ::Report::OpsMailer.with(case: @case, reason: "Manual escalation by #{current_user.pd_id}")
             .case_escalated
             .deliver_later
 
