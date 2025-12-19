@@ -24,6 +24,8 @@ class QuickSearchController < ApplicationController
       { id: "nav-api-keys", name: "API Keys", section: "Navigation", icon: "🔑", url: dashboard_api_keys_path, keywords: "keys tokens auth" },
       { id: "nav-sessions", name: "Active Sessions", section: "Navigation", icon: "💻", url: dashboard_sessions_path, keywords: "devices login" },
       { id: "nav-check", name: "Check Domain/URL", section: "Navigation", icon: "🔍", url: dashboard_domain_check_path, keywords: "scan phishing verify" },
+      { id: "nav-check-phone", name: "Check Phone Number", section: "Navigation", icon: "📞", url: dashboard_phone_check_path, keywords: "phone number scam verify" },
+      { id: "nav-check-email", name: "Check Email", section: "Navigation", icon: "📧", url: dashboard_email_check_path, keywords: "email address fraud verify" },
       { id: "nav-docs", name: "API Documentation", section: "Navigation", icon: "📚", url: docs_path, keywords: "api reference help" },
       { id: "nav-logout", name: "Sign Out", section: "Navigation", icon: "🚪", url: logout_path, keywords: "exit logout signout", method: "delete" }
     ]
@@ -36,6 +38,8 @@ class QuickSearchController < ApplicationController
       { id: "admin-services", name: "Manage Services", section: "Admin", icon: "⚙️", url: admin_services_path, keywords: "services api clients" },
       { id: "admin-domains", name: "Phishing Domains", section: "Admin", icon: "🌐", url: admin_domains_path, keywords: "domains phishing" },
       { id: "admin-urls", name: "Phishing URLs", section: "Admin", icon: "🔗", url: admin_urls_path, keywords: "urls phishing links" },
+      { id: "admin-phones", name: "Phone Numbers", section: "Admin", icon: "📞", url: admin_phone_numbers_path, keywords: "phones numbers scam voip" },
+      { id: "admin-emails", name: "Emails", section: "Admin", icon: "📧", url: admin_emails_path, keywords: "emails fraud disposable" },
       { id: "admin-flipper", name: "Feature Flags", section: "Admin Tools", icon: "🚩", url: "/admin/flipper", keywords: "flags features toggle" },
       { id: "admin-jobs", name: "Background Jobs", section: "Admin Tools", icon: "⏱️", url: "/admin/jobs", keywords: "jobs queue workers sidekiq" },
       { id: "admin-blazer", name: "Analytics (Blazer)", section: "Admin Tools", icon: "📊", url: "/admin/blazer", keywords: "analytics sql queries reports" },
@@ -57,12 +61,18 @@ class QuickSearchController < ApplicationController
       results += search_domains_by_public_id(query)
     when /^url_/i
       results += search_urls_by_public_id(query)
+    when /^phn_/i
+      results += search_phone_numbers_by_public_id(query)
+    when /^eml_/i
+      results += search_emails_by_public_id(query)
     when /^PDU/i
       results += search_users_by_pd_id(query) if current_user.admin?
     else
       # General search across relevant types
       results += search_domains(query)
       results += search_urls(query)
+      results += search_phone_numbers(query)
+      results += search_emails(query)
       results += search_users(query) if current_user.admin?
       results += search_services(query) if current_user.admin?
     end
@@ -131,6 +141,30 @@ class QuickSearchController < ApplicationController
     urls.map { |u| format_url(u) }
   end
 
+  def search_phone_numbers_by_public_id(query)
+    phone = Phish::PhoneNumber.find_by_public_id(query)
+    return [] unless phone
+
+    [format_phone_number(phone)]
+  end
+
+  def search_phone_numbers(query)
+    phone_numbers = Phish::PhoneNumber.where("phone_number ILIKE :q", q: "%#{query}%").limit(5)
+    phone_numbers.map { |p| format_phone_number(p) }
+  end
+
+  def search_emails_by_public_id(query)
+    email = Phish::Email.find_by_public_id(query)
+    return [] unless email
+
+    [format_email(email)]
+  end
+
+  def search_emails(query)
+    emails = Phish::Email.where("email ILIKE :q", q: "%#{query}%").limit(5)
+    emails.map { |e| format_email(e) }
+  end
+
   def format_user(user)
     {
       type: "user",
@@ -180,6 +214,32 @@ class QuickSearchController < ApplicationController
       url: current_user.admin? ? admin_url_path(url) : "#",
       badge: url.verdict&.classification || "unknown",
       badge_color: verdict_badge_color(url.verdict&.classification)
+    }
+  end
+
+  def format_phone_number(phone)
+    {
+      type: "phone",
+      section: "Phone Numbers",
+      icon: "📞",
+      name: phone.phone_number,
+      subtitle: phone.verdict&.classification || "unchecked",
+      url: current_user.admin? ? admin_phone_number_path(phone) : "#",
+      badge: phone.verdict&.classification || "unknown",
+      badge_color: verdict_badge_color(phone.verdict&.classification)
+    }
+  end
+
+  def format_email(email)
+    {
+      type: "email",
+      section: "Emails",
+      icon: "📧",
+      name: email.email,
+      subtitle: email.verdict&.classification || "unchecked",
+      url: current_user.admin? ? admin_email_path(email) : "#",
+      badge: email.verdict&.classification || "unknown",
+      badge_color: verdict_badge_color(email.verdict&.classification)
     }
   end
 

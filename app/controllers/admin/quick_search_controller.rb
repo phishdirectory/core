@@ -20,6 +20,10 @@ module Admin
         results += search_domains_by_public_id(query)
       when /^url_/i
         results += search_urls_by_public_id(query)
+      when /^phn_/i
+        results += search_phone_numbers_by_public_id(query)
+      when /^eml_/i
+        results += search_emails_by_public_id(query)
       when /^PDU/i
         results += search_users_by_pd_id(query)
       else
@@ -28,6 +32,8 @@ module Admin
         results += search_services(query)
         results += search_domains(query)
         results += search_urls(query)
+        results += search_phone_numbers(query)
+        results += search_emails(query)
       end
 
       render json: { results: results.first(10) }
@@ -94,6 +100,30 @@ module Admin
       urls.map { |u| format_url(u) }
     end
 
+    def search_phone_numbers_by_public_id(query)
+      phone = Phish::PhoneNumber.find_by_public_id(query)
+      return [] unless phone
+
+      [format_phone_number(phone)]
+    end
+
+    def search_phone_numbers(query)
+      phone_numbers = Phish::PhoneNumber.where("phone_number ILIKE :q", q: "%#{query}%").limit(5)
+      phone_numbers.map { |p| format_phone_number(p) }
+    end
+
+    def search_emails_by_public_id(query)
+      email = Phish::Email.find_by_public_id(query)
+      return [] unless email
+
+      [format_email(email)]
+    end
+
+    def search_emails(query)
+      emails = Phish::Email.where("email ILIKE :q", q: "%#{query}%").limit(5)
+      emails.map { |e| format_email(e) }
+    end
+
     def format_user(user)
       {
         type: "user",
@@ -143,6 +173,32 @@ module Admin
         url: admin_url_path(url),
         badge: url.verdict&.classification || "unknown",
         badge_color: verdict_badge_color(url.verdict&.classification)
+      }
+    end
+
+    def format_phone_number(phone)
+      {
+        type: "phone",
+        section: "Phone Numbers",
+        icon: "📞",
+        name: phone.phone_number,
+        subtitle: phone.verdict&.classification || "unchecked",
+        url: admin_phone_number_path(phone),
+        badge: phone.verdict&.classification || "unknown",
+        badge_color: verdict_badge_color(phone.verdict&.classification)
+      }
+    end
+
+    def format_email(email)
+      {
+        type: "email",
+        section: "Emails",
+        icon: "📧",
+        name: email.email,
+        subtitle: email.verdict&.classification || "unchecked",
+        url: admin_email_path(email),
+        badge: email.verdict&.classification || "unknown",
+        badge_color: verdict_badge_color(email.verdict&.classification)
       }
     end
 

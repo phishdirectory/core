@@ -92,6 +92,14 @@ Rails.application.routes.draw do
     get "check", to: "domain_checks#new", as: :domain_check
     post "check", to: "domain_checks#create"
 
+    # Phone number checking
+    get "check_phone", to: "phone_checks#new", as: :phone_check
+    post "check_phone", to: "phone_checks#create"
+
+    # Email checking
+    get "check_email", to: "email_checks#new", as: :email_check
+    post "check_email", to: "email_checks#create"
+
     resources :api_keys, only: [:index, :create, :destroy] do
       member do
         post :regenerate
@@ -150,6 +158,8 @@ Rails.application.routes.draw do
 
     resources :domains, controller: "phish_domains", only: [:index, :show]
     resources :urls, controller: "phish_urls", only: [:index, :show]
+    resources :phone_numbers, controller: "phish_phone_numbers", only: [:index, :show]
+    resources :emails, controller: "phish_emails", only: [:index, :show]
     resources :verdicts, only: [:index, :show, :edit, :update]
     resources :protections, only: [:index, :show, :new, :create, :destroy]
 

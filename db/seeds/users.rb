@@ -17,7 +17,16 @@ module Seeds
       puts "Seeding users..."
 
       USERS.each do |u|
-        User.find_or_create_by!(email: u[:email], first_name: u[:first_name], last_name: u[:last_name], access_level: u[:access_level], staff: u[:staff], pd_dev: u[:pd_dev])
+        User.find_or_create_by!(
+          email: u[:email],
+          first_name: u[:first_name],
+          last_name: u[:last_name],
+          access_level: u[:access_level],
+          staff: u[:staff],
+          pd_dev: u[:pd_dev],
+          email_verified: true,
+          email_verified_at: Time.current
+        )
         end
       end
 

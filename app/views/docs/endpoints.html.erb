@@ -144,6 +144,123 @@
     </div>
   </div>
 
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Phone Number Endpoints</h2>
+
+  <div class="not-prose space-y-4 mb-8">
+    <div class="bg-pd-secondary border border-slate-700/20 rounded-xl p-5">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="px-2 py-1 bg-emerald-500/15 text-emerald-500 rounded font-mono text-xs font-semibold">GET</span>
+        <span class="px-2 py-1 bg-blue-500/15 text-blue-500 rounded font-mono text-xs font-semibold">POST</span>
+        <code class="text-slate-100 font-mono">/v1/phone/check</code>
+      </div>
+      <p class="text-slate-400 text-sm mb-4">Check a single phone number for scam or fraud activity.</p>
+
+      <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Parameters</div>
+      <table class="w-full text-sm mb-4">
+        <tr class="border-b border-slate-700/20">
+          <td class="py-2 pr-4"><code class="text-cyan-accent">phone</code></td>
+          <td class="py-2 pr-4 text-slate-500">string</td>
+          <td class="py-2 pr-4"><span class="text-red-400 text-xs">required</span></td>
+          <td class="py-2 text-slate-400">Phone number in E.164 format (e.g., +14155551234)</td>
+        </tr>
+      </table>
+
+      <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Example Response</div>
+      <div class="bg-pd-tertiary rounded-lg p-4 font-mono text-sm">
+<pre class="text-slate-100">{
+  "id": "phn_4k8xJm2pN9qW",
+  "phone_number": "+14155551234",
+  "verdict": "clean",
+  "confidence": 0.85,
+  "phone_type": "mobile",
+  "country_code": "US",
+  "carrier": "Verizon",
+  "last_checked": "2024-01-15T10:30:00Z",
+  "created_at": "2024-01-01T00:00:00Z"
+}</pre>
+      </div>
+    </div>
+
+    <div class="bg-pd-secondary border border-slate-700/20 rounded-xl p-5">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="px-2 py-1 bg-emerald-500/15 text-emerald-500 rounded font-mono text-xs font-semibold">GET</span>
+        <span class="px-2 py-1 bg-blue-500/15 text-blue-500 rounded font-mono text-xs font-semibold">POST</span>
+        <code class="text-slate-100 font-mono">/v1/phone/bulk</code>
+      </div>
+      <p class="text-slate-400 text-sm mb-4">Check multiple phone numbers in a single request (max 100).</p>
+
+      <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Parameters</div>
+      <table class="w-full text-sm mb-4">
+        <tr class="border-b border-slate-700/20">
+          <td class="py-2 pr-4"><code class="text-cyan-accent">phones</code></td>
+          <td class="py-2 pr-4 text-slate-500">array</td>
+          <td class="py-2 pr-4"><span class="text-red-400 text-xs">required</span></td>
+          <td class="py-2 text-slate-400">Array of phone numbers in E.164 format (max 100)</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Email Endpoints</h2>
+
+  <div class="not-prose space-y-4 mb-8">
+    <div class="bg-pd-secondary border border-slate-700/20 rounded-xl p-5">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="px-2 py-1 bg-emerald-500/15 text-emerald-500 rounded font-mono text-xs font-semibold">GET</span>
+        <span class="px-2 py-1 bg-blue-500/15 text-blue-500 rounded font-mono text-xs font-semibold">POST</span>
+        <code class="text-slate-100 font-mono">/v1/email/check</code>
+      </div>
+      <p class="text-slate-400 text-sm mb-4">Check a single email address for fraud or disposable services.</p>
+
+      <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Parameters</div>
+      <table class="w-full text-sm mb-4">
+        <tr class="border-b border-slate-700/20">
+          <td class="py-2 pr-4"><code class="text-cyan-accent">email</code></td>
+          <td class="py-2 pr-4 text-slate-500">string</td>
+          <td class="py-2 pr-4"><span class="text-red-400 text-xs">required</span></td>
+          <td class="py-2 text-slate-400">The email address to check</td>
+        </tr>
+      </table>
+
+      <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Example Response</div>
+      <div class="bg-pd-tertiary rounded-lg p-4 font-mono text-sm">
+<pre class="text-slate-100">{
+  "id": "eml_4k8xJm2pN9qW",
+  "email": "user@example.com",
+  "domain": "example.com",
+  "verdict": "clean",
+  "confidence": 0.92,
+  "disposable": false,
+  "free_provider": true,
+  "deliverable": true,
+  "valid_mx": true,
+  "reputation_score": 0.85,
+  "last_checked": "2024-01-15T10:30:00Z",
+  "created_at": "2024-01-01T00:00:00Z"
+}</pre>
+      </div>
+    </div>
+
+    <div class="bg-pd-secondary border border-slate-700/20 rounded-xl p-5">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="px-2 py-1 bg-emerald-500/15 text-emerald-500 rounded font-mono text-xs font-semibold">GET</span>
+        <span class="px-2 py-1 bg-blue-500/15 text-blue-500 rounded font-mono text-xs font-semibold">POST</span>
+        <code class="text-slate-100 font-mono">/v1/email/bulk</code>
+      </div>
+      <p class="text-slate-400 text-sm mb-4">Check multiple email addresses in a single request (max 100).</p>
+
+      <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Parameters</div>
+      <table class="w-full text-sm mb-4">
+        <tr class="border-b border-slate-700/20">
+          <td class="py-2 pr-4"><code class="text-cyan-accent">emails</code></td>
+          <td class="py-2 pr-4 text-slate-500">array</td>
+          <td class="py-2 pr-4"><span class="text-red-400 text-xs">required</span></td>
+          <td class="py-2 text-slate-400">Array of email addresses to check (max 100)</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
   <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">User Endpoints</h2>
 
   <div class="not-prose space-y-4 mb-8">

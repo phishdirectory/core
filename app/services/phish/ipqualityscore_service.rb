@@ -47,7 +47,7 @@ module Phish
 
       with_rate_limit do
         conn = connection(base_url: URL_BASE_URL)
-        response = get(conn, "/#{api_key}/#{CGI.escape(normalized)}", url_request_params)
+        response = get(conn, "#{api_key}/#{CGI.escape(normalized)}", url_request_params)
         parse_url_response(response, domain: normalized)
       end
     rescue RateLimitable::RateLimitExceeded => e
@@ -67,7 +67,7 @@ module Phish
 
       with_rate_limit do
         conn = connection(base_url: URL_BASE_URL)
-        response = get(conn, "/#{api_key}/#{CGI.escape(normalized)}", url_request_params)
+        response = get(conn, "#{api_key}/#{CGI.escape(normalized)}", url_request_params)
         parse_url_response(response, url: normalized)
       end
     rescue RateLimitable::RateLimitExceeded => e
@@ -87,7 +87,7 @@ module Phish
 
       with_rate_limit do
         conn = connection(base_url: EMAIL_BASE_URL)
-        response = get(conn, "/#{api_key}/#{CGI.escape(normalized)}", email_request_params)
+        response = get(conn, "#{api_key}/#{CGI.escape(normalized)}", email_request_params)
         parse_email_response(response, normalized)
       end
     rescue RateLimitable::RateLimitExceeded => e
@@ -109,7 +109,7 @@ module Phish
 
       with_rate_limit do
         conn = connection(base_url: PHONE_BASE_URL)
-        response = get(conn, "/#{api_key}/#{CGI.escape(normalized)}", phone_request_params)
+        response = get(conn, "#{api_key}/#{CGI.escape(normalized)}", phone_request_params)
         parse_phone_response(response, normalized)
       end
     rescue RateLimitable::RateLimitExceeded => e
@@ -297,6 +297,15 @@ module Phish
       confidence -= 0.1 if response["catch_all"] == true # Catch-all reduces certainty
       confidence = confidence.clamp(0.0, 1.0)
 
+      # Map deliverability string to boolean
+      deliverability = response["deliverability"]
+      deliverable = case deliverability
+      when "high" then true
+      when "medium" then true
+      when "low" then false
+      else nil
+      end
+
       build_result(
         verdict: verdict,
         confidence: confidence.round(2),
@@ -306,8 +315,10 @@ module Phish
           valid: valid,
           disposable: disposable,
           free_provider: response["free_email"],
-          deliverable: response["deliverability"] == "high",
-          valid_mx: response["valid_mx"],
+          free_email: response["free_email"],
+          deliverable: deliverable,
+          deliverability: deliverability,
+          valid_mx: response["dns_valid"],  # IPQS uses dns_valid for MX validation
           recent_abuse: recent_abuse,
           leaked: leaked,
           honeypot: honeypot,
@@ -318,7 +329,7 @@ module Phish
           dns_valid: response["dns_valid"],
           smtp_score: response["smtp_score"],
           overall_score: response["overall_score"],
-          first_seen: response["first_seen"],
+          first_seen: response.dig("first_seen", "human"),
           domain_age: response.dig("domain_age", "human"),
           suggested_domain: response["suggested_domain"],
           source: "ipqualityscore"

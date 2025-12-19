@@ -1,0 +1,168 @@
+<% content_for :title, @phone_number.phone_number %>
+
+<header class="px-8 py-6 border-b border-surface-200/50 flex items-center justify-between bg-surface-50/50 sticky top-0 z-40 backdrop-blur-sm">
+  <div class="flex items-center gap-4">
+    <%= link_to admin_phone_numbers_path, class: "text-surface-500 hover:text-surface-900 transition-colors" do %>
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19l-7-7 7-7"/></svg>
+    <% end %>
+    <div>
+      <h1 class="text-xl font-semibold text-surface-900 font-mono"><%= @phone_number.phone_number %></h1>
+      <p class="text-sm text-surface-500 mt-0.5 font-mono"><%= @phone_number.public_id %></p>
+    </div>
+  </div>
+</header>
+
+<div class="p-8">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <%# Left column - Verdict details %>
+    <div class="lg:col-span-2 space-y-6">
+      <%# Verdict card %>
+      <div class="bg-surface-100 rounded-lg overflow-hidden">
+        <div class="px-5 py-4 border-b border-surface-200/50">
+          <h2 class="text-sm font-semibold text-surface-900">Verdict</h2>
+        </div>
+        <div class="p-5">
+          <% if @phone_number.verdict %>
+            <div class="flex items-center gap-6 mb-6">
+              <div>
+                <div class="text-xs font-medium text-surface-500 mb-1.5">Classification</div>
+                <% case @phone_number.classification %>
+                <% when 'phishing' %>
+                  <span class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium bg-danger/10 text-danger">Phishing</span>
+                <% when 'suspicious' %>
+                  <span class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium bg-warning/10 text-warning">Suspicious</span>
+                <% when 'clean' %>
+                  <span class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium bg-success/10 text-success">Clean</span>
+                <% when 'unknown' %>
+                  <span class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium bg-surface-300 text-surface-600">Unknown</span>
+                <% end %>
+              </div>
+              <div>
+                <div class="text-xs font-medium text-surface-500 mb-1.5">Confidence</div>
+                <div class="flex items-center gap-3">
+                  <div class="w-24 h-2 bg-surface-200 rounded-full overflow-hidden">
+                    <div class="h-full rounded-full <%= @phone_number.confidence_score && @phone_number.confidence_score >= 0.8 ? 'bg-success' : @phone_number.confidence_score && @phone_number.confidence_score >= 0.5 ? 'bg-warning' : 'bg-danger' %>" style="width: <%= @phone_number.confidence_score ? (@phone_number.confidence_score * 100).to_i : 0 %>%"></div>
+                  </div>
+                  <span class="text-xl font-semibold font-mono text-surface-800"><%= @phone_number.confidence_score ? "#{(@phone_number.confidence_score * 100).to_i}%" : "&mdash;".html_safe %></span>
+                </div>
+              </div>
+            </div>
+
+            <%# Sources %>
+            <% if @phone_number.verdict.sources_list.any? %>
+              <div class="border-t border-surface-200/50 pt-5">
+                <div class="text-xs font-medium text-surface-500 mb-3">Detection Sources</div>
+                <div class="space-y-3">
+                  <% @phone_number.verdict.sources_list.each do |source| %>
+                    <%
+                      source_name = source["name"] || source[:name] || source["service"] || source[:service] || source[:service_name]
+                      source_result = source["result"] || source[:result] || source["verdict"] || source[:verdict]
+                      source_confidence = source["confidence"] || source[:confidence]
+                      checked_at = source["checked_at"] || source[:checked_at]
+                    %>
+                    <div class="bg-surface-200 rounded-md p-4 flex items-center justify-between">
+                      <div>
+                        <div class="font-medium text-sm text-surface-800"><%= source_name&.to_s&.titleize&.gsub('_', ' ') || "Unknown Source" %></div>
+                        <% if checked_at %>
+                          <div class="text-xs text-surface-500 mt-0.5">
+                            Checked <%= time_ago_in_words(Time.parse(checked_at.to_s)) %> ago
+                          </div>
+                        <% end %>
+                      </div>
+                      <div class="flex items-center gap-3">
+                        <% if source_confidence %>
+                          <span class="text-xs text-surface-500"><%= (source_confidence * 100).to_i %>% confidence</span>
+                        <% end %>
+                        <span class="text-sm font-medium <%= source_result == 'clean' ? 'text-success' : source_result == 'phishing' ? 'text-danger' : 'text-surface-600' %>">
+                          <%= source_result&.to_s&.titleize || "&mdash;".html_safe %>
+                        </span>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+
+            <%# Metadata %>
+            <% if @phone_number.verdict.metadata_hash.any? %>
+              <div class="border-t border-surface-200/50 pt-5 mt-5">
+                <div class="text-xs font-medium text-surface-500 mb-3">Additional Metadata</div>
+                <div class="bg-surface-200 rounded-md p-4 font-mono text-xs overflow-x-auto">
+                  <pre class="text-surface-700"><%= JSON.pretty_generate(@phone_number.verdict.metadata_hash) %></pre>
+                </div>
+              </div>
+            <% end %>
+          <% else %>
+            <div class="text-center py-10">
+              <div class="text-sm font-medium text-surface-600 mb-1">No verdict yet</div>
+              <p class="text-xs text-surface-500">This phone number has not been checked by any detection services</p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <%# Right column - Details %>
+    <div class="space-y-6">
+      <%# Info card %>
+      <div class="bg-surface-100 rounded-lg overflow-hidden">
+        <div class="px-5 py-4 border-b border-surface-200/50">
+          <h2 class="text-sm font-semibold text-surface-900">Details</h2>
+        </div>
+        <div class="p-5 space-y-4">
+          <div>
+            <div class="text-xs font-medium text-surface-500 mb-1">Phone Number</div>
+            <code class="text-sm text-surface-800 font-mono"><%= @phone_number.phone_number %></code>
+          </div>
+          <div>
+            <div class="text-xs font-medium text-surface-500 mb-1">Public ID</div>
+            <code class="text-xs text-surface-600 font-mono break-all"><%= @phone_number.public_id %></code>
+          </div>
+          <div>
+            <div class="text-xs font-medium text-surface-500 mb-1">Phone Type</div>
+            <div class="text-sm text-surface-700 capitalize"><%= @phone_number.phone_type || "&mdash;".html_safe %></div>
+          </div>
+          <div>
+            <div class="text-xs font-medium text-surface-500 mb-1">Country</div>
+            <div class="text-sm text-surface-700"><%= @phone_number.country_code || "&mdash;".html_safe %></div>
+          </div>
+          <div>
+            <div class="text-xs font-medium text-surface-500 mb-1">Carrier</div>
+            <div class="text-sm text-surface-700"><%= @phone_number.carrier&.name || "&mdash;".html_safe %></div>
+          </div>
+          <div>
+            <div class="text-xs font-medium text-surface-500 mb-1">First Seen</div>
+            <div class="text-sm text-surface-700"><%= @phone_number.created_at.strftime("%B %d, %Y at %I:%M %p") %></div>
+          </div>
+          <div>
+            <div class="text-xs font-medium text-surface-500 mb-1">Last Checked</div>
+            <div class="text-sm text-surface-700"><%= @phone_number.last_checked_at ? @phone_number.last_checked_at.strftime("%B %d, %Y at %I:%M %p") : "Never" %></div>
+          </div>
+          <div>
+            <div class="text-xs font-medium text-surface-500 mb-1">Status</div>
+            <% if @phone_number.stale? %>
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-warning/10 text-warning">Stale</span>
+            <% elsif @phone_number.checked? %>
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-success/10 text-success">Current</span>
+            <% else %>
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-surface-300 text-surface-600">Unchecked</span>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <%# External links %>
+      <div class="bg-surface-100 rounded-lg overflow-hidden">
+        <div class="px-5 py-4 border-b border-surface-200/50">
+          <h2 class="text-sm font-semibold text-surface-900">External Tools</h2>
+        </div>
+        <div class="p-5 space-y-2">
+          <a href="https://www.ipqualityscore.com/free-ip-lookup-proxy-vpn-test/lookup/<%= @phone_number.phone_number %>" target="_blank" rel="noopener" class="flex items-center justify-between px-4 py-3 bg-surface-200 rounded-md hover:bg-surface-300 transition-colors">
+            <span class="text-sm text-surface-800">IPQualityScore</span>
+            <svg class="w-4 h-4 text-surface-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

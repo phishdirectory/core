@@ -1,0 +1,148 @@
+<% content_for :title, "Check Phone Number" %>
+
+<header class="px-8 py-6 border-b border-surface-200/50 flex items-center justify-between bg-surface-50/50 sticky top-0 z-40 backdrop-blur-sm">
+  <div>
+    <h1 class="text-xl font-semibold text-surface-900">Check Phone Number</h1>
+    <p class="text-sm text-surface-500 mt-0.5">Analyze phone numbers for scam or fraud activity</p>
+  </div>
+</header>
+
+<div class="p-8">
+  <%# Phone check form %>
+  <div class="bg-surface-100 rounded-lg overflow-hidden mb-6">
+    <div class="px-5 py-4 border-b border-surface-200/50">
+      <h2 class="text-sm font-semibold text-surface-900">Phone Number Lookup</h2>
+    </div>
+    <div class="p-5">
+      <%= form_with url: dashboard_phone_check_path, method: :post, local: true, class: "flex gap-4" do |f| %>
+        <div class="flex-1">
+          <%= f.text_field :phone,
+            value: @phone,
+            placeholder: "Enter a phone number (e.g., +14155551234)",
+            class: "w-full px-3 py-2.5 bg-surface-200 border border-surface-300/50 rounded-md text-surface-900 placeholder-surface-500 text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 font-mono transition-colors",
+            autocomplete: "off",
+            autofocus: true %>
+        </div>
+        <%= f.submit "Check Phone",
+          class: "px-5 py-2.5 bg-surface-900 text-surface-0 font-medium text-sm rounded-md hover:bg-surface-800 transition-colors cursor-pointer" %>
+      <% end %>
+      <p class="text-xs text-surface-500 mt-2">Phone numbers are normalized to E.164 format (+country code + number)</p>
+    </div>
+  </div>
+
+  <% if @result %>
+    <%# Results %>
+    <div class="bg-surface-100 rounded-lg overflow-hidden">
+      <div class="px-5 py-4 border-b border-surface-200/50 flex items-center justify-between">
+        <h2 class="text-sm font-semibold text-surface-900">Results</h2>
+        <span class="font-mono text-xs text-surface-500"><%= @result[:phone_number] %></span>
+      </div>
+      <div class="p-5">
+        <%# Verdict badge %>
+        <div class="flex items-center gap-4 mb-6">
+          <div class="text-xs font-medium text-surface-500 uppercase tracking-wide">Verdict</div>
+          <% verdict = @result[:verdict] %>
+          <% case verdict %>
+          <% when "phishing" %>
+            <span class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium bg-danger/10 text-danger">
+              <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+              Scam/Fraud
+            </span>
+          <% when "suspicious" %>
+            <span class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium bg-warning/10 text-warning">
+              <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+              Suspicious
+            </span>
+          <% when "clean" %>
+            <span class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium bg-success/10 text-success">
+              <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Clean
+            </span>
+          <% else %>
+            <span class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium bg-surface-200 text-surface-600">
+              <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              Unknown
+            </span>
+            <span class="text-xs text-surface-500">No threat intelligence sources returned results</span>
+          <% end %>
+        </div>
+
+        <%# Details grid %>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <div class="bg-surface-200 rounded-md p-4">
+            <div class="text-xs font-medium text-surface-500 mb-1">Confidence</div>
+            <div class="text-xl font-semibold font-mono text-surface-900">
+              <% if @result[:confidence] %>
+                <%= (@result[:confidence] * 100).round %>%
+              <% else %>
+                --
+              <% end %>
+            </div>
+          </div>
+          <div class="bg-surface-200 rounded-md p-4">
+            <div class="text-xs font-medium text-surface-500 mb-1">Phone Type</div>
+            <div class="text-sm font-medium text-surface-900">
+              <%= @result[:phone_type]&.titleize || "Unknown" %>
+            </div>
+          </div>
+          <div class="bg-surface-200 rounded-md p-4">
+            <div class="text-xs font-medium text-surface-500 mb-1">Country</div>
+            <div class="text-sm font-medium text-surface-900">
+              <%= @result[:country_code] || "Unknown" %>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <div class="bg-surface-200 rounded-md p-4">
+            <div class="text-xs font-medium text-surface-500 mb-1">Carrier</div>
+            <div class="text-sm font-medium text-surface-900">
+              <%= @result[:carrier] || "Unknown" %>
+            </div>
+          </div>
+          <div class="bg-surface-200 rounded-md p-4">
+            <div class="text-xs font-medium text-surface-500 mb-1">Last Checked</div>
+            <div class="text-sm font-medium text-surface-900">
+              <% if @result[:last_checked] %>
+                <%= time_ago_in_words(@result[:last_checked]) %> ago
+              <% else %>
+                Never
+              <% end %>
+            </div>
+          </div>
+          <div class="bg-surface-200 rounded-md p-4">
+            <div class="text-xs font-medium text-surface-500 mb-1">First Seen</div>
+            <div class="text-sm font-medium text-surface-900">
+              <%= @result[:created_at].strftime("%b %d, %Y") %>
+            </div>
+          </div>
+        </div>
+
+        <%# API usage hint %>
+        <div class="border-t border-surface-200/50 pt-5 mt-5">
+          <div class="text-xs font-medium text-surface-500 uppercase tracking-wide mb-3">API Usage</div>
+          <div class="bg-surface-200 rounded-md p-4 font-mono text-xs overflow-x-auto">
+            <div class="text-surface-500"># Check this phone number via API</div>
+            <div class="text-surface-700 mt-2">
+              curl -X POST https://phish.directory/api/v1/phone/check \<br>
+              <span class="pl-4">-H "Authorization: Bearer YOUR_API_KEY" \</span><br>
+              <span class="pl-4">-H "Content-Type: application/json" \</span><br>
+              <span class="pl-4">-d '{"phone": "<%= @result[:phone_number] %>"}'</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% else %>
+    <%# Empty state %>
+    <div class="bg-surface-100 rounded-lg overflow-hidden">
+      <div class="text-center py-12">
+        <svg class="w-10 h-10 mx-auto text-surface-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+        <div class="text-sm font-medium text-surface-600 mb-1">Enter a phone number to check</div>
+        <p class="text-xs text-surface-500 max-w-md mx-auto">
+          We'll analyze it against fraud detection services to identify potential scam or spam numbers.
+        </p>
+      </div>
+    </div>
+  <% end %>
+</div>

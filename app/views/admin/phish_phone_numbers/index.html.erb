@@ -1,0 +1,115 @@
+<% content_for :title, "Phone Numbers" %>
+
+<header class="px-8 py-6 border-b border-surface-200/50 flex items-center justify-between bg-surface-50/50 sticky top-0 z-40 backdrop-blur-sm">
+  <div>
+    <h1 class="text-xl font-semibold text-surface-900">Phone Numbers</h1>
+    <p class="text-sm text-surface-500 mt-0.5"><%= Phish::PhoneNumber.count %> phone numbers tracked</p>
+  </div>
+  <div class="flex items-center gap-4">
+    <div class="flex items-center gap-2 text-sm">
+      <span class="px-2 py-0.5 rounded bg-danger/10 text-danger font-mono text-xs"><%= Phish::PhoneNumber.phishing.count %></span>
+      <span class="text-surface-500">phishing</span>
+      <span class="px-2 py-0.5 rounded bg-warning/10 text-warning font-mono text-xs ml-2"><%= Phish::PhoneNumber.suspicious.count %></span>
+      <span class="text-surface-500">suspicious</span>
+      <span class="px-2 py-0.5 rounded bg-success/10 text-success font-mono text-xs ml-2"><%= Phish::PhoneNumber.clean.count %></span>
+      <span class="text-surface-500">clean</span>
+    </div>
+  </div>
+</header>
+
+<div class="p-8">
+  <% if @phone_numbers.any? %>
+    <div class="bg-surface-100 rounded-lg overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="border-b border-surface-200/50">
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Phone Number</th>
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Classification</th>
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Confidence</th>
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Type</th>
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Carrier</th>
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Last Checked</th>
+              <th class="px-5 py-2.5 text-right text-xs font-medium text-surface-500">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @phone_numbers.each do |phone_number| %>
+              <tr class="border-b border-surface-200/50 hover:bg-surface-200/30 transition-colors">
+                <td class="px-5 py-3">
+                  <code class="text-sm text-surface-800 font-mono"><%= phone_number.phone_number %></code>
+                  <div class="text-xs text-surface-500 font-mono mt-0.5"><%= phone_number.public_id %></div>
+                </td>
+                <td class="px-5 py-3">
+                  <% if phone_number.verdict %>
+                    <% case phone_number.classification %>
+                    <% when 'phishing' %>
+                      <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-danger/10 text-danger">Phishing</span>
+                    <% when 'suspicious' %>
+                      <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-warning/10 text-warning">Suspicious</span>
+                    <% when 'clean' %>
+                      <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-success/10 text-success">Clean</span>
+                    <% when 'unknown' %>
+                      <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-surface-300 text-surface-600">Unknown</span>
+                    <% end %>
+                  <% else %>
+                    <span class="text-surface-500">&mdash;</span>
+                  <% end %>
+                </td>
+                <td class="px-5 py-3">
+                  <% if phone_number.confidence_score %>
+                    <div class="flex items-center gap-2">
+                      <div class="w-16 h-1.5 bg-surface-200 rounded-full overflow-hidden">
+                        <div class="h-full rounded-full <%= phone_number.confidence_score >= 0.8 ? 'bg-success' : phone_number.confidence_score >= 0.5 ? 'bg-warning' : 'bg-danger' %>" style="width: <%= (phone_number.confidence_score * 100).to_i %>%"></div>
+                      </div>
+                      <span class="text-surface-600 text-sm font-mono"><%= (phone_number.confidence_score * 100).to_i %>%</span>
+                    </div>
+                  <% else %>
+                    <span class="text-surface-500">&mdash;</span>
+                  <% end %>
+                </td>
+                <td class="px-5 py-3 text-surface-600 text-sm">
+                  <% if phone_number.phone_type %>
+                    <span class="capitalize"><%= phone_number.phone_type %></span>
+                  <% else %>
+                    <span class="text-surface-500">&mdash;</span>
+                  <% end %>
+                </td>
+                <td class="px-5 py-3 text-surface-600 text-sm">
+                  <%= phone_number.carrier&.name || "&mdash;".html_safe %>
+                </td>
+                <td class="px-5 py-3 text-surface-600 text-sm">
+                  <%= phone_number.last_checked_at ? time_ago_in_words(phone_number.last_checked_at) + " ago" : "Never" %>
+                </td>
+                <td class="px-5 py-3 text-right">
+                  <%= link_to "View", admin_phone_number_path(phone_number), class: "px-2.5 py-1.5 text-xs font-medium text-surface-600 bg-surface-200 rounded-md hover:bg-surface-300 transition-colors" %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <%# Pagination %>
+    <% if @phone_numbers.respond_to?(:total_pages) && @phone_numbers.total_pages > 1 %>
+      <div class="mt-6 flex items-center justify-center gap-2">
+        <% if @phone_numbers.current_page > 1 %>
+          <%= link_to "&larr; Previous".html_safe, admin_phone_numbers_path(page: @phone_numbers.current_page - 1), class: "px-4 py-2 text-sm font-medium text-surface-600 bg-surface-200 rounded-md hover:bg-surface-300 transition-colors" %>
+        <% end %>
+        <span class="px-4 py-2 text-sm text-surface-500">
+          Page <%= @phone_numbers.current_page %> of <%= @phone_numbers.total_pages %>
+        </span>
+        <% if @phone_numbers.current_page < @phone_numbers.total_pages %>
+          <%= link_to "Next &rarr;".html_safe, admin_phone_numbers_path(page: @phone_numbers.current_page + 1), class: "px-4 py-2 text-sm font-medium text-surface-600 bg-surface-200 rounded-md hover:bg-surface-300 transition-colors" %>
+        <% end %>
+      </div>
+    <% end %>
+  <% else %>
+    <div class="bg-surface-100 rounded-lg p-12 text-center">
+      <svg class="w-10 h-10 mx-auto text-surface-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+      <div class="text-sm font-medium text-surface-600 mb-1">No phone numbers tracked</div>
+      <p class="text-xs text-surface-500">Phone numbers will appear here as they are checked via the API</p>
+    </div>
+  <% end %>
+</div>

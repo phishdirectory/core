@@ -57,6 +57,10 @@ tags:
     description: Domain verification endpoints
   - name: URL
     description: URL verification endpoints
+  - name: Phone
+    description: Phone number verification endpoints
+  - name: Email
+    description: Email verification endpoints
   - name: User
     description: User account management
   - name: Webhooks
@@ -281,6 +285,205 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
+  /phone/check:
+    get:
+      tags:
+        - Phone
+      summary: Check a phone number
+      description: Check if a phone number is associated with scam or fraud activity.
+      parameters:
+        - name: phone
+          in: query
+          required: true
+          description: The phone number to check (E.164 format preferred, e.g., +14155551234)
+          schema:
+            type: string
+            example: "+14155551234"
+      responses:
+        '200':
+          description: Phone number check result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhoneResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags:
+        - Phone
+      summary: Check a phone number
+      description: Check if a phone number is associated with scam or fraud activity.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - phone
+              properties:
+                phone:
+                  type: string
+                  description: The phone number to check (E.164 format preferred)
+                  example: "+14155551234"
+      responses:
+        '200':
+          description: Phone number check result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhoneResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /phone/bulk:
+    post:
+      tags:
+        - Phone
+      summary: Check multiple phone numbers
+      description: Check up to 100 phone numbers in a single request.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - phones
+              properties:
+                phones:
+                  type: array
+                  items:
+                    type: string
+                  maxItems: 100
+                  example:
+                    - "+14155551234"
+                    - "+442071234567"
+      responses:
+        '200':
+          description: Bulk phone number check results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PhoneResult'
+                  count:
+                    type: integer
+                    example: 2
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /email/check:
+    get:
+      tags:
+        - Email
+      summary: Check an email address
+      description: Check if an email address is associated with fraud, disposable services, or phishing.
+      parameters:
+        - name: email
+          in: query
+          required: true
+          description: The email address to check
+          schema:
+            type: string
+            format: email
+            example: "user@example.com"
+      responses:
+        '200':
+          description: Email check result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmailResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags:
+        - Email
+      summary: Check an email address
+      description: Check if an email address is associated with fraud, disposable services, or phishing.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: The email address to check
+                  example: "user@example.com"
+      responses:
+        '200':
+          description: Email check result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmailResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /email/bulk:
+    post:
+      tags:
+        - Email
+      summary: Check multiple email addresses
+      description: Check up to 100 email addresses in a single request.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - emails
+              properties:
+                emails:
+                  type: array
+                  items:
+                    type: string
+                    format: email
+                  maxItems: 100
+                  example:
+                    - "user1@example.com"
+                    - "user2@suspicious.net"
+      responses:
+        '200':
+          description: Bulk email check results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/EmailResult'
+                  count:
+                    type: integer
+                    example: 2
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
   /user/me:
     get:
       tags:
@@ -396,6 +599,123 @@ components:
           type: string
           format: date-time
           description: When the URL was first seen
+
+    PhoneResult:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the phone record
+          example: phn_4k8xJm2pN9qW
+        phone_number:
+          type: string
+          description: The phone number in E.164 format
+          example: "+14155551234"
+        verdict:
+          type: string
+          enum: [clean, suspicious, phishing, unknown]
+          description: The verdict for this phone number
+          example: clean
+        confidence:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          nullable: true
+          description: Confidence score (0-1)
+          example: 0.85
+        phone_type:
+          type: string
+          enum: [mobile, voip, landline, toll_free, unknown]
+          nullable: true
+          description: Type of phone number
+          example: mobile
+        country_code:
+          type: string
+          nullable: true
+          description: ISO 3166-1 alpha-2 country code
+          example: US
+        carrier:
+          type: string
+          nullable: true
+          description: Phone carrier name
+          example: Verizon
+        last_checked:
+          type: string
+          format: date-time
+          nullable: true
+          description: When the phone number was last checked
+        created_at:
+          type: string
+          format: date-time
+          description: When the phone number was first seen
+
+    EmailResult:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the email record
+          example: eml_4k8xJm2pN9qW
+        email:
+          type: string
+          format: email
+          description: The email address
+          example: user@example.com
+        domain:
+          type: string
+          description: The domain portion of the email
+          example: example.com
+        verdict:
+          type: string
+          enum: [clean, suspicious, phishing, unknown]
+          description: The verdict for this email
+          example: clean
+        confidence:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          nullable: true
+          description: Confidence score (0-1)
+          example: 0.92
+        disposable:
+          type: boolean
+          nullable: true
+          description: Whether the email uses a disposable/temporary domain
+          example: false
+        free_provider:
+          type: boolean
+          nullable: true
+          description: Whether the email uses a free email provider
+          example: true
+        deliverable:
+          type: boolean
+          nullable: true
+          description: Whether the email appears to be deliverable
+          example: true
+        valid_mx:
+          type: boolean
+          nullable: true
+          description: Whether the domain has valid MX records
+          example: true
+        reputation_score:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          nullable: true
+          description: Email reputation score (0-1)
+          example: 0.85
+        last_checked:
+          type: string
+          format: date-time
+          nullable: true
+          description: When the email was last checked
+        created_at:
+          type: string
+          format: date-time
+          description: When the email was first seen
 
     User:
       type: object
