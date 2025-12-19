@@ -3,6 +3,7 @@
 class Phish::Url < ApplicationRecord
   include SoftDeletable
   include PublicIdentifiable
+  include Classifiable
 
   self.table_name = "phish_urls"
   set_public_id_prefix "url"

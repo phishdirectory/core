@@ -80,13 +80,16 @@ module Api
         private
 
         def serialize_url(phish_url)
+          verdict = phish_url.verdict
           {
             id: phish_url.public_id,
             url: phish_url.url,
             domain: phish_url.domain,
-            verdict: phish_url.verdict&.verdict || "unknown",
-            confidence: phish_url.verdict&.confidence,
-            verdict_id: phish_url.verdict&.public_id,
+            verdict: verdict&.classification || "unknown",
+            confidence: verdict&.confidence_score,
+            scam_category: phish_url.scam_category,
+            scam_subcategory: phish_url.scam_subcategory,
+            verdict_id: verdict&.public_id,
             last_checked: phish_url.last_checked_at&.iso8601,
             created_at: phish_url.created_at.iso8601
           }

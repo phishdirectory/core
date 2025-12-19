@@ -86,12 +86,15 @@ module Api
         private
 
         def serialize_domain(phish_domain)
+          verdict = phish_domain.verdict
           {
             id: phish_domain.public_id,
             domain: phish_domain.domain,
-            verdict: phish_domain.verdict&.verdict || "unknown",
-            confidence: phish_domain.verdict&.confidence,
-            verdict_id: phish_domain.verdict&.public_id,
+            verdict: verdict&.classification || "unknown",
+            confidence: verdict&.confidence_score,
+            scam_category: phish_domain.scam_category,
+            scam_subcategory: phish_domain.scam_subcategory,
+            verdict_id: verdict&.public_id,
             last_checked: phish_domain.last_checked_at&.iso8601,
             created_at: phish_domain.created_at.iso8601
           }

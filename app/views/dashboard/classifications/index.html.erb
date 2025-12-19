@@ -1,0 +1,68 @@
+<% content_for :title, "Scam Classifications" %>
+
+<header class="px-8 py-6 border-b border-surface-200/50 bg-surface-50/50 sticky top-0 z-40 backdrop-blur-sm">
+  <h1 class="text-xl font-semibold text-surface-900">Scam Classifications</h1>
+  <p class="text-sm text-surface-500 mt-0.5">Help classify phishing and suspicious domains/URLs</p>
+</header>
+
+<div class="p-8">
+  <%# Stats %>
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div class="bg-surface-100 rounded-lg p-5">
+      <div class="text-xs font-medium text-surface-500 uppercase tracking-wide mb-1">Domains Pending</div>
+      <div class="text-2xl font-semibold font-mono text-surface-900"><%= @stats[:total_domains_pending] %></div>
+    </div>
+    <div class="bg-surface-100 rounded-lg p-5">
+      <div class="text-xs font-medium text-surface-500 uppercase tracking-wide mb-1">URLs Pending</div>
+      <div class="text-2xl font-semibold font-mono text-surface-900"><%= @stats[:total_urls_pending] %></div>
+    </div>
+    <div class="bg-surface-100 rounded-lg p-5">
+      <div class="text-xs font-medium text-surface-500 uppercase tracking-wide mb-1">My Today</div>
+      <div class="text-2xl font-semibold font-mono text-surface-900"><%= @stats[:my_classifications_today] %></div>
+    </div>
+    <div class="bg-surface-100 rounded-lg p-5">
+      <div class="text-xs font-medium text-surface-500 uppercase tracking-wide mb-1">My Total</div>
+      <div class="text-2xl font-semibold font-mono text-surface-900"><%= @stats[:my_total_classifications] %></div>
+    </div>
+  </div>
+
+  <%# Main action card %>
+  <div class="bg-surface-100 rounded-lg overflow-hidden">
+    <% total_pending = @stats[:total_domains_pending] + @stats[:total_urls_pending] %>
+    <% if @next_item && total_pending > 0 %>
+      <% next_type = @next_item.is_a?(Phish::Domain) ? "domain" : "url" %>
+      <div class="p-8 text-center">
+        <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-surface-200/50 flex items-center justify-center">
+          <svg class="w-8 h-8 text-surface-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+          </svg>
+        </div>
+        <h2 class="text-lg font-semibold text-surface-900 mb-2">Ready to classify</h2>
+        <p class="text-sm text-surface-500 mb-6 max-w-md mx-auto">
+          There <%= total_pending == 1 ? "is" : "are" %> <span class="font-semibold text-surface-700"><%= total_pending %></span> item<%= total_pending == 1 ? "" : "s" %> waiting to be classified.
+          Help improve our phishing detection by categorizing scam types.
+        </p>
+        <%= link_to dashboard_classification_path(type: next_type, id: @next_item.public_id),
+            class: "inline-flex items-center gap-2 px-6 py-3 bg-surface-900 text-surface-0 text-sm font-medium rounded-lg hover:bg-surface-800 transition-colors" do %>
+          <span>Start Classifying</span>
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+          </svg>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="p-8 text-center">
+        <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-success/10 flex items-center justify-center">
+          <svg class="w-8 h-8 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <h2 class="text-lg font-semibold text-surface-900 mb-2">All caught up!</h2>
+        <p class="text-sm text-surface-500 max-w-md mx-auto">
+          There are no items waiting for your classification right now.
+          Check back later for new items to review.
+        </p>
+      </div>
+    <% end %>
+  </div>
+</div>

@@ -364,6 +364,10 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_19_174845) do
     t.boolean "http_reachable"
     t.datetime "last_checked_at"
     t.datetime "last_seen_at"
+    t.datetime "marked_clean_at"
+    t.uuid "marked_clean_by_id"
+    t.string "scam_category"
+    t.string "scam_subcategory"
     t.uuid "tld_id"
     t.datetime "updated_at", null: false
     t.uuid "verdict_id"
@@ -372,6 +376,10 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_19_174845) do
     t.index ["domain"], name: "index_phish_domains_on_domain", unique: true
     t.index ["last_checked_at"], name: "index_phish_domains_on_last_checked_at"
     t.index ["last_seen_at"], name: "index_phish_domains_on_last_seen_at"
+    t.index ["marked_clean_at"], name: "index_phish_domains_on_marked_clean_at"
+    t.index ["marked_clean_by_id"], name: "index_phish_domains_on_marked_clean_by_id"
+    t.index ["scam_category"], name: "index_phish_domains_on_scam_category"
+    t.index ["scam_subcategory"], name: "index_phish_domains_on_scam_subcategory"
     t.index ["tld_id"], name: "index_phish_domains_on_tld_id"
     t.index ["verdict_id"], name: "index_phish_domains_on_verdict_id"
   end
@@ -409,11 +417,21 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_19_174845) do
     t.datetime "created_at", null: false
     t.datetime "discarded_at"
     t.datetime "last_checked_at"
+    t.datetime "last_seen_at"
+    t.datetime "marked_clean_at"
+    t.uuid "marked_clean_by_id"
+    t.string "scam_category"
+    t.string "scam_subcategory"
     t.datetime "updated_at", null: false
     t.string "url", null: false
     t.uuid "verdict_id"
     t.index ["discarded_at"], name: "index_phish_urls_on_discarded_at"
     t.index ["last_checked_at"], name: "index_phish_urls_on_last_checked_at"
+    t.index ["last_seen_at"], name: "index_phish_urls_on_last_seen_at"
+    t.index ["marked_clean_at"], name: "index_phish_urls_on_marked_clean_at"
+    t.index ["marked_clean_by_id"], name: "index_phish_urls_on_marked_clean_by_id"
+    t.index ["scam_category"], name: "index_phish_urls_on_scam_category"
+    t.index ["scam_subcategory"], name: "index_phish_urls_on_scam_subcategory"
     t.index ["url"], name: "index_phish_urls_on_url", unique: true
     t.index ["verdict_id"], name: "index_phish_urls_on_verdict_id"
   end
@@ -556,6 +574,33 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_19_174845) do
     t.datetime "time", null: false
     t.float "value"
     t.index ["name", "interval", "time", "dimensions"], name: "index_rollups_on_name_and_interval_and_time_and_dimensions", unique: true
+  end
+
+  create_table "scam_classifications", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "classifiable_id", null: false
+    t.string "classifiable_type", null: false
+    t.datetime "created_at", null: false
+    t.text "notes"
+    t.string "scam_category", null: false
+    t.string "scam_subcategory"
+    t.datetime "updated_at", null: false
+    t.uuid "user_id", null: false
+    t.index ["classifiable_type", "classifiable_id"], name: "index_scam_classifications_on_classifiable"
+    t.index ["scam_category"], name: "index_scam_classifications_on_scam_category"
+    t.index ["scam_subcategory"], name: "index_scam_classifications_on_scam_subcategory"
+    t.index ["user_id", "classifiable_type", "classifiable_id"], name: "index_scam_classifications_on_user_and_classifiable", unique: true
+    t.index ["user_id"], name: "index_scam_classifications_on_user_id"
+  end
+
+  create_table "scam_skips", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "classifiable_id", null: false
+    t.string "classifiable_type", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.uuid "user_id", null: false
+    t.index ["classifiable_type", "classifiable_id"], name: "index_scam_skips_on_classifiable"
+    t.index ["user_id", "classifiable_type", "classifiable_id"], name: "index_scam_skips_on_user_and_classifiable"
+    t.index ["user_id"], name: "index_scam_skips_on_user_id"
   end
 
   create_table "service_key_usages", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -702,8 +747,13 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_19_174845) do
     t.float "confidence_score"
     t.datetime "created_at", null: false
     t.jsonb "metadata"
+    t.string "scam_category"
+    t.string "scam_subcategory"
     t.jsonb "sources"
     t.datetime "updated_at", null: false
+    t.index ["classification"], name: "index_verdicts_on_classification"
+    t.index ["scam_category", "scam_subcategory"], name: "index_verdicts_on_scam_category_and_subcategory"
+    t.index ["scam_category"], name: "index_verdicts_on_scam_category"
   end
 
   create_table "versions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

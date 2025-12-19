@@ -100,6 +100,13 @@ Rails.application.routes.draw do
 
     resource :profile, only: [:show, :edit, :update]
     resources :sessions, only: [:index, :destroy]
+
+    # Scam classification (trusted+ users only)
+    get "classifications", to: "classifications#index", as: :classifications
+    get "classifications/:type/:id", to: "classifications#show", as: :classification
+    post "classifications/:type/:id", to: "classifications#create", as: :create_classification
+    post "classifications/:type/:id/mark_clean", to: "classifications#mark_clean", as: :mark_clean_classification
+    post "classifications/:type/:id/skip", to: "classifications#skip", as: :skip_classification
   end
 
   # ===========================================

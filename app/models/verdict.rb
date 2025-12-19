@@ -5,7 +5,7 @@ class Verdict < ApplicationRecord
 
   set_public_id_prefix "vrd"
 
-  # Classifications
+  # Primary Classifications (threat level)
   CLASSIFICATIONS = %w[phishing suspicious clean unknown protected].freeze
 
   # Associations
@@ -16,7 +16,7 @@ class Verdict < ApplicationRecord
   validates :classification, presence: true, inclusion: { in: CLASSIFICATIONS }
   validates :confidence_score, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 1 }, allow_nil: true
 
-  # Scopes
+  # Scopes - Classification
   scope :phishing, -> { where(classification: "phishing") }
   scope :suspicious, -> { where(classification: "suspicious") }
   scope :clean, -> { where(classification: "clean") }
@@ -24,6 +24,7 @@ class Verdict < ApplicationRecord
   scope :protected_classification, -> { where(classification: "protected") }
   scope :high_confidence, -> { where("confidence_score >= ?", 0.8) }
   scope :low_confidence, -> { where("confidence_score < ?", 0.5) }
+  scope :dangerous, -> { phishing.or(suspicious) }
 
   # ===========================================
   # Classification helpers

@@ -13,6 +13,7 @@ class User < ApplicationRecord
   has_many :visits, class_name: "Ahoy::Visit", dependent: :destroy
   has_many :user_sessions, class_name: "User::Session", dependent: :destroy
   has_many :user_api_keys, dependent: :destroy
+  has_many :scam_classifications, class_name: "Scam::Classification", dependent: :destroy
   has_one_attached :profile_photo
 
   # Flipper integration - use pd_id for feature flags
