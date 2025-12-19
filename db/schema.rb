@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_19_174845) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_19_201906) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "fuzzystrmatch"
   enable_extension "pg_catalog.plpgsql"
@@ -146,7 +146,6 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_19_174845) do
     t.text "user_agent"
     t.uuid "user_id"
     t.index ["authenticatable_type", "authenticatable_id", "requested_at"], name: "idx_api_requests_auth_time"
-    t.index ["authenticatable_type", "authenticatable_id"], name: "index_api_requests_on_authenticatable"
     t.index ["duration_ms"], name: "index_api_requests_on_duration_ms"
     t.index ["requested_at"], name: "index_api_requests_on_requested_at"
     t.index ["response_code"], name: "index_api_requests_on_response_code"
@@ -561,7 +560,6 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_19_174845) do
     t.datetime "updated_at", null: false
     t.index ["abuse_contact_id"], name: "index_report_submissions_on_abuse_contact_id"
     t.index ["case_id", "abuse_contact_id"], name: "index_report_submissions_on_case_id_and_abuse_contact_id", unique: true
-    t.index ["case_id"], name: "index_report_submissions_on_case_id"
     t.index ["depends_on_submission_id"], name: "index_report_submissions_on_depends_on_submission_id"
     t.index ["discarded_at"], name: "index_report_submissions_on_discarded_at"
     t.index ["status"], name: "index_report_submissions_on_status"
@@ -589,7 +587,6 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_19_174845) do
     t.index ["scam_category"], name: "index_scam_classifications_on_scam_category"
     t.index ["scam_subcategory"], name: "index_scam_classifications_on_scam_subcategory"
     t.index ["user_id", "classifiable_type", "classifiable_id"], name: "index_scam_classifications_on_user_and_classifiable", unique: true
-    t.index ["user_id"], name: "index_scam_classifications_on_user_id"
   end
 
   create_table "scam_skips", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -600,7 +597,6 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_19_174845) do
     t.uuid "user_id", null: false
     t.index ["classifiable_type", "classifiable_id"], name: "index_scam_skips_on_classifiable"
     t.index ["user_id", "classifiable_type", "classifiable_id"], name: "index_scam_skips_on_user_and_classifiable"
-    t.index ["user_id"], name: "index_scam_skips_on_user_id"
   end
 
   create_table "service_key_usages", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -707,7 +703,6 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_19_174845) do
     t.index ["impersonated_by_id"], name: "index_user_sessions_on_impersonated_by_id"
     t.index ["session_token_bidx"], name: "index_user_sessions_on_session_token_bidx"
     t.index ["user_id", "last_seen_at"], name: "index_user_sessions_on_user_id_and_last_seen_at"
-    t.index ["user_id"], name: "index_user_sessions_on_user_id"
   end
 
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -753,7 +748,6 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_19_174845) do
     t.datetime "updated_at", null: false
     t.index ["classification"], name: "index_verdicts_on_classification"
     t.index ["scam_category", "scam_subcategory"], name: "index_verdicts_on_scam_category_and_subcategory"
-    t.index ["scam_category"], name: "index_verdicts_on_scam_category"
   end
 
   create_table "versions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
