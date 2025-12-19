@@ -51,10 +51,10 @@ Add required keys:
 ```yaml
 # Encryption keys (required - generate with: SecureRandom.hex(32))
 lockbox:
-  master_key: <64-char hex string>
+  master_key: <32-char hex string>
 
 blind_index:
-  master_key: <64-char hex string>
+  master_key: <32-char hex string>
 
 # Phishing detection services (optional - services skip if unconfigured)
 google_safe_browsing:
