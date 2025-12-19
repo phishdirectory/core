@@ -5,36 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2a5e2596-2715-487b-8ded-05ced76ea516" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/config/initializers/flipper.rb" beforeDir="false" afterPath="$PROJECT_DIR$/config/initializers/flipper.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20251215154608_create_users.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20251215160000_create_user_sessions.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20251215160001_create_user_api_keys.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20251215160002_create_services.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20251215160003_create_webhook_deliveries.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20251215160004_create_phish_tables.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20251215160005_create_sessions.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20251215160006_create_ahoy_tables.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20251215160007_create_flipper_tables.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20251215160008_create_doorkeeper_tables.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20251215160009_create_supporting_tables.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20251215160010_create_console_audit_tables.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20251215160011_create_blazer_tables.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20251215164308_create_active_storage_tables.active_storage.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20251217190105_create_action_mailbox_tables.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20251217190106_create_report_tables.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20251217225546_add_discarded_at_to_tables.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20251217233644_remove_unneeded_indexes.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20251218005652_add_notes_to_report_abuse_contacts.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20251218061610_create_api_requests.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20251218061611_add_availability_to_phish_domains.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20251218061612_add_last_api_activity_at_to_users.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20251218234216_create_phish_protections.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20251218235245_validate_phish_protections_foreign_key.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20251219001615_create_phish_tlds.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20251219001757_add_phish_tlds_foreign_key.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20251219001818_validate_phish_tlds_foreign_key.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/migrate/20251219002227_backfill_domain_tlds.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/schema.rb" beforeDir="false" afterPath="$PROJECT_DIR$/db/schema.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/PhishDirectory.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/PhishDirectory.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/views/dashboard/classifications/index.html.erb" beforeDir="false" afterPath="$PROJECT_DIR$/app/views/dashboard/classifications/index.html.erb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/views/dashboard/classifications/show.html.erb" beforeDir="false" afterPath="$PROJECT_DIR$/app/views/dashboard/classifications/show.html.erb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/views/layouts/dashboard.html.erb" beforeDir="false" afterPath="$PROJECT_DIR$/app/views/layouts/dashboard.html.erb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -44,21 +19,21 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "jaspermayone"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;jaspermayone&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "git@github.com:phishdirectory/core.git",
-    "accountId": "f825df23-4a5c-42a4-9df0-26b3b328779d"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;git@github.com:phishdirectory/core.git&quot;,
+    &quot;accountId&quot;: &quot;f825df23-4a5c-42a4-9df0-26b3b328779d&quot;
   }
-}]]></component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 2
-}]]></component>
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 2
+}</component>
   <component name="ProjectId" id="372XYqkNhgTn8BAsWduHGd8Gunk" />
   <component name="ProjectViewState">
     <option name="autoscrollToSource" value="true" />
@@ -71,9 +46,10 @@
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "com.intellij.lang.ruby.rbs.tools.collection.workspace.sync.RbsCollectionUpdateProjectActivity#LAST_UPDATE_TIMESTAMP": "1766102250181",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "com.intellij.lang.ruby.rbs.tools.collection.workspace.sync.RbsCollectionUpdateProjectActivity#LAST_UPDATE_TIMESTAMP": "1766168396233",
     "git-widget-placeholder": "main",
-    "last_opened_file_path": "/Users/jsp/dev/projects/phishdirectory/PhishDirectory",
+    "last_opened_file_path": "/Users/jsp/dev/projects/phishdirectory/core",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -84,6 +60,13 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="RubyModuleManagerSettings">
+    <option name="blackListedRootsPaths">
+      <list>
+        <option value="$PROJECT_DIR$" />
+      </list>
+    </option>
+  </component>
   <component name="RunManager" selected="Rails.PhishDirectory">
     <configuration name="PhishDirectory" type="RailsRunConfigurationType" factoryName="Rails">
       <module name="PhishDirectory" />
@@ -177,6 +160,7 @@
       <option name="presentableId" value="Default" />
       <updated>1766102190179</updated>
       <workItem from="1766102191226" duration="7696000" />
+      <workItem from="1766168337200" duration="3944000" />
     </task>
     <servers />
   </component>
