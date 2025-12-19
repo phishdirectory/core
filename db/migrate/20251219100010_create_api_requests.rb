@@ -7,7 +7,7 @@ class CreateApiRequests < ActiveRecord::Migration[8.1]
       t.references :authenticatable, polymorphic: true, type: :uuid, index: true
 
       # Optional user reference (for service keys acting on behalf of users)
-      t.references :user, type: :uuid, foreign_key: { on_delete: :nullify }, index: true
+      t.references :user, type: :uuid, index: true
 
       # Request details
       t.string :request_path, null: false
@@ -35,5 +35,7 @@ class CreateApiRequests < ActiveRecord::Migration[8.1]
     add_index :api_requests, :duration_ms
     add_index :api_requests, [:authenticatable_type, :authenticatable_id, :requested_at],
               name: "idx_api_requests_auth_time"
+
+    safety_assured { add_foreign_key :api_requests, :users, on_delete: :nullify }
   end
 end

@@ -1,19 +1,21 @@
+# frozen_string_literal: true
+
 class CreateServices < ActiveRecord::Migration[8.1]
   def change
-    # Service status enum
-    create_enum "service_status", %w[active suspended decommissioned]
-    create_enum "service_key_status", %w[active deprecated revoked]
-
     # Services table
     create_table :services, id: :uuid do |t|
       t.string :name, null: false
       t.column :status, :service_status, default: "active", null: false
       t.integer :keys_count, default: 0, null: false
 
+      # Soft delete
+      t.datetime :discarded_at
+
       t.timestamps
     end
 
     add_index :services, :name, unique: true
+    add_index :services, :discarded_at
 
     # Service keys table
     create_table :service_keys, id: :uuid do |t|
@@ -23,13 +25,17 @@ class CreateServices < ActiveRecord::Migration[8.1]
       t.column :status, :service_key_status, default: "active", null: false
       t.text :notes
 
+      # Soft delete
+      t.datetime :discarded_at
+
       t.timestamps
     end
 
     add_index :service_keys, :service_id
     add_index :service_keys, :api_key, unique: true
+    add_index :service_keys, :discarded_at
 
-    add_foreign_key :service_keys, :services
+    safety_assured { add_foreign_key :service_keys, :services }
 
     # Service webhooks table
     create_table :service_webhooks, id: :uuid do |t|
@@ -37,13 +43,17 @@ class CreateServices < ActiveRecord::Migration[8.1]
       t.string :url, null: false
       t.string :secret, null: false
 
+      # Soft delete
+      t.datetime :discarded_at
+
       t.timestamps
     end
 
     add_index :service_webhooks, :service_id
     add_index :service_webhooks, :url, unique: true
+    add_index :service_webhooks, :discarded_at
 
-    add_foreign_key :service_webhooks, :services
+    safety_assured { add_foreign_key :service_webhooks, :services }
 
     # Service key usages table (API request logging)
     create_table :service_key_usages, id: :uuid do |t|
@@ -75,7 +85,25 @@ class CreateServices < ActiveRecord::Migration[8.1]
     add_index :service_key_usages, :requested_at
     add_index :service_key_usages, :duration_ms
 
-    add_foreign_key :service_key_usages, :service_keys, column: :key_id
-    add_foreign_key :service_key_usages, :users, on_delete: :nullify
+    safety_assured do
+      add_foreign_key :service_key_usages, :service_keys, column: :key_id
+      add_foreign_key :service_key_usages, :users, on_delete: :nullify
+    end
+
+    # Webhook deliveries table
+    create_table :webhook_deliveries, id: :uuid do |t|
+      t.string :url
+      t.string :event
+      t.text :payload
+      t.string :status
+      t.integer :attempts
+      t.datetime :last_attempt_at
+      t.jsonb :response
+
+      t.timestamps
+    end
+
+    add_index :webhook_deliveries, :status
+    add_index :webhook_deliveries, :event
   end
 end

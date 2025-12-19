@@ -2,15 +2,7 @@
 
 class CreateReportTables < ActiveRecord::Migration[8.1]
   def change
-    # Enums for report system
-    create_enum :report_contact_type, %w[registrar hosting security_vendor other]
-    create_enum :report_contact_method, %w[email web_form api]
-    create_enum :report_case_status, %w[pending submitting awaiting_response partially_resolved resolved escalated]
-    create_enum :report_submission_status, %w[pending queued sent acknowledged resolved failed skipped]
-    create_enum :report_email_direction, %w[inbound outbound]
-
     # Abuse contacts - organizations that receive abuse reports
-    # Note: public_id is computed dynamically via PublicIdentifiable concern
     create_table :report_abuse_contacts, id: :uuid, default: -> { "gen_random_uuid()" } do |t|
       # Organization info
       t.string :name, null: false
@@ -46,6 +38,9 @@ class CreateReportTables < ActiveRecord::Migration[8.1]
       t.integer :reports_acknowledged, default: 0, null: false
       t.float :avg_response_hours
 
+      # Notes
+      t.text :notes
+
       t.boolean :active, default: true, null: false
       t.datetime :discarded_at
       t.timestamps
@@ -57,7 +52,6 @@ class CreateReportTables < ActiveRecord::Migration[8.1]
     add_index :report_abuse_contacts, :discarded_at
 
     # Cases - groups reports for a single phishing domain/URL
-    # Note: public_id is computed dynamically via PublicIdentifiable concern
     create_table :report_cases, id: :uuid, default: -> { "gen_random_uuid()" } do |t|
       t.string :case_number, null: false # Flake ID: case_chqrg05u4agw
 
@@ -97,7 +91,6 @@ class CreateReportTables < ActiveRecord::Migration[8.1]
     safety_assured { add_foreign_key :report_cases, :verdicts, column: :verdict_snapshot_id }
 
     # Submissions - individual reports to abuse contacts
-    # Note: public_id is computed dynamically via PublicIdentifiable concern
     create_table :report_submissions, id: :uuid, default: -> { "gen_random_uuid()" } do |t|
       t.uuid :case_id, null: false
       t.uuid :abuse_contact_id, null: false
@@ -186,7 +179,6 @@ class CreateReportTables < ActiveRecord::Migration[8.1]
     end
 
     # Case emails - inbound/outbound email history
-    # Note: public_id is computed dynamically via PublicIdentifiable concern
     create_table :report_case_emails, id: :uuid, default: -> { "gen_random_uuid()" } do |t|
       t.uuid :case_id, null: false
       t.uuid :submission_id

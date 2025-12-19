@@ -40,6 +40,9 @@ end
 
 # Initialize default feature flags
 Rails.application.config.after_initialize do
+  # Skip if Flipper tables don't exist (e.g., during db:migrate or db:rollback)
+  next unless ActiveRecord::Base.connection.table_exists?(:flipper_features)
+
   # Auto-reporting: Enable automated abuse reporting when phishing is detected
   # Start disabled - enable via admin UI when ready
   unless Flipper.exist?(:auto_reporting)

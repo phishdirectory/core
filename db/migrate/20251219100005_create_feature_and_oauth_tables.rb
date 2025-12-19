@@ -1,6 +1,27 @@
-class CreateDoorkeeperTables < ActiveRecord::Migration[8.1]
+# frozen_string_literal: true
+
+class CreateFeatureAndOauthTables < ActiveRecord::Migration[8.1]
   def change
-    # OAuth Applications
+    # Flipper feature flags
+    create_table :flipper_features, id: :uuid do |t|
+      t.string :key, null: false
+
+      t.timestamps
+    end
+
+    add_index :flipper_features, :key, unique: true
+
+    create_table :flipper_gates, id: :uuid do |t|
+      t.string :feature_key, null: false
+      t.string :key, null: false
+      t.text :value
+
+      t.timestamps
+    end
+
+    add_index :flipper_gates, [:feature_key, :key, :value], unique: true
+
+    # Doorkeeper OAuth Applications
     create_table :oauth_applications, id: :uuid do |t|
       t.string :name, null: false
       t.string :uid, null: false
@@ -31,8 +52,10 @@ class CreateDoorkeeperTables < ActiveRecord::Migration[8.1]
     add_index :oauth_access_grants, :resource_owner_id
     add_index :oauth_access_grants, :application_id
 
-    add_foreign_key :oauth_access_grants, :users, column: :resource_owner_id
-    add_foreign_key :oauth_access_grants, :oauth_applications, column: :application_id
+    safety_assured do
+      add_foreign_key :oauth_access_grants, :users, column: :resource_owner_id
+      add_foreign_key :oauth_access_grants, :oauth_applications, column: :application_id
+    end
 
     # OAuth Access Tokens
     create_table :oauth_access_tokens, id: :uuid do |t|
@@ -53,7 +76,9 @@ class CreateDoorkeeperTables < ActiveRecord::Migration[8.1]
     add_index :oauth_access_tokens, :resource_owner_id
     add_index :oauth_access_tokens, :application_id
 
-    add_foreign_key :oauth_access_tokens, :users, column: :resource_owner_id
-    add_foreign_key :oauth_access_tokens, :oauth_applications, column: :application_id
+    safety_assured do
+      add_foreign_key :oauth_access_tokens, :users, column: :resource_owner_id
+      add_foreign_key :oauth_access_tokens, :oauth_applications, column: :application_id
+    end
   end
 end
