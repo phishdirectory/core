@@ -41,3 +41,6 @@
 # Ignore compiled assets
 /public/assets/
 
+# IDE
+.idea/
+
