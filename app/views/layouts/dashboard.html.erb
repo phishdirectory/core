@@ -41,13 +41,22 @@
             <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             <span>Check Domain</span>
           <% end %>
-          <% if current_user&.trusted? %>
-          <%= link_to dashboard_classifications_path, class: "flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium transition-colors #{controller_path == 'dashboard/classifications' ? 'bg-accent/10 text-accent' : 'text-surface-600 hover:bg-surface-100 hover:text-surface-800'}" do %>
-            <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+        </div>
+
+        <% if current_user&.trusted? %>
+        <div class="mb-6">
+          <div class="flex items-center gap-1.5 px-2 mb-2">
+            <svg class="w-3 h-3 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clip-rule="evenodd"/>
+            </svg>
+            <div class="text-[10px] font-semibold text-amber-600 uppercase tracking-wider">Trusted</div>
+          </div>
+          <%= link_to dashboard_classifications_path, class: "flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium transition-colors #{controller_path == 'dashboard/classifications' ? 'bg-amber-500/10 text-amber-600' : 'text-surface-600 hover:bg-amber-500/5 hover:text-amber-700'}" do %>
+            <svg class="w-4 h-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
             <span>Classifications</span>
           <% end %>
-          <% end %>
         </div>
+        <% end %>
 
         <div class="mb-6">
           <div class="text-[10px] font-semibold text-surface-500 uppercase tracking-wider px-2 mb-2">Developer</div>
@@ -88,7 +97,11 @@
       <div class="p-3 border-t border-surface-200/50">
         <%= link_to dashboard_profile_path, class: "flex items-center gap-2.5 px-2 py-2 rounded-md hover:bg-surface-100 transition-colors" do %>
           <div class="w-8 h-8 bg-surface-200 rounded-full flex items-center justify-center font-medium text-xs text-surface-600">
-            <%= current_user.initials %>
+            <% if current_user.has_profile_photo? %>
+              <%= image_tag current_user.profile_photo_url(variant: :medium), class: "w-full h-full object-cover rounded-full" %>
+            <% else %>
+              <%= current_user.initials %>
+            <% end %>
           </div>
           <div class="flex-1 min-w-0">
             <div class="font-medium text-sm text-surface-800 truncate"><%= current_user.full_name %></div>
