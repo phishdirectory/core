@@ -1,0 +1,181 @@
+<% content_for :title, "API Request Details" %>
+
+<header class="px-8 py-6 border-b border-surface-200/50 flex items-center justify-between bg-surface-50/50 sticky top-0 z-40 backdrop-blur-sm">
+  <div class="flex items-center gap-4">
+    <%= link_to admin_api_requests_path, class: "text-surface-500 hover:text-surface-900 transition-colors" do %>
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19l-7-7 7-7"/></svg>
+    <% end %>
+    <div>
+      <h1 class="text-xl font-semibold text-surface-900">API Request Details</h1>
+      <p class="text-sm text-surface-500 mt-0.5 font-mono"><%= @request.request_method %> <%= @request.request_path %></p>
+    </div>
+  </div>
+</header>
+
+<div class="p-8">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <%# Left column - Request/Response details %>
+    <div class="lg:col-span-2 space-y-6">
+      <%# Request summary card %>
+      <div class="bg-surface-100 rounded-lg overflow-hidden">
+        <div class="px-5 py-4 border-b border-surface-200/50">
+          <h2 class="text-sm font-semibold text-surface-900">Request Summary</h2>
+        </div>
+        <div class="p-5">
+          <div class="flex items-center gap-6 mb-6">
+            <div>
+              <div class="text-xs font-medium text-surface-500 mb-1.5">Method</div>
+              <% method_colors = { 'GET' => 'bg-info/10 text-info', 'POST' => 'bg-success/10 text-success', 'PUT' => 'bg-warning/10 text-warning', 'PATCH' => 'bg-warning/10 text-warning', 'DELETE' => 'bg-danger/10 text-danger' } %>
+              <span class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-mono font-medium <%= method_colors[@request.request_method] || 'bg-surface-300 text-surface-600' %>">
+                <%= @request.request_method %>
+              </span>
+            </div>
+            <div>
+              <div class="text-xs font-medium text-surface-500 mb-1.5">Status</div>
+              <% if @request.response_code %>
+                <% status_color = @request.success? ? 'bg-success/10 text-success' : @request.client_error? ? 'bg-warning/10 text-warning' : @request.server_error? ? 'bg-danger/10 text-danger' : 'bg-surface-300 text-surface-600' %>
+                <span class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-mono font-medium <%= status_color %>">
+                  <%= @request.response_code %>
+                </span>
+              <% else %>
+                <span class="text-surface-500">—</span>
+              <% end %>
+            </div>
+            <div>
+              <div class="text-xs font-medium text-surface-500 mb-1.5">Duration</div>
+              <% if @request.duration_ms %>
+                <% duration_color = @request.duration_ms < 100 ? 'text-surface-800' : @request.duration_ms < 500 ? 'text-warning' : @request.duration_ms < 1000 ? 'text-warning' : 'text-danger' %>
+                <span class="text-xl font-semibold font-mono <%= duration_color %>"><%= @request.duration_ms %>ms</span>
+              <% else %>
+                <span class="text-surface-500">—</span>
+              <% end %>
+            </div>
+          </div>
+
+          <div>
+            <div class="text-xs font-medium text-surface-500 mb-1.5">Path</div>
+            <code class="text-sm text-surface-800 font-mono break-all"><%= @request.request_path %></code>
+          </div>
+        </div>
+      </div>
+
+      <%# Request headers card %>
+      <% headers = @request.parsed_request_headers %>
+      <% if headers.any? %>
+        <div class="bg-surface-100 rounded-lg overflow-hidden">
+          <div class="px-5 py-4 border-b border-surface-200/50">
+            <h2 class="text-sm font-semibold text-surface-900">Request Headers</h2>
+          </div>
+          <div class="p-5">
+            <div class="bg-surface-200 rounded-md p-4 font-mono text-xs overflow-x-auto">
+              <pre class="text-surface-700"><%= JSON.pretty_generate(headers) %></pre>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <%# Request body card %>
+      <% request_body = @request.parsed_request_body %>
+      <% if request_body.present? %>
+        <div class="bg-surface-100 rounded-lg overflow-hidden">
+          <div class="px-5 py-4 border-b border-surface-200/50">
+            <h2 class="text-sm font-semibold text-surface-900">Request Body</h2>
+          </div>
+          <div class="p-5">
+            <div class="bg-surface-200 rounded-md p-4 font-mono text-xs overflow-x-auto">
+              <% if request_body.is_a?(Hash) || request_body.is_a?(Array) %>
+                <pre class="text-surface-700"><%= JSON.pretty_generate(request_body) %></pre>
+              <% else %>
+                <pre class="text-surface-700"><%= request_body %></pre>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <%# Response body card %>
+      <% response_body = @request.parsed_response_body %>
+      <% if response_body.present? %>
+        <div class="bg-surface-100 rounded-lg overflow-hidden">
+          <div class="px-5 py-4 border-b border-surface-200/50">
+            <h2 class="text-sm font-semibold text-surface-900">Response Body</h2>
+          </div>
+          <div class="p-5">
+            <div class="bg-surface-200 rounded-md p-4 font-mono text-xs overflow-x-auto max-h-96 overflow-y-auto">
+              <% if response_body.is_a?(Hash) || response_body.is_a?(Array) %>
+                <pre class="text-surface-700"><%= JSON.pretty_generate(response_body) %></pre>
+              <% else %>
+                <pre class="text-surface-700"><%= response_body %></pre>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <%# Right column - Metadata %>
+    <div class="space-y-6">
+      <%# Auth info card %>
+      <div class="bg-surface-100 rounded-lg overflow-hidden">
+        <div class="px-5 py-4 border-b border-surface-200/50">
+          <h2 class="text-sm font-semibold text-surface-900">Authentication</h2>
+        </div>
+        <div class="p-5 space-y-4">
+          <div>
+            <div class="text-xs font-medium text-surface-500 mb-1">Type</div>
+            <% if @request.user_api_key? %>
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-accent/10 text-accent">User API Key</span>
+            <% elsif @request.service_key? %>
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-500/10 text-purple-500">Service Key</span>
+            <% else %>
+              <span class="text-surface-500">Unknown</span>
+            <% end %>
+          </div>
+          <% if @request.user %>
+            <div>
+              <div class="text-xs font-medium text-surface-500 mb-1">User</div>
+              <%= link_to admin_user_path(@request.user), class: "text-sm text-accent hover:underline" do %>
+                <%= @request.user.full_name %>
+              <% end %>
+              <div class="text-xs text-surface-500 font-mono"><%= @request.user.public_id %></div>
+            </div>
+          <% end %>
+          <% if @request.service_key? && @request.service %>
+            <div>
+              <div class="text-xs font-medium text-surface-500 mb-1">Service</div>
+              <%= link_to admin_service_path(@request.service), class: "text-sm text-accent hover:underline" do %>
+                <%= @request.service.name %>
+              <% end %>
+              <div class="text-xs text-surface-500 font-mono"><%= @request.service.public_id %></div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <%# Details card %>
+      <div class="bg-surface-100 rounded-lg overflow-hidden">
+        <div class="px-5 py-4 border-b border-surface-200/50">
+          <h2 class="text-sm font-semibold text-surface-900">Details</h2>
+        </div>
+        <div class="p-5 space-y-4">
+          <div>
+            <div class="text-xs font-medium text-surface-500 mb-1">Request ID</div>
+            <code class="text-xs text-surface-600 font-mono break-all"><%= @request.id %></code>
+          </div>
+          <div>
+            <div class="text-xs font-medium text-surface-500 mb-1">Requested At</div>
+            <div class="text-sm text-surface-700"><%= @request.requested_at&.strftime("%B %d, %Y at %I:%M:%S %p") || "—" %></div>
+          </div>
+          <div>
+            <div class="text-xs font-medium text-surface-500 mb-1">Response Code</div>
+            <div class="text-sm text-surface-700"><%= @request.response_code || "—" %></div>
+          </div>
+          <div>
+            <div class="text-xs font-medium text-surface-500 mb-1">Duration</div>
+            <div class="text-sm text-surface-700"><%= @request.duration_ms ? "#{@request.duration_ms}ms" : "—" %></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

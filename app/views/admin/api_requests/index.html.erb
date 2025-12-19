@@ -1,0 +1,159 @@
+<% content_for :title, "API Requests" %>
+
+<header class="px-8 py-6 border-b border-surface-200/50 flex items-center justify-between bg-surface-50/50 sticky top-0 z-40 backdrop-blur-sm">
+  <div>
+    <h1 class="text-xl font-semibold text-surface-900">API Requests</h1>
+    <p class="text-sm text-surface-500 mt-0.5"><%= ApiRequest.count %> total requests</p>
+  </div>
+  <div class="flex items-center gap-4">
+    <div class="flex items-center gap-2 text-sm">
+      <span class="px-2 py-0.5 rounded bg-success/10 text-success font-mono text-xs"><%= ApiRequest.successful.count %></span>
+      <span class="text-surface-500">2xx</span>
+      <span class="px-2 py-0.5 rounded bg-warning/10 text-warning font-mono text-xs ml-2"><%= ApiRequest.client_errors.count %></span>
+      <span class="text-surface-500">4xx</span>
+      <span class="px-2 py-0.5 rounded bg-danger/10 text-danger font-mono text-xs ml-2"><%= ApiRequest.server_errors.count %></span>
+      <span class="text-surface-500">5xx</span>
+    </div>
+  </div>
+</header>
+
+<div class="p-8">
+  <%# Filters %>
+  <div class="mb-6 flex items-center gap-4 flex-wrap">
+    <%# Status filter tabs %>
+    <div class="flex items-center gap-1 bg-surface-100 rounded-lg p-1">
+      <%= link_to "All", admin_api_requests_path(time: params[:time], auth_type: params[:auth_type], slow: params[:slow], path: params[:path]),
+          class: "px-3 py-1.5 text-sm font-medium rounded-md transition-colors #{params[:status].blank? ? 'bg-surface-0 text-surface-900 shadow-sm' : 'text-surface-600 hover:text-surface-800'}" %>
+      <%= link_to "Success", admin_api_requests_path(status: "success", time: params[:time], auth_type: params[:auth_type], slow: params[:slow], path: params[:path]),
+          class: "px-3 py-1.5 text-sm font-medium rounded-md transition-colors #{params[:status] == 'success' ? 'bg-surface-0 text-surface-900 shadow-sm' : 'text-surface-600 hover:text-surface-800'}" %>
+      <%= link_to "4xx", admin_api_requests_path(status: "client_error", time: params[:time], auth_type: params[:auth_type], slow: params[:slow], path: params[:path]),
+          class: "px-3 py-1.5 text-sm font-medium rounded-md transition-colors #{params[:status] == 'client_error' ? 'bg-surface-0 text-surface-900 shadow-sm' : 'text-surface-600 hover:text-surface-800'}" %>
+      <%= link_to "5xx", admin_api_requests_path(status: "server_error", time: params[:time], auth_type: params[:auth_type], slow: params[:slow], path: params[:path]),
+          class: "px-3 py-1.5 text-sm font-medium rounded-md transition-colors #{params[:status] == 'server_error' ? 'bg-surface-0 text-surface-900 shadow-sm' : 'text-surface-600 hover:text-surface-800'}" %>
+    </div>
+
+    <%# Time filter %>
+    <div class="flex items-center gap-1 bg-surface-100 rounded-lg p-1">
+      <%= link_to "All Time", admin_api_requests_path(status: params[:status], auth_type: params[:auth_type], slow: params[:slow], path: params[:path]),
+          class: "px-3 py-1.5 text-sm font-medium rounded-md transition-colors #{params[:time].blank? ? 'bg-surface-0 text-surface-900 shadow-sm' : 'text-surface-600 hover:text-surface-800'}" %>
+      <%= link_to "Today", admin_api_requests_path(status: params[:status], time: "today", auth_type: params[:auth_type], slow: params[:slow], path: params[:path]),
+          class: "px-3 py-1.5 text-sm font-medium rounded-md transition-colors #{params[:time] == 'today' ? 'bg-surface-0 text-surface-900 shadow-sm' : 'text-surface-600 hover:text-surface-800'}" %>
+      <%= link_to "This Week", admin_api_requests_path(status: params[:status], time: "week", auth_type: params[:auth_type], slow: params[:slow], path: params[:path]),
+          class: "px-3 py-1.5 text-sm font-medium rounded-md transition-colors #{params[:time] == 'week' ? 'bg-surface-0 text-surface-900 shadow-sm' : 'text-surface-600 hover:text-surface-800'}" %>
+    </div>
+
+    <%# Auth type filter %>
+    <div class="flex items-center gap-1 bg-surface-100 rounded-lg p-1">
+      <%= link_to "All Keys", admin_api_requests_path(status: params[:status], time: params[:time], slow: params[:slow], path: params[:path]),
+          class: "px-3 py-1.5 text-sm font-medium rounded-md transition-colors #{params[:auth_type].blank? ? 'bg-surface-0 text-surface-900 shadow-sm' : 'text-surface-600 hover:text-surface-800'}" %>
+      <%= link_to "User", admin_api_requests_path(status: params[:status], time: params[:time], auth_type: "user", slow: params[:slow], path: params[:path]),
+          class: "px-3 py-1.5 text-sm font-medium rounded-md transition-colors #{params[:auth_type] == 'user' ? 'bg-surface-0 text-surface-900 shadow-sm' : 'text-surface-600 hover:text-surface-800'}" %>
+      <%= link_to "Service", admin_api_requests_path(status: params[:status], time: params[:time], auth_type: "service", slow: params[:slow], path: params[:path]),
+          class: "px-3 py-1.5 text-sm font-medium rounded-md transition-colors #{params[:auth_type] == 'service' ? 'bg-surface-0 text-surface-900 shadow-sm' : 'text-surface-600 hover:text-surface-800'}" %>
+    </div>
+
+    <%# Slow toggle %>
+    <%= link_to admin_api_requests_path(status: params[:status], time: params[:time], auth_type: params[:auth_type], slow: params[:slow] == "true" ? nil : "true", path: params[:path]),
+        class: "px-3 py-1.5 text-sm font-medium rounded-md transition-colors #{params[:slow] == 'true' ? 'bg-warning/10 text-warning' : 'bg-surface-100 text-surface-600 hover:text-surface-800'}" do %>
+      <span class="flex items-center gap-1.5">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        Slow (>1s)
+      </span>
+    <% end %>
+  </div>
+
+  <% if @requests.any? %>
+    <div class="bg-surface-100 rounded-lg overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="border-b border-surface-200/50">
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Method</th>
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Path</th>
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Status</th>
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Duration</th>
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Auth</th>
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Time</th>
+              <th class="px-5 py-2.5 text-right text-xs font-medium text-surface-500">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @requests.each do |request| %>
+              <tr class="border-b border-surface-200/50 hover:bg-surface-200/30 transition-colors">
+                <td class="px-5 py-3">
+                  <% method_colors = { 'GET' => 'bg-info/10 text-info', 'POST' => 'bg-success/10 text-success', 'PUT' => 'bg-warning/10 text-warning', 'PATCH' => 'bg-warning/10 text-warning', 'DELETE' => 'bg-danger/10 text-danger' } %>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono font-medium <%= method_colors[request.request_method] || 'bg-surface-300 text-surface-600' %>">
+                    <%= request.request_method %>
+                  </span>
+                </td>
+                <td class="px-5 py-3">
+                  <code class="text-sm text-surface-800 font-mono"><%= truncate(request.request_path, length: 50) %></code>
+                </td>
+                <td class="px-5 py-3">
+                  <% if request.response_code %>
+                    <% status_color = request.success? ? 'bg-success/10 text-success' : request.client_error? ? 'bg-warning/10 text-warning' : request.server_error? ? 'bg-danger/10 text-danger' : 'bg-surface-300 text-surface-600' %>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono font-medium <%= status_color %>">
+                      <%= request.response_code %>
+                    </span>
+                  <% else %>
+                    <span class="text-surface-500">—</span>
+                  <% end %>
+                </td>
+                <td class="px-5 py-3">
+                  <% if request.duration_ms %>
+                    <% duration_color = request.duration_ms < 100 ? 'text-surface-600' : request.duration_ms < 500 ? 'text-warning' : request.duration_ms < 1000 ? 'text-warning font-medium' : 'text-danger font-medium' %>
+                    <span class="text-sm font-mono <%= duration_color %>"><%= request.duration_ms %>ms</span>
+                  <% else %>
+                    <span class="text-surface-500">—</span>
+                  <% end %>
+                </td>
+                <td class="px-5 py-3">
+                  <% if request.user_api_key? %>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-accent/10 text-accent">User</span>
+                  <% elsif request.service_key? %>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-500/10 text-purple-500">Service</span>
+                  <% else %>
+                    <span class="text-surface-500">—</span>
+                  <% end %>
+                </td>
+                <td class="px-5 py-3 text-surface-600 text-sm">
+                  <%= request.requested_at ? time_ago_in_words(request.requested_at) + " ago" : "—" %>
+                </td>
+                <td class="px-5 py-3 text-right">
+                  <%= link_to "View", admin_api_request_path(request), class: "px-2.5 py-1.5 text-xs font-medium text-surface-600 bg-surface-200 rounded-md hover:bg-surface-300 transition-colors" %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <%# Pagination %>
+    <% if @requests.respond_to?(:total_pages) && @requests.total_pages > 1 %>
+      <div class="mt-6 flex items-center justify-center gap-2">
+        <% if @requests.current_page > 1 %>
+          <%= link_to "&larr; Previous".html_safe, admin_api_requests_path(page: @requests.current_page - 1, status: params[:status], time: params[:time], auth_type: params[:auth_type], slow: params[:slow], path: params[:path]), class: "px-4 py-2 text-sm font-medium text-surface-600 bg-surface-200 rounded-md hover:bg-surface-300 transition-colors" %>
+        <% end %>
+        <span class="px-4 py-2 text-sm text-surface-500">
+          Page <%= @requests.current_page %> of <%= @requests.total_pages %>
+        </span>
+        <% if @requests.current_page < @requests.total_pages %>
+          <%= link_to "Next &rarr;".html_safe, admin_api_requests_path(page: @requests.current_page + 1, status: params[:status], time: params[:time], auth_type: params[:auth_type], slow: params[:slow], path: params[:path]), class: "px-4 py-2 text-sm font-medium text-surface-600 bg-surface-200 rounded-md hover:bg-surface-300 transition-colors" %>
+        <% end %>
+      </div>
+    <% end %>
+  <% else %>
+    <div class="bg-surface-100 rounded-lg p-12 text-center">
+      <svg class="w-10 h-10 mx-auto text-surface-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+      <div class="text-sm font-medium text-surface-600 mb-1">No API requests found</div>
+      <p class="text-xs text-surface-500">
+        <% if params[:status].present? || params[:time].present? || params[:auth_type].present? || params[:slow].present? %>
+          Try adjusting your filters
+        <% else %>
+          API requests will appear here as they are made
+        <% end %>
+      </p>
+    </div>
+  <% end %>
+</div>
