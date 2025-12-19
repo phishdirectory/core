@@ -5,11 +5,14 @@ module Phish
   # and produces a combined verdict
   class AggregatorService < BaseService
     # Default services to check (can be configured)
+    # Note: Reddit is excluded - it's feed-only with no check_domain/check_url API
     DEFAULT_SERVICES = %i[
       walshy
       google_safe_browsing
       virustotal
       fish_fish
+      sinking_yachts
+      openphish
     ].freeze
 
     attr_reader :services
@@ -122,6 +125,8 @@ module Phish
       when :virustotal then VirustotalService
       when :urlscan then UrlscanService
       when :fish_fish then FishFishService
+      when :sinking_yachts then SinkingYachtsService
+      when :openphish then OpenphishService
       else
         log_info("Unknown service: #{name}")
         return nil
@@ -254,7 +259,7 @@ module Phish
 
     # Authoritative sources that override weighted scoring when they detect phishing
     # These are curated lists with high standards for inclusion
-    AUTHORITATIVE_SOURCES = %w[fish_fish].freeze
+    AUTHORITATIVE_SOURCES = %w[fish_fish sinking_yachts].freeze
 
     # Check if any authoritative source flagged as phishing
     # Returns the result if found, nil otherwise

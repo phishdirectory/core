@@ -100,8 +100,8 @@ module RateLimitable
       key = cache_key(name, action)
       current = Rails.cache.read(key).to_i
       remaining = [config[:requests] - current, 0].max
-      ttl = Rails.cache.send(:read_entry, key, {})&.expires_at
-      reset_at = ttl ? Time.at(ttl) : Time.current + config[:period]
+      # Estimate reset time based on period since cache TTL APIs are internal
+      reset_at = Time.current + config[:period]
 
       {
         limit: config[:requests],
@@ -120,10 +120,8 @@ module RateLimitable
       current = Rails.cache.read(key).to_i
 
       if current >= config[:requests]
-        # Calculate retry_after based on cache TTL
-        entry = Rails.cache.send(:read_entry, key, {})
-        expires_at = entry&.expires_at || (Time.current.to_i + config[:period])
-        retry_after = [(expires_at - Time.current.to_i), 1].max
+        # Estimate retry_after based on period since cache TTL APIs are internal
+        retry_after = config[:period]
 
         raise RateLimitExceeded.new(
           limit_name: name,

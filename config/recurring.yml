@@ -49,3 +49,29 @@ cleandns_tld_sync:
   class: CleandnsTldSyncJob
   queue: maintenance
   schedule: every day at 3am
+
+# Sinking Yachts - poll every 10 minutes for near-real-time updates
+sinking_yachts_sync:
+  class: SinkingYachtsSyncJob
+  queue: maintenance
+  schedule: every 10 minutes
+
+# Sinking Yachts - full sync weekly (catch any missed updates)
+sinking_yachts_full_sync:
+  class: SinkingYachtsSyncJob
+  queue: maintenance
+  args:
+    - full_sync: true
+  schedule: every sunday at 4am
+
+# OpenPhish - sync every 12 hours (matches feed update frequency)
+openphish_sync:
+  class: OpenphishSyncJob
+  queue: maintenance
+  schedule: every 12 hours at minute 15
+
+# Reddit - scrape phishing subreddits every 6 hours
+reddit_sync:
+  class: RedditSyncJob
+  queue: maintenance
+  schedule: every 6 hours at minute 45

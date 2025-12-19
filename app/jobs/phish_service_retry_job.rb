@@ -66,6 +66,9 @@ class PhishServiceRetryJob < ApplicationJob
     when :urlscan then Phish::UrlscanService.new
     when :google_safe_browsing then Phish::GoogleSafeBrowsingService.new
     when :walshy then Phish::WalshyService.new
+    when :sinking_yachts then Phish::SinkingYachtsService.new
+    when :openphish then Phish::OpenphishService.new
+    when :fish_fish then Phish::FishFishService.new
     else
       Rails.logger.warn("[PhishRetry] Unknown service: #{service_name}")
       nil
