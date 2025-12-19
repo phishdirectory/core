@@ -54,15 +54,29 @@
                 <div class="text-xs font-medium text-surface-500 mb-3">Detection Sources</div>
                 <div class="space-y-3">
                   <% @domain.verdict.sources_list.each do |source| %>
+                    <%
+                      # Handle both old format (service/verdict) and new format (name/result)
+                      source_name = source["name"] || source[:name] || source["service"] || source[:service]
+                      source_result = source["result"] || source[:result] || source["verdict"] || source[:verdict]
+                      source_confidence = source["confidence"] || source[:confidence]
+                      checked_at = source["checked_at"] || source[:checked_at]
+                    %>
                     <div class="bg-surface-200 rounded-md p-4 flex items-center justify-between">
                       <div>
-                        <div class="font-medium text-sm text-surface-800"><%= source["name"] || source[:name] %></div>
-                        <div class="text-xs text-surface-500 mt-0.5">
-                          Checked <%= source["checked_at"] ? time_ago_in_words(Time.parse(source["checked_at"])) + " ago" : "unknown" %>
-                        </div>
+                        <div class="font-medium text-sm text-surface-800"><%= source_name&.titleize&.gsub('_', ' ') || "Unknown Source" %></div>
+                        <% if checked_at %>
+                          <div class="text-xs text-surface-500 mt-0.5">
+                            Checked <%= time_ago_in_words(Time.parse(checked_at)) %> ago
+                          </div>
+                        <% end %>
                       </div>
-                      <div class="text-sm text-surface-600 font-mono">
-                        <%= source["result"] || source[:result] %>
+                      <div class="flex items-center gap-3">
+                        <% if source_confidence %>
+                          <span class="text-xs text-surface-500"><%= (source_confidence * 100).to_i %>% confidence</span>
+                        <% end %>
+                        <span class="text-sm font-medium <%= source_result == 'clean' ? 'text-success' : source_result == 'phishing' ? 'text-danger' : 'text-surface-600' %>">
+                          <%= source_result&.titleize || "—" %>
+                        </span>
                       </div>
                     </div>
                   <% end %>
