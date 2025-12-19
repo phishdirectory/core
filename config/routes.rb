@@ -127,6 +127,11 @@ Rails.application.routes.draw do
     end
 
     resources :services do
+      member do
+        post :suspend
+        post :reactivate
+        post :decommission
+      end
       resources :keys, controller: "service_keys", only: [:index, :create, :destroy] do
         member do
           post :deprecate

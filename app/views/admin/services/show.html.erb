@@ -198,15 +198,15 @@
         </div>
         <div class="p-5 space-y-3">
           <% if @service.may_suspend? %>
-            <%= button_to "Suspend Service", "#", method: :post, class: "w-full px-4 py-2.5 text-sm font-medium text-warning bg-warning/10 rounded-md hover:bg-warning/20 transition-colors cursor-pointer text-left", disabled: true, title: "State transition endpoint not yet implemented" %>
+            <%= button_to "Suspend Service", suspend_admin_service_path(@service), method: :post, class: "w-full px-4 py-2.5 text-sm font-medium text-warning bg-warning/10 rounded-md hover:bg-warning/20 transition-colors cursor-pointer text-left", data: { turbo_confirm: "Are you sure you want to suspend this service?" } %>
           <% end %>
 
           <% if @service.may_reactivate? %>
-            <%= button_to "Reactivate Service", "#", method: :post, class: "w-full px-4 py-2.5 text-sm font-medium text-success bg-success/10 rounded-md hover:bg-success/20 transition-colors cursor-pointer text-left", disabled: true, title: "State transition endpoint not yet implemented" %>
+            <%= button_to "Reactivate Service", reactivate_admin_service_path(@service), method: :post, class: "w-full px-4 py-2.5 text-sm font-medium text-success bg-success/10 rounded-md hover:bg-success/20 transition-colors cursor-pointer text-left" %>
           <% end %>
 
           <% if @service.may_decommission? %>
-            <%= button_to "Decommission Service", "#", method: :post, class: "w-full px-4 py-2.5 text-sm font-medium text-danger bg-danger/10 rounded-md hover:bg-danger/20 transition-colors cursor-pointer text-left", disabled: true, title: "State transition endpoint not yet implemented" %>
+            <%= button_to "Decommission Service", decommission_admin_service_path(@service), method: :post, class: "w-full px-4 py-2.5 text-sm font-medium text-danger bg-danger/10 rounded-md hover:bg-danger/20 transition-colors cursor-pointer text-left", data: { turbo_confirm: "Are you sure you want to decommission this service? This action cannot be undone." } %>
           <% end %>
 
           <div class="border-t border-surface-200/50 pt-3 mt-3">

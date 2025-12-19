@@ -23,8 +23,8 @@ class Service::Key < ApplicationRecord
   validates :api_key, presence: true, uniqueness: true
   validates :hash_key, presence: true
 
-  # State machine for key status
-  aasm column: :status, enum: true do
+  # State machine for key status (uses PostgreSQL enum, not Rails enum)
+  aasm column: :status do
     state :active, initial: true
     state :deprecated
     state :revoked

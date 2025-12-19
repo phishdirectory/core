@@ -26,7 +26,7 @@ class UsersController < ApplicationController
 
   # GET /users/:id
   def show
-    unless current_user.viewable_by?(current_user) || @user == current_user
+    unless @user.viewable_by?(current_user) || @user == current_user
       redirect_to root_path, alert: "You don't have permission to view this profile."
     end
   end
@@ -52,7 +52,7 @@ class UsersController < ApplicationController
   private
 
   def set_user
-    @user = User.find(params[:id])
+    @user = User.find_by_public_id!(params[:id])
   end
 
   def authorize_user!

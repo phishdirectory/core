@@ -68,8 +68,8 @@ class Report::Submission < ApplicationRecord
   }
   scope :by_priority, -> { joins(:abuse_contact).order("report_abuse_contacts.priority ASC") }
 
-  # AASM State Machine
-  aasm column: :status, enum: true do
+  # AASM State Machine (uses PostgreSQL enum, not Rails enum)
+  aasm column: :status do
     state :pending, initial: true
     state :queued
     state :sent

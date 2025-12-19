@@ -28,7 +28,7 @@ module Admin
     end
 
     def set_webhook
-      @webhook = @service.service_webhooks.find(params[:id])
+      @webhook = @service.service_webhooks.find_by_public_id!(params[:id])
     end
   end
 end

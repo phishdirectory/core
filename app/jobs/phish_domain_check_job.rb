@@ -17,22 +17,8 @@ class PhishDomainCheckJob < ApplicationJob
 
     Rails.logger.info("[PhishCheck] Checking domain: #{domain.domain}")
 
-    # Use the aggregator service to check multiple sources
-    service = Phish::AggregatorService.new
-    result = service.check_domain(domain.domain)
-
-    # Update or create verdict
-    verdict = domain.verdict || Verdict.new
-    verdict.update!(
-      classification: result[:verdict],
-      confidence_score: result[:confidence],
-      sources: result[:details]&.dig(:service_results) || [],
-      metadata: result[:details] || {}
-    )
-    domain.update!(verdict: verdict) unless domain.verdict_id == verdict.id
-
-    # Update last_checked_at
-    domain.update!(last_checked_at: Time.current)
+    # Use VerdictService to check and update atomically
+    result = VerdictService.check_domain!(domain)
 
     # Record metrics
     ApiMetricsService.record_phish_check(

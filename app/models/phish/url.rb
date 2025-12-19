@@ -29,6 +29,8 @@ class Phish::Url < ApplicationRecord
   scope :phishing, -> { joins(:verdict).where(verdicts: { classification: "phishing" }) }
   scope :suspicious, -> { joins(:verdict).where(verdicts: { classification: "suspicious" }) }
   scope :clean, -> { joins(:verdict).where(verdicts: { classification: "clean" }) }
+  scope :seen_recently, ->(threshold = 7.days) { where("last_seen_at > ?", threshold.ago) }
+  scope :not_seen_recently, ->(threshold = 7.days) { where("last_seen_at IS NULL OR last_seen_at <= ?", threshold.ago) }
 
   # Delegations
   delegate :classification, :confidence_score, :phishing?, :suspicious?, :clean?, :dangerous?, :safe?,
@@ -88,6 +90,14 @@ class Phish::Url < ApplicationRecord
 
   def mark_checked!
     update!(last_checked_at: Time.current)
+  end
+
+  # ===========================================
+  # Usage tracking
+  # ===========================================
+
+  def touch_last_seen!
+    update!(last_seen_at: Time.current)
   end
 
   # ===========================================

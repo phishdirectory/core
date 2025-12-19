@@ -98,10 +98,14 @@ module Phish
       total = stats.values.sum
 
       verdict = malicious >= MALICIOUS_THRESHOLD ? "phishing" : "clean"
-      confidence = total.positive? ? (1.0 - (malicious.to_f / total)).clamp(0.0, 1.0) : 0.5
-
-      # Invert confidence for phishing verdicts (higher malicious = higher confidence)
-      confidence = 1.0 - confidence if verdict == "phishing"
+      # For phishing: higher malicious ratio = higher confidence
+      # For clean: lower malicious ratio = higher confidence
+      confidence = if total.positive?
+        malicious_ratio = malicious.to_f / total
+        verdict == "phishing" ? malicious_ratio : (1.0 - malicious_ratio)
+      else
+        0.5
+      end
 
       build_result(
         verdict: verdict,

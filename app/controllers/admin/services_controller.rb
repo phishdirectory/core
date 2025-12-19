@@ -46,6 +46,33 @@ module Admin
       end
     end
 
+    def suspend
+      if @service.may_suspend?
+        @service.suspend!
+        redirect_to admin_service_path(@service), notice: "Service suspended."
+      else
+        redirect_to admin_service_path(@service), alert: "Cannot suspend this service."
+      end
+    end
+
+    def reactivate
+      if @service.may_reactivate?
+        @service.reactivate!
+        redirect_to admin_service_path(@service), notice: "Service reactivated."
+      else
+        redirect_to admin_service_path(@service), alert: "Cannot reactivate this service."
+      end
+    end
+
+    def decommission
+      if @service.may_decommission?
+        @service.decommission!
+        redirect_to admin_service_path(@service), notice: "Service decommissioned."
+      else
+        redirect_to admin_service_path(@service), alert: "Cannot decommission this service."
+      end
+    end
+
     private
 
     def set_service

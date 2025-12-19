@@ -20,8 +20,8 @@ module Api
             return render json: { error: "Invalid domain format" }, status: :bad_request
           end
 
-          # Find or create the domain record
-          phish_domain = Phish::Domain.find_or_create_by(domain: normalized_domain)
+          # Find or create the domain record (create_or_find_by handles race conditions)
+          phish_domain = Phish::Domain.create_or_find_by!(domain: normalized_domain)
 
           # Track that this domain was queried
           phish_domain.touch_last_seen!
@@ -62,10 +62,10 @@ module Api
           # Find existing domains
           existing = Phish::Domain.where(domain: normalized_domains).index_by(&:domain)
 
-          # Create missing domains
+          # Create missing domains (create_or_find_by! handles race conditions)
           missing_domains = normalized_domains - existing.keys
           missing_domains.each do |domain|
-            existing[domain] = Phish::Domain.create!(domain: domain)
+            existing[domain] = Phish::Domain.create_or_find_by!(domain: domain)
           end
 
           # Update last_seen_at for all domains in bulk

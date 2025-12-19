@@ -39,7 +39,7 @@ module Dashboard
     private
 
     def set_api_key
-      @api_key = current_user.user_api_keys.find(params[:id])
+      @api_key = current_user.user_api_keys.find_by_public_id!(params[:id])
     end
 
     def api_key_params

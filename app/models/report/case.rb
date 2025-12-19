@@ -58,8 +58,8 @@ class Report::Case < ApplicationRecord
   scope :for_url, ->(url_id) { where(reportable_type: "Phish::Url", reportable_id: url_id) }
   scope :recent, -> { order(created_at: :desc) }
 
-  # AASM State Machine
-  aasm column: :status, enum: true do
+  # AASM State Machine (uses PostgreSQL enum, not Rails enum)
+  aasm column: :status do
     state :pending, initial: true
     state :submitting
     state :awaiting_response

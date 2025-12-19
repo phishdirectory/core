@@ -20,8 +20,8 @@ class Service < ApplicationRecord
   # Counter cache for keys
   # Note: keys_count is managed by Service::Key callbacks
 
-  # State machine for service status
-  aasm column: :status, enum: true do
+  # State machine for service status (uses PostgreSQL enum, not Rails enum)
+  aasm column: :status do
     state :active, initial: true
     state :suspended
     state :decommissioned

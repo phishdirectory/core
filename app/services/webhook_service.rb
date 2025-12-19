@@ -31,7 +31,7 @@ class WebhookService
     private
 
     def broadcast_event(event, payload)
-      Service::Webhook.find_each do |webhook|
+      Service::Webhook.includes(:service).find_each do |webhook|
         webhook.deliver(event: event, payload: payload)
       rescue StandardError => e
         Rails.logger.error "[WebhookService] Failed to queue webhook delivery: #{e.message}"

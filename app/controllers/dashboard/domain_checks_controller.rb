@@ -43,22 +43,7 @@ module Dashboard
     private
 
     def run_domain_check(phish_domain)
-      service = Phish::AggregatorService.new
-      result = service.check_domain(phish_domain.domain)
-
-      # Update or create verdict
-      verdict = phish_domain.verdict || Verdict.new
-      verdict.update!(
-        classification: result[:verdict],
-        confidence_score: result[:confidence],
-        sources: result[:details]&.dig(:service_results) || [],
-        metadata: result[:details] || {}
-      )
-
-      phish_domain.update!(
-        verdict: verdict,
-        last_checked_at: Time.current
-      )
+      VerdictService.check_domain!(phish_domain)
     rescue StandardError => e
       Rails.logger.error("[DomainCheck] Failed to check #{phish_domain.domain}: #{e.message}")
       # Don't fail the request, just show unknown

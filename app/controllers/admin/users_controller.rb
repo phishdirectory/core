@@ -7,7 +7,7 @@ module Admin
     before_action :authorize_manage!, only: [:edit, :update, :destroy, :impersonate, :suspend, :reactivate, :lock, :unlock, :make_admin, :remove_privileges]
 
     def index
-      @users = User.order(created_at: :desc).page(params[:page])
+      @users = User.includes(:user_sessions).order(created_at: :desc).page(params[:page])
     end
 
     def show
@@ -47,8 +47,10 @@ module Admin
     end
 
     def search
+      query = "%#{ActiveRecord::Base.sanitize_sql_like(params[:q].to_s)}%"
       @users = User.where("email ILIKE ? OR first_name ILIKE ? OR last_name ILIKE ?",
-                          "%#{params[:q]}%", "%#{params[:q]}%", "%#{params[:q]}%")
+                          query, query, query)
+                   .includes(:user_sessions)
                    .limit(20)
       render :index
     end
