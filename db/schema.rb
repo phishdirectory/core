@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_19_220002) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_19_235059) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "fuzzystrmatch"
   enable_extension "pg_catalog.plpgsql"
@@ -367,6 +367,30 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_19_220002) do
     t.index ["country_code"], name: "index_phish_carriers_on_country_code"
     t.index ["discarded_at"], name: "index_phish_carriers_on_discarded_at"
     t.index ["name"], name: "index_phish_carriers_on_name", unique: true
+  end
+
+  create_table "phish_domain_registrations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "discarded_at"
+    t.boolean "dnssec", default: false
+    t.string "domain", null: false
+    t.datetime "expires_at"
+    t.jsonb "nameservers", default: []
+    t.datetime "queried_at", null: false
+    t.jsonb "raw_data"
+    t.datetime "registered_at"
+    t.string "registrar"
+    t.string "registrar_url"
+    t.string "source"
+    t.jsonb "status", default: []
+    t.datetime "updated_at", null: false
+    t.datetime "updated_at_registry"
+    t.index ["discarded_at"], name: "index_phish_domain_registrations_on_discarded_at"
+    t.index ["domain"], name: "index_phish_domain_registrations_on_domain", unique: true
+    t.index ["expires_at"], name: "index_phish_domain_registrations_on_expires_at"
+    t.index ["queried_at"], name: "index_phish_domain_registrations_on_queried_at"
+    t.index ["registered_at"], name: "index_phish_domain_registrations_on_registered_at"
+    t.index ["registrar"], name: "index_phish_domain_registrations_on_registrar"
   end
 
   create_table "phish_domains", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

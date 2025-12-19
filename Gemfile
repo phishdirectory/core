@@ -60,6 +60,7 @@ gem "rswag-api"                     # Serve OpenAPI JSON
 gem "rswag-ui"                      # Swagger UI for API docs
 gem "whois"                         # WHOIS lookups for domain info
 gem "whois-parser"                  # Parse WHOIS responses
+gem "rdap"                          # RDAP lookups (newer WHOIS replacement)
 gem "public_suffix"                 # TLD parsing for compound TLDs (.co.uk, etc.)
 
 # ============================================

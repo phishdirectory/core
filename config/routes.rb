@@ -219,6 +219,13 @@ Rails.application.routes.draw do
         post "check", to: "domains#check"
         get "bulk", to: "domains#bulk"
         post "bulk", to: "domains#bulk"
+
+        # WHOIS/RDAP registration info
+        get "whois", to: "whois#check"
+        post "whois", to: "whois#check"
+        get "whois/bulk", to: "whois#bulk"
+        post "whois/bulk", to: "whois#bulk"
+
         resources :protections, only: [:index, :show, :create, :destroy]
       end
 
