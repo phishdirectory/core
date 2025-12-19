@@ -98,7 +98,7 @@
         <%= link_to dashboard_profile_path, class: "flex items-center gap-2.5 px-2 py-2 rounded-md hover:bg-surface-100 transition-colors" do %>
           <div class="w-8 h-8 bg-surface-200 rounded-full flex items-center justify-center font-medium text-xs text-surface-600">
             <% if current_user.has_profile_photo? %>
-              <%= image_tag current_user.profile_photo_url(variant: :medium), class: "w-full h-full object-cover rounded-full" %>
+              <%= image_tag current_user.profile_photo_url(variant: :thumb), class: "w-full h-full object-cover rounded-full" %>
             <% else %>
               <%= current_user.initials %>
             <% end %>
