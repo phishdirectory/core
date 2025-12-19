@@ -13,21 +13,29 @@
     { "id": "nav-sessions", "name": "Active Sessions", "section": "Navigation", "url": "<%= dashboard_sessions_path %>", "keywords": "devices login" },
     { "id": "nav-docs", "name": "API Documentation", "section": "Navigation", "url": "<%= docs_path %>", "keywords": "api reference help" }
   ],
-  "admin_navigation": <%= current_user.admin? ? [
-    { id: "admin-dashboard", name: "Admin Dashboard", section: "Admin", url: admin_root_path, keywords: "admin panel" },
-    { id: "admin-users", name: "Manage Users", section: "Admin", url: admin_users_path, keywords: "users accounts" },
-    { id: "admin-services", name: "Manage Services", section: "Admin", url: admin_services_path, keywords: "services api clients" },
-    { id: "admin-domains", name: "Phishing Domains", section: "Admin", url: admin_domains_path, keywords: "domains phishing" },
-    { id: "admin-urls", name: "Phishing URLs", section: "Admin", url: admin_urls_path, keywords: "urls phishing links" },
-    { id: "admin-abuse-contacts", name: "Abuse Contacts", section: "Admin", url: admin_report_abuse_contacts_path, keywords: "abuse contacts registrar hosting report" },
-    { id: "admin-report-cases", name: "Report Cases", section: "Admin", url: admin_report_cases_path, keywords: "cases reports submissions takedown" },
-    { id: "admin-flipper", name: "Feature Flags", section: "Admin Tools", url: "/admin/flipper", keywords: "flags features toggle" },
-    { id: "admin-jobs", name: "Background Jobs", section: "Admin Tools", url: "/admin/jobs", keywords: "jobs queue workers" },
-    { id: "admin-blazer", name: "Analytics (Blazer)", section: "Admin Tools", url: "/admin/blazer", keywords: "analytics sql queries" },
-    { id: "admin-pghero", name: "Database (PgHero)", section: "Admin Tools", url: "/admin/pghero", keywords: "database postgres" },
-    { id: "admin-console", name: "Console Audits", section: "Admin Tools", url: "/admin/console_audits", keywords: "console logs audit" }
+  "trusted_navigation": <%= current_user.trusted? ? [
+    { id: "trusted-classifications", name: "Classifications", section: "Trusted", url: dashboard_classifications_path, keywords: "classify scam category vote", role: "trusted" }
   ].to_json.html_safe : "[]" %>,
-  "is_admin": <%= current_user.admin? %>
+  "admin_navigation": <%= current_user.admin? ? [
+    { id: "admin-dashboard", name: "Admin Dashboard", section: "Admin", url: admin_root_path, keywords: "admin panel", role: "admin" },
+    { id: "admin-users", name: "Manage Users", section: "Admin: Management", url: admin_users_path, keywords: "users accounts", role: "admin" },
+    { id: "admin-services", name: "Manage Services", section: "Admin: Management", url: admin_services_path, keywords: "services api clients", role: "admin" },
+    { id: "admin-domains", name: "Phishing Domains", section: "Admin: Phishing Data", url: admin_domains_path, keywords: "domains phishing", role: "admin" },
+    { id: "admin-urls", name: "Phishing URLs", section: "Admin: Phishing Data", url: admin_urls_path, keywords: "urls phishing links", role: "admin" },
+    { id: "admin-verdicts", name: "Verdicts", section: "Admin: Phishing Data", url: admin_verdicts_path, keywords: "verdicts classifications confidence", role: "admin" },
+    { id: "admin-protections", name: "Protected Domains", section: "Admin: Phishing Data", url: admin_protections_path, keywords: "protected whitelist safe", role: "admin" },
+    { id: "admin-api-requests", name: "API Requests", section: "Admin: Monitoring", url: admin_api_requests_path, keywords: "api requests logs debug", role: "admin" },
+    { id: "admin-webhook-deliveries", name: "Webhook Deliveries", section: "Admin: Monitoring", url: admin_webhook_deliveries_path, keywords: "webhooks deliveries retry", role: "admin" },
+    { id: "admin-abuse-contacts", name: "Abuse Contacts", section: "Admin: Reporting", url: admin_report_abuse_contacts_path, keywords: "abuse contacts registrar hosting report", role: "admin" },
+    { id: "admin-report-cases", name: "Report Cases", section: "Admin: Reporting", url: admin_report_cases_path, keywords: "cases reports submissions takedown", role: "admin" },
+    { id: "admin-flipper", name: "Feature Flags", section: "Admin: Tools", url: "/admin/flipper", keywords: "flags features toggle", role: "admin" },
+    { id: "admin-jobs", name: "Background Jobs", section: "Admin: Tools", url: "/admin/jobs", keywords: "jobs queue workers", role: "admin" },
+    { id: "admin-blazer", name: "Analytics (Blazer)", section: "Admin: Tools", url: "/admin/blazer", keywords: "analytics sql queries", role: "admin" },
+    { id: "admin-pghero", name: "Database (PgHero)", section: "Admin: Tools", url: "/admin/pghero", keywords: "database postgres", role: "admin" },
+    { id: "admin-console", name: "Console Audits", section: "Admin: Tools", url: "/admin/console_audits", keywords: "console logs audit", role: "admin" }
+  ].to_json.html_safe : "[]" %>,
+  "is_admin": <%= current_user.admin? %>,
+  "is_trusted": <%= current_user.trusted? %>
 }
 </script>
 
@@ -99,9 +107,11 @@
   var dataEl = document.getElementById('command-k-data');
   var data = JSON.parse(dataEl.textContent);
   var navigation = data.navigation || [];
+  var trustedNavigation = data.trusted_navigation || [];
   var adminNavigation = data.admin_navigation || [];
   var isAdmin = data.is_admin;
-  var allItems = navigation.concat(adminNavigation);
+  var isTrusted = data.is_trusted;
+  var allItems = navigation.concat(trustedNavigation).concat(adminNavigation);
 
   var selectedIndex = 0;
   var filteredItems = allItems;
@@ -148,10 +158,35 @@
 
   function createItem(item, index) {
     var el = document.createElement('div');
-    el.className = 'command-k-item flex items-center gap-3 px-4 py-2.5 cursor-pointer transition-colors';
+
+    // Base classes
+    var baseClasses = 'command-k-item flex items-center gap-3 py-2.5 cursor-pointer transition-colors';
+
+    // Add role-specific styling
+    if (item.role === 'admin') {
+      el.className = baseClasses + ' pl-3 pr-4 border-l-2 border-purple-500';
+    } else if (item.role === 'trusted') {
+      el.className = baseClasses + ' pl-3 pr-4 border-l-2 border-cyan-500';
+    } else {
+      el.className = baseClasses + ' px-4';
+    }
+
     el.dataset.index = index;
     el.dataset.url = item.url || '#';
     if (item.method) el.dataset.method = item.method;
+
+    // Add role badge for admin/trusted items
+    if (item.role === 'admin' || item.role === 'trusted') {
+      var roleBadge = document.createElement('span');
+      if (item.role === 'admin') {
+        roleBadge.className = 'px-1.5 py-0.5 text-[10px] rounded font-medium bg-purple-500/20 text-purple-400';
+        roleBadge.textContent = 'Admin';
+      } else {
+        roleBadge.className = 'px-1.5 py-0.5 text-[10px] rounded font-medium bg-cyan-500/20 text-cyan-400';
+        roleBadge.textContent = 'Trusted';
+      }
+      el.appendChild(roleBadge);
+    }
 
     var textDiv = document.createElement('div');
     textDiv.className = 'flex-1 min-w-0';
