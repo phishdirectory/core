@@ -1,0 +1,132 @@
+<% content_for :title, "Webhook Deliveries" %>
+
+<header class="px-8 py-6 border-b border-surface-200/50 flex items-center justify-between bg-surface-50/50 sticky top-0 z-40 backdrop-blur-sm">
+  <div>
+    <h1 class="text-xl font-semibold text-surface-900">Webhook Deliveries</h1>
+    <p class="text-sm text-surface-500 mt-0.5"><%= WebhookDelivery.count %> total deliveries</p>
+  </div>
+  <div class="flex items-center gap-4">
+    <div class="flex items-center gap-2 text-sm">
+      <span class="px-2 py-0.5 rounded bg-surface-300 text-surface-600 font-mono text-xs"><%= WebhookDelivery.pending.count %></span>
+      <span class="text-surface-500">pending</span>
+      <span class="px-2 py-0.5 rounded bg-success/10 text-success font-mono text-xs ml-2"><%= WebhookDelivery.delivered.count %></span>
+      <span class="text-surface-500">delivered</span>
+      <span class="px-2 py-0.5 rounded bg-danger/10 text-danger font-mono text-xs ml-2"><%= WebhookDelivery.failed.count %></span>
+      <span class="text-surface-500">failed</span>
+    </div>
+  </div>
+</header>
+
+<div class="p-8">
+  <%# Filters %>
+  <div class="mb-6 flex items-center gap-4 flex-wrap">
+    <%# Status filter tabs %>
+    <div class="flex items-center gap-1 bg-surface-100 rounded-lg p-1">
+      <%= link_to "All", admin_webhook_deliveries_path(event: params[:event], retryable: params[:retryable]),
+          class: "px-3 py-1.5 text-sm font-medium rounded-md transition-colors #{params[:status].blank? ? 'bg-surface-0 text-surface-900 shadow-sm' : 'text-surface-600 hover:text-surface-800'}" %>
+      <% WebhookDelivery::STATUSES.each do |status| %>
+        <%= link_to status.titleize, admin_webhook_deliveries_path(status: status, event: params[:event], retryable: params[:retryable]),
+            class: "px-3 py-1.5 text-sm font-medium rounded-md transition-colors #{params[:status] == status ? 'bg-surface-0 text-surface-900 shadow-sm' : 'text-surface-600 hover:text-surface-800'}" %>
+      <% end %>
+    </div>
+
+    <%# Retryable toggle %>
+    <%= link_to admin_webhook_deliveries_path(status: params[:status], event: params[:event], retryable: params[:retryable] == "true" ? nil : "true"),
+        class: "px-3 py-1.5 text-sm font-medium rounded-md transition-colors #{params[:retryable] == 'true' ? 'bg-warning/10 text-warning' : 'bg-surface-100 text-surface-600 hover:text-surface-800'}" do %>
+      <span class="flex items-center gap-1.5">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        Retryable Only
+      </span>
+    <% end %>
+  </div>
+
+  <% if @deliveries.any? %>
+    <div class="bg-surface-100 rounded-lg overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="border-b border-surface-200/50">
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Event</th>
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">URL</th>
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Status</th>
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Attempts</th>
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Last Attempt</th>
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Created</th>
+              <th class="px-5 py-2.5 text-right text-xs font-medium text-surface-500">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @deliveries.each do |delivery| %>
+              <tr class="border-b border-surface-200/50 hover:bg-surface-200/30 transition-colors">
+                <td class="px-5 py-3">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono font-medium bg-accent/10 text-accent">
+                    <%= delivery.event %>
+                  </span>
+                </td>
+                <td class="px-5 py-3">
+                  <code class="text-sm text-surface-800 font-mono"><%= truncate(delivery.url, length: 40) %></code>
+                </td>
+                <td class="px-5 py-3">
+                  <% case delivery.status %>
+                  <% when 'pending' %>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-surface-300 text-surface-600">Pending</span>
+                  <% when 'delivering' %>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-info/10 text-info">Delivering</span>
+                  <% when 'delivered' %>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-success/10 text-success">Delivered</span>
+                  <% when 'failed' %>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-danger/10 text-danger">Failed</span>
+                  <% end %>
+                </td>
+                <td class="px-5 py-3">
+                  <span class="text-sm text-surface-600 font-mono"><%= delivery.attempts %>/<%= WebhookDelivery::MAX_ATTEMPTS %></span>
+                </td>
+                <td class="px-5 py-3 text-surface-600 text-sm">
+                  <%= delivery.last_attempt_at ? time_ago_in_words(delivery.last_attempt_at) + " ago" : "—" %>
+                </td>
+                <td class="px-5 py-3 text-surface-600 text-sm">
+                  <%= delivery.created_at.strftime("%b %d, %Y") %>
+                </td>
+                <td class="px-5 py-3 text-right">
+                  <div class="flex items-center justify-end gap-2">
+                    <%= link_to "View", admin_webhook_delivery_path(delivery), class: "px-2.5 py-1.5 text-xs font-medium text-surface-600 bg-surface-200 rounded-md hover:bg-surface-300 transition-colors" %>
+                    <% if delivery.retryable? %>
+                      <%= button_to "Retry", retry_admin_webhook_delivery_path(delivery), method: :post, class: "px-2.5 py-1.5 text-xs font-medium text-warning bg-warning/10 rounded-md hover:bg-warning/20 transition-colors cursor-pointer" %>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <%# Pagination %>
+    <% if @deliveries.respond_to?(:total_pages) && @deliveries.total_pages > 1 %>
+      <div class="mt-6 flex items-center justify-center gap-2">
+        <% if @deliveries.current_page > 1 %>
+          <%= link_to "&larr; Previous".html_safe, admin_webhook_deliveries_path(page: @deliveries.current_page - 1, status: params[:status], event: params[:event], retryable: params[:retryable]), class: "px-4 py-2 text-sm font-medium text-surface-600 bg-surface-200 rounded-md hover:bg-surface-300 transition-colors" %>
+        <% end %>
+        <span class="px-4 py-2 text-sm text-surface-500">
+          Page <%= @deliveries.current_page %> of <%= @deliveries.total_pages %>
+        </span>
+        <% if @deliveries.current_page < @deliveries.total_pages %>
+          <%= link_to "Next &rarr;".html_safe, admin_webhook_deliveries_path(page: @deliveries.current_page + 1, status: params[:status], event: params[:event], retryable: params[:retryable]), class: "px-4 py-2 text-sm font-medium text-surface-600 bg-surface-200 rounded-md hover:bg-surface-300 transition-colors" %>
+        <% end %>
+      </div>
+    <% end %>
+  <% else %>
+    <div class="bg-surface-100 rounded-lg p-12 text-center">
+      <svg class="w-10 h-10 mx-auto text-surface-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+      <div class="text-sm font-medium text-surface-600 mb-1">No webhook deliveries found</div>
+      <p class="text-xs text-surface-500">
+        <% if params[:status].present? || params[:retryable].present? %>
+          Try adjusting your filters
+        <% else %>
+          Webhook deliveries will appear here as webhooks are sent
+        <% end %>
+      </p>
+    </div>
+  <% end %>
+</div>
