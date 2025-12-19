@@ -12,6 +12,7 @@ class Verdict < ApplicationRecord
   has_many :phish_domains, class_name: "Phish::Domain", dependent: :nullify
   has_many :phish_urls, class_name: "Phish::Url", dependent: :nullify
   has_many :phish_phone_numbers, class_name: "Phish::PhoneNumber", dependent: :nullify
+  has_many :phish_emails, class_name: "Phish::Email", dependent: :nullify
 
   # Validations
   validates :classification, presence: true, inclusion: { in: CLASSIFICATIONS }

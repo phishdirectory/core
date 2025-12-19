@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_19_220001) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_19_220002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "fuzzystrmatch"
   enable_extension "pg_catalog.plpgsql"
@@ -396,6 +396,38 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_19_220001) do
     t.index ["scam_subcategory"], name: "index_phish_domains_on_scam_subcategory"
     t.index ["tld_id"], name: "index_phish_domains_on_tld_id"
     t.index ["verdict_id"], name: "index_phish_domains_on_verdict_id"
+  end
+
+  create_table "phish_emails", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.boolean "deliverable"
+    t.datetime "discarded_at"
+    t.boolean "disposable"
+    t.string "domain"
+    t.string "email", null: false
+    t.boolean "free_provider"
+    t.datetime "last_checked_at"
+    t.datetime "last_seen_at"
+    t.datetime "marked_clean_at"
+    t.uuid "marked_clean_by_id"
+    t.float "reputation_score"
+    t.string "scam_category"
+    t.string "scam_subcategory"
+    t.datetime "updated_at", null: false
+    t.boolean "valid_mx"
+    t.uuid "verdict_id"
+    t.index ["discarded_at"], name: "index_phish_emails_on_discarded_at"
+    t.index ["disposable"], name: "index_phish_emails_on_disposable"
+    t.index ["domain"], name: "index_phish_emails_on_domain"
+    t.index ["email"], name: "index_phish_emails_on_email", unique: true
+    t.index ["free_provider"], name: "index_phish_emails_on_free_provider"
+    t.index ["last_checked_at"], name: "index_phish_emails_on_last_checked_at"
+    t.index ["last_seen_at"], name: "index_phish_emails_on_last_seen_at"
+    t.index ["marked_clean_at"], name: "index_phish_emails_on_marked_clean_at"
+    t.index ["marked_clean_by_id"], name: "index_phish_emails_on_marked_clean_by_id"
+    t.index ["scam_category"], name: "index_phish_emails_on_scam_category"
+    t.index ["scam_subcategory"], name: "index_phish_emails_on_scam_subcategory"
+    t.index ["verdict_id"], name: "index_phish_emails_on_verdict_id"
   end
 
   create_table "phish_phone_numbers", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -829,6 +861,8 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_19_220001) do
   add_foreign_key "oauth_access_tokens", "users", column: "resource_owner_id"
   add_foreign_key "phish_domains", "phish_tlds", column: "tld_id"
   add_foreign_key "phish_domains", "verdicts"
+  add_foreign_key "phish_emails", "users", column: "marked_clean_by_id"
+  add_foreign_key "phish_emails", "verdicts"
   add_foreign_key "phish_phone_numbers", "phish_carriers", column: "carrier_id"
   add_foreign_key "phish_phone_numbers", "users", column: "marked_clean_by_id"
   add_foreign_key "phish_phone_numbers", "verdicts"
