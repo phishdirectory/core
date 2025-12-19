@@ -29,94 +29,235 @@
         </a>
       </div>
 
+      <%# Back to User Dashboard %>
+      <div class="px-3 py-2 border-b border-surface-200/50">
+        <%= link_to dashboard_root_path, class: "flex items-center gap-2 px-2.5 py-2 rounded-md text-sm font-medium text-surface-600 hover:bg-surface-100 hover:text-surface-800 transition-colors" do %>
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 17l-5-5m0 0l5-5m-5 5h12"/></svg>
+          <span>User Dashboard</span>
+        <% end %>
+      </div>
+
       <%# Navigation %>
-      <nav class="flex-1 px-3 py-4 overflow-y-auto">
-        <div class="mb-6">
+      <nav class="flex-1 px-3 py-4 overflow-y-auto" id="admin-nav">
+        <%# Overview - not collapsible %>
+        <div class="mb-4">
           <div class="text-[10px] font-semibold text-surface-500 uppercase tracking-wider px-2 mb-2">Overview</div>
           <%= link_to admin_root_path, class: "flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium transition-colors #{controller_path == 'admin/dashboard' ? 'bg-accent/10 text-accent' : 'text-surface-600 hover:bg-surface-100 hover:text-surface-800'}" do %>
             <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-            <span>Dashboard</span>
+            <span>Admin Home</span>
           <% end %>
         </div>
 
-        <div class="mb-6">
-          <div class="text-[10px] font-semibold text-surface-500 uppercase tracking-wider px-2 mb-2">Management</div>
-          <%= link_to admin_users_path, class: "flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium transition-colors #{controller_path == 'admin/users' ? 'bg-accent/10 text-accent' : 'text-surface-600 hover:bg-surface-100 hover:text-surface-800'}" do %>
-            <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-            <span>Users</span>
-          <% end %>
-          <%= link_to admin_services_path, class: "flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium transition-colors #{controller_path == 'admin/services' ? 'bg-accent/10 text-accent' : 'text-surface-600 hover:bg-surface-100 hover:text-surface-800'}" do %>
-            <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"/></svg>
-            <span>Services</span>
-          <% end %>
+        <%# Management - collapsible %>
+        <div class="mb-4" data-nav-section="management">
+          <button type="button" class="w-full flex items-center justify-between text-[10px] font-semibold text-surface-500 uppercase tracking-wider px-2 mb-2 hover:text-surface-700 transition-colors cursor-pointer" data-nav-toggle>
+            <span>Management</span>
+            <svg class="w-3 h-3 transition-transform duration-200" data-nav-chevron fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+          <div class="space-y-0.5 overflow-hidden transition-all duration-200" data-nav-content>
+            <%= link_to admin_users_path, class: "flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium transition-colors #{controller_path == 'admin/users' ? 'bg-accent/10 text-accent' : 'text-surface-600 hover:bg-surface-100 hover:text-surface-800'}" do %>
+              <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+              <span>Users</span>
+            <% end %>
+            <%= link_to admin_services_path, class: "flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium transition-colors #{controller_path == 'admin/services' ? 'bg-accent/10 text-accent' : 'text-surface-600 hover:bg-surface-100 hover:text-surface-800'}" do %>
+              <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"/></svg>
+              <span>Services</span>
+            <% end %>
+          </div>
         </div>
 
-        <div class="mb-6">
-          <div class="text-[10px] font-semibold text-surface-500 uppercase tracking-wider px-2 mb-2">Phishing Data</div>
-          <%= link_to admin_protections_path, class: "flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium transition-colors #{controller_path == 'admin/protections' ? 'bg-accent/10 text-accent' : 'text-surface-600 hover:bg-surface-100 hover:text-surface-800'}" do %>
-            <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-            <span>Protected</span>
-          <% end %>
+        <%# Phishing Data - collapsible, collapsed by default %>
+        <div class="mb-4" data-nav-section="phishing" data-nav-default-collapsed="true">
+          <button type="button" class="w-full flex items-center justify-between text-[10px] font-semibold text-surface-500 uppercase tracking-wider px-2 mb-2 hover:text-surface-700 transition-colors cursor-pointer" data-nav-toggle>
+            <span>Phishing Data</span>
+            <svg class="w-3 h-3 transition-transform duration-200" data-nav-chevron fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+          <div class="space-y-0.5 overflow-hidden transition-all duration-200" data-nav-content>
+            <%= link_to admin_domains_path, class: "flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium transition-colors #{controller_path == 'admin/phish_domains' ? 'bg-accent/10 text-accent' : 'text-surface-600 hover:bg-surface-100 hover:text-surface-800'}" do %>
+              <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+              <span>Domains</span>
+            <% end %>
+            <%= link_to admin_urls_path, class: "flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium transition-colors #{controller_path == 'admin/phish_urls' ? 'bg-accent/10 text-accent' : 'text-surface-600 hover:bg-surface-100 hover:text-surface-800'}" do %>
+              <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+              <span>URLs</span>
+            <% end %>
+            <%= link_to admin_verdicts_path, class: "flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium transition-colors #{controller_path == 'admin/verdicts' ? 'bg-accent/10 text-accent' : 'text-surface-600 hover:bg-surface-100 hover:text-surface-800'}" do %>
+              <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <span>Verdicts</span>
+            <% end %>
+            <%= link_to admin_protections_path, class: "flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium transition-colors #{controller_path == 'admin/protections' ? 'bg-accent/10 text-accent' : 'text-surface-600 hover:bg-surface-100 hover:text-surface-800'}" do %>
+              <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+              <span>Protected</span>
+            <% end %>
+          </div>
         </div>
 
-        <div class="mb-6">
-          <div class="text-[10px] font-semibold text-surface-500 uppercase tracking-wider px-2 mb-2">Reporting</div>
-          <%= link_to admin_report_abuse_contacts_path, class: "flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium transition-colors #{controller_path == 'admin/report/abuse_contacts' ? 'bg-accent/10 text-accent' : 'text-surface-600 hover:bg-surface-100 hover:text-surface-800'}" do %>
-            <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-            <span>Abuse Contacts</span>
-          <% end %>
-          <%= link_to admin_report_cases_path, class: "flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium transition-colors #{controller_path == 'admin/report/cases' ? 'bg-accent/10 text-accent' : 'text-surface-600 hover:bg-surface-100 hover:text-surface-800'}" do %>
-            <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
-            <span>Report Cases</span>
-          <% end %>
+        <%# Monitoring - collapsible %>
+        <div class="mb-4" data-nav-section="monitoring">
+          <button type="button" class="w-full flex items-center justify-between text-[10px] font-semibold text-surface-500 uppercase tracking-wider px-2 mb-2 hover:text-surface-700 transition-colors cursor-pointer" data-nav-toggle>
+            <span>Monitoring</span>
+            <svg class="w-3 h-3 transition-transform duration-200" data-nav-chevron fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+          <div class="space-y-0.5 overflow-hidden transition-all duration-200" data-nav-content>
+            <%= link_to admin_api_requests_path, class: "flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium transition-colors #{controller_path == 'admin/api_requests' ? 'bg-accent/10 text-accent' : 'text-surface-600 hover:bg-surface-100 hover:text-surface-800'}" do %>
+              <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              <span>API Requests</span>
+            <% end %>
+            <%= link_to admin_webhook_deliveries_path, class: "flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium transition-colors #{controller_path == 'admin/webhook_deliveries' ? 'bg-accent/10 text-accent' : 'text-surface-600 hover:bg-surface-100 hover:text-surface-800'}" do %>
+              <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+              <span>Webhook Deliveries</span>
+            <% end %>
+          </div>
         </div>
 
-        <div class="mb-6">
-          <div class="text-[10px] font-semibold text-surface-500 uppercase tracking-wider px-2 mb-2">Tools</div>
-          <a href="/admin/flipper" class="flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium text-surface-600 hover:bg-surface-100 hover:text-surface-800 transition-colors">
-            <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
-            <span>Feature Flags</span>
-          </a>
-          <a href="/admin/jobs" class="flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium text-surface-600 hover:bg-surface-100 hover:text-surface-800 transition-colors">
-            <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-            <span>Background Jobs</span>
-          </a>
-          <a href="/admin/blazer" class="flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium text-surface-600 hover:bg-surface-100 hover:text-surface-800 transition-colors">
-            <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-            <span>Analytics</span>
-          </a>
-          <a href="/admin/console_audits" class="flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium text-surface-600 hover:bg-surface-100 hover:text-surface-800 transition-colors">
-            <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-            <span>Console Audits</span>
-          </a>
-          <a href="/admin/pghero" class="flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium text-surface-600 hover:bg-surface-100 hover:text-surface-800 transition-colors">
-            <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
-            <span>Database Monitor</span>
-          </a>
+        <%# Reporting - collapsible %>
+        <div class="mb-4" data-nav-section="reporting">
+          <button type="button" class="w-full flex items-center justify-between text-[10px] font-semibold text-surface-500 uppercase tracking-wider px-2 mb-2 hover:text-surface-700 transition-colors cursor-pointer" data-nav-toggle>
+            <span>Reporting</span>
+            <svg class="w-3 h-3 transition-transform duration-200" data-nav-chevron fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+          <div class="space-y-0.5 overflow-hidden transition-all duration-200" data-nav-content>
+            <%= link_to admin_report_abuse_contacts_path, class: "flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium transition-colors #{controller_path == 'admin/report/abuse_contacts' ? 'bg-accent/10 text-accent' : 'text-surface-600 hover:bg-surface-100 hover:text-surface-800'}" do %>
+              <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+              <span>Abuse Contacts</span>
+            <% end %>
+            <%= link_to admin_report_cases_path, class: "flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium transition-colors #{controller_path == 'admin/report/cases' ? 'bg-accent/10 text-accent' : 'text-surface-600 hover:bg-surface-100 hover:text-surface-800'}" do %>
+              <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+              <span>Report Cases</span>
+            <% end %>
+          </div>
         </div>
 
-        <div class="mb-6">
-          <div class="text-[10px] font-semibold text-surface-500 uppercase tracking-wider px-2 mb-2">Navigation</div>
-          <%= link_to docs_path, class: "flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium text-surface-600 hover:bg-surface-100 hover:text-surface-800 transition-colors" do %>
-            <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-            <span>Documentation</span>
-          <% end %>
-          <%= link_to dashboard_root_path, class: "flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium text-surface-600 hover:bg-surface-100 hover:text-surface-800 transition-colors" do %>
-            <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 17l-5-5m0 0l5-5m-5 5h12"/></svg>
-            <span>Back to Dashboard</span>
-          <% end %>
+        <%# Tools - collapsible, collapsed by default %>
+        <div class="mb-4" data-nav-section="tools" data-nav-default-collapsed="true">
+          <button type="button" class="w-full flex items-center justify-between text-[10px] font-semibold text-surface-500 uppercase tracking-wider px-2 mb-2 hover:text-surface-700 transition-colors cursor-pointer" data-nav-toggle>
+            <span>Tools</span>
+            <svg class="w-3 h-3 transition-transform duration-200" data-nav-chevron fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+          <div class="space-y-0.5 overflow-hidden transition-all duration-200" data-nav-content>
+            <a href="/admin/flipper" class="flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium text-surface-600 hover:bg-surface-100 hover:text-surface-800 transition-colors">
+              <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+              <span>Feature Flags</span>
+            </a>
+            <a href="/admin/jobs" class="flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium text-surface-600 hover:bg-surface-100 hover:text-surface-800 transition-colors">
+              <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+              <span>Background Jobs</span>
+            </a>
+            <a href="/admin/blazer" class="flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium text-surface-600 hover:bg-surface-100 hover:text-surface-800 transition-colors">
+              <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+              <span>Analytics</span>
+            </a>
+            <a href="/admin/console_audits" class="flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium text-surface-600 hover:bg-surface-100 hover:text-surface-800 transition-colors">
+              <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              <span>Console Audits</span>
+            </a>
+            <a href="/admin/pghero" class="flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium text-surface-600 hover:bg-surface-100 hover:text-surface-800 transition-colors">
+              <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
+              <span>Database Monitor</span>
+            </a>
+          </div>
         </div>
+
       </nav>
+
+      <%# Collapsible navigation JavaScript %>
+      <script nonce="<%= content_security_policy_nonce %>">
+        (function() {
+          const STORAGE_KEY = 'admin_nav_collapsed_v2';
+
+          function getCollapsedState() {
+            try {
+              return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+            } catch {
+              return {};
+            }
+          }
+
+          function saveCollapsedState(state) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          }
+
+          function initNav() {
+            const sections = document.querySelectorAll('[data-nav-section]');
+            const state = getCollapsedState();
+
+            sections.forEach(section => {
+              const sectionName = section.dataset.navSection;
+              const toggle = section.querySelector('[data-nav-toggle]');
+              const content = section.querySelector('[data-nav-content]');
+              const chevron = section.querySelector('[data-nav-chevron]');
+              const defaultCollapsed = section.dataset.navDefaultCollapsed === 'true';
+
+              // Determine initial state (use saved state if exists, otherwise use default)
+              let isCollapsed = state.hasOwnProperty(sectionName)
+                ? state[sectionName]
+                : defaultCollapsed;
+
+              // Store current state on the element for toggle logic
+              section.dataset.collapsed = isCollapsed;
+
+              // Apply initial state
+              if (isCollapsed) {
+                content.style.maxHeight = '0';
+                content.style.opacity = '0';
+                chevron.style.transform = 'rotate(-90deg)';
+              } else {
+                content.style.maxHeight = content.scrollHeight + 'px';
+                content.style.opacity = '1';
+                chevron.style.transform = 'rotate(0deg)';
+              }
+
+              // Add click handler (only once)
+              if (!toggle.dataset.initialized) {
+                toggle.dataset.initialized = 'true';
+                toggle.addEventListener('click', () => {
+                  const wasCollapsed = section.dataset.collapsed === 'true';
+                  const nowCollapsed = !wasCollapsed;
+
+                  if (nowCollapsed) {
+                    content.style.maxHeight = '0';
+                    content.style.opacity = '0';
+                    chevron.style.transform = 'rotate(-90deg)';
+                  } else {
+                    content.style.maxHeight = content.scrollHeight + 'px';
+                    content.style.opacity = '1';
+                    chevron.style.transform = 'rotate(0deg)';
+                  }
+
+                  section.dataset.collapsed = nowCollapsed;
+                  const currentState = getCollapsedState();
+                  currentState[sectionName] = nowCollapsed;
+                  saveCollapsedState(currentState);
+                });
+              }
+            });
+          }
+
+          // Initialize on DOM ready
+          if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initNav);
+          } else {
+            initNav();
+          }
+
+          // Re-initialize on Turbo navigation
+          document.addEventListener('turbo:load', initNav);
+        })();
+      </script>
 
       <%# User section %>
       <div class="p-3 border-t border-surface-200/50">
         <%= link_to dashboard_profile_path, class: "flex items-center gap-2.5 px-2 py-2 rounded-md hover:bg-surface-100 transition-colors" do %>
           <div class="w-8 h-8 bg-surface-200 rounded-full flex items-center justify-center font-medium text-xs text-surface-600">
-            <%= current_user.initials %>
+            <% if current_user.has_profile_photo? %>
+              <%= image_tag current_user.profile_photo_url(variant: :thumb), class: "w-full h-full object-cover rounded-full" %>
+            <% else %>
+              <%= current_user.initials %>
+            <% end %>
           </div>
           <div class="flex-1 min-w-0">
             <div class="font-medium text-sm text-surface-800 truncate"><%= current_user.full_name %></div>
-            <div class="text-xs text-surface-500 truncate"><%= current_user.email %></div>
+            <div class="text-xs text-surface-500 truncate"><%= current_user.pd_id %></div>
           </div>
         <% end %>
         <%= button_to logout_path, method: :delete, class: "w-full mt-2 px-3 py-2 text-sm font-medium text-surface-600 bg-surface-100 rounded-md hover:bg-surface-200 hover:text-surface-700 transition-colors cursor-pointer" do %>
