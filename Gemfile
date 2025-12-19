@@ -49,6 +49,7 @@ gem "kaminari"                      # Pagination
 gem "validates_email_format_of"     # Email format validation
 gem "valid_email2"                  # Disposable email checking
 gem "discard"                       # Soft delete with recovery
+gem "phonelib"                      # Phone number parsing & E.164 validation
 
 # ============================================
 # API & HTTP

@@ -327,6 +327,7 @@ GEM
       activesupport (>= 6.1)
     pghero (3.7.0)
       activerecord (>= 7.1)
+    phonelib (0.10.14)
     pp (0.6.3)
       prettyprint
     prettyprint (0.2.0)
@@ -580,6 +581,7 @@ DEPENDENCIES
   pg (~> 1.1)
   pg_search
   pghero
+  phonelib
   public_suffix
   puma (>= 5.0)
   rack-attack

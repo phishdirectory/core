@@ -220,6 +220,14 @@ Rails.application.routes.draw do
         post "bulk", to: "urls#bulk"
       end
 
+      # Phone number checking
+      namespace :phone do
+        get "check", to: "phone_numbers#check"
+        post "check", to: "phone_numbers#check"
+        get "bulk", to: "phone_numbers#bulk"
+        post "bulk", to: "phone_numbers#bulk"
+      end
+
       # Webhooks
       resources :webhooks, only: [:index, :create, :destroy]
     end

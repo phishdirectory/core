@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_19_201906) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_19_220001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "fuzzystrmatch"
   enable_extension "pg_catalog.plpgsql"
@@ -354,6 +354,21 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_19_201906) do
     t.index ["searchable_type", "searchable_id"], name: "index_pg_search_documents_on_searchable_type_and_searchable_id"
   end
 
+  create_table "phish_carriers", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "carrier_type"
+    t.string "country_code"
+    t.datetime "created_at", null: false
+    t.datetime "discarded_at"
+    t.jsonb "metadata", default: {}
+    t.string "name", null: false
+    t.integer "phone_numbers_count", default: 0
+    t.datetime "updated_at", null: false
+    t.index ["carrier_type"], name: "index_phish_carriers_on_carrier_type"
+    t.index ["country_code"], name: "index_phish_carriers_on_country_code"
+    t.index ["discarded_at"], name: "index_phish_carriers_on_discarded_at"
+    t.index ["name"], name: "index_phish_carriers_on_name", unique: true
+  end
+
   create_table "phish_domains", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "availability_checked_at"
     t.datetime "created_at", null: false
@@ -381,6 +396,35 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_19_201906) do
     t.index ["scam_subcategory"], name: "index_phish_domains_on_scam_subcategory"
     t.index ["tld_id"], name: "index_phish_domains_on_tld_id"
     t.index ["verdict_id"], name: "index_phish_domains_on_verdict_id"
+  end
+
+  create_table "phish_phone_numbers", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "carrier_id"
+    t.string "country_code"
+    t.datetime "created_at", null: false
+    t.datetime "discarded_at"
+    t.datetime "last_checked_at"
+    t.datetime "last_seen_at"
+    t.datetime "marked_clean_at"
+    t.uuid "marked_clean_by_id"
+    t.string "phone_number", null: false
+    t.string "phone_type"
+    t.string "scam_category"
+    t.string "scam_subcategory"
+    t.datetime "updated_at", null: false
+    t.uuid "verdict_id"
+    t.index ["carrier_id"], name: "index_phish_phone_numbers_on_carrier_id"
+    t.index ["country_code"], name: "index_phish_phone_numbers_on_country_code"
+    t.index ["discarded_at"], name: "index_phish_phone_numbers_on_discarded_at"
+    t.index ["last_checked_at"], name: "index_phish_phone_numbers_on_last_checked_at"
+    t.index ["last_seen_at"], name: "index_phish_phone_numbers_on_last_seen_at"
+    t.index ["marked_clean_at"], name: "index_phish_phone_numbers_on_marked_clean_at"
+    t.index ["marked_clean_by_id"], name: "index_phish_phone_numbers_on_marked_clean_by_id"
+    t.index ["phone_number"], name: "index_phish_phone_numbers_on_phone_number", unique: true
+    t.index ["phone_type"], name: "index_phish_phone_numbers_on_phone_type"
+    t.index ["scam_category"], name: "index_phish_phone_numbers_on_scam_category"
+    t.index ["scam_subcategory"], name: "index_phish_phone_numbers_on_scam_subcategory"
+    t.index ["verdict_id"], name: "index_phish_phone_numbers_on_verdict_id"
   end
 
   create_table "phish_protections", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -785,6 +829,9 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_19_201906) do
   add_foreign_key "oauth_access_tokens", "users", column: "resource_owner_id"
   add_foreign_key "phish_domains", "phish_tlds", column: "tld_id"
   add_foreign_key "phish_domains", "verdicts"
+  add_foreign_key "phish_phone_numbers", "phish_carriers", column: "carrier_id"
+  add_foreign_key "phish_phone_numbers", "users", column: "marked_clean_by_id"
+  add_foreign_key "phish_phone_numbers", "verdicts"
   add_foreign_key "phish_protections", "users", column: "protected_by_id"
   add_foreign_key "phish_urls", "verdicts"
   add_foreign_key "report_case_emails", "action_mailbox_inbound_emails"
