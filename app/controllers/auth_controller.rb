@@ -78,6 +78,7 @@ class AuthController < ApplicationController
       render json: {
         user: {
           pd_id: current_user.pd_id,
+          public_id: current_user.public_id,
           email: current_user.email,
           name: current_user.full_name,
           username: current_user.username,
