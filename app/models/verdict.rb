@@ -6,7 +6,7 @@ class Verdict < ApplicationRecord
   set_public_id_prefix "vrd"
 
   # Classifications
-  CLASSIFICATIONS = %w[phishing suspicious clean unknown].freeze
+  CLASSIFICATIONS = %w[phishing suspicious clean unknown protected].freeze
 
   # Associations
   has_many :phish_domains, class_name: "Phish::Domain", dependent: :nullify
@@ -21,6 +21,7 @@ class Verdict < ApplicationRecord
   scope :suspicious, -> { where(classification: "suspicious") }
   scope :clean, -> { where(classification: "clean") }
   scope :unknown, -> { where(classification: "unknown") }
+  scope :protected_classification, -> { where(classification: "protected") }
   scope :high_confidence, -> { where("confidence_score >= ?", 0.8) }
   scope :low_confidence, -> { where("confidence_score < ?", 0.5) }
 
@@ -44,12 +45,16 @@ class Verdict < ApplicationRecord
     classification == "unknown"
   end
 
+  def protected_classification?
+    classification == "protected"
+  end
+
   def dangerous?
     phishing? || suspicious?
   end
 
   def safe?
-    clean?
+    clean? || protected_classification?
   end
 
   # ===========================================

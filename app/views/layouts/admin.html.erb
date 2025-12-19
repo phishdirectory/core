@@ -57,6 +57,10 @@
             <span class="w-5 text-center opacity-80">&#128279;</span>
             <span>URLs</span>
           <% end %>
+          <%= link_to admin_protections_path, class: "flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium transition-all #{controller_path == 'admin/protections' ? 'bg-cyan-accent/15 text-cyan-accent' : 'text-slate-400 hover:bg-pd-tertiary hover:text-slate-100'}" do %>
+            <span class="w-5 text-center opacity-80">&#128737;</span>
+            <span>Protected</span>
+          <% end %>
         </div>
 
         <div class="mb-6">

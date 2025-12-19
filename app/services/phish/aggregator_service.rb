@@ -27,6 +27,12 @@ module Phish
       normalized = normalize_domain(domain)
       log_info("Aggregating checks for domain: #{normalized}")
 
+      # Check if domain is protected before running any services
+      if (protection = Phish::Protection.protection_for("Phish::Domain", normalized))
+        log_info("Domain #{normalized} is protected, skipping checks")
+        return build_protected_result(domain: normalized, protection: protection)
+      end
+
       results, rate_limited = collect_service_results(:check_domain, normalized)
 
       # Schedule retry jobs for rate-limited services
@@ -42,6 +48,12 @@ module Phish
     def check_url(url, record: nil)
       normalized = normalize_url(url)
       log_info("Aggregating checks for URL: #{normalized}")
+
+      # Check if URL is protected before running any services
+      if (protection = Phish::Protection.protection_for("Phish::Url", normalized))
+        log_info("URL #{normalized} is protected, skipping checks")
+        return build_protected_result(url: normalized, protection: protection)
+      end
 
       results, rate_limited = collect_service_results(:check_url, normalized)
 
@@ -223,6 +235,19 @@ module Phish
         details: context.merge(
           services_checked: 0,
           reason: "No services returned results"
+        )
+      )
+    end
+
+    def build_protected_result(protection:, **context)
+      build_result(
+        verdict: "protected",
+        confidence: 1.0,
+        details: context.merge(
+          services_checked: 0,
+          reason: protection.reason || "Domain is on protected list",
+          protected_by: protection.protected_by&.public_id,
+          protected_at: protection.created_at.iso8601
         )
       )
     end

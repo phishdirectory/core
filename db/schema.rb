@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_18_061612) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_18_235245) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "fuzzystrmatch"
   enable_extension "pg_catalog.plpgsql"
@@ -374,6 +374,19 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_18_061612) do
     t.index ["verdict_id"], name: "index_phish_domains_on_verdict_id"
   end
 
+  create_table "phish_protections", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "discarded_at"
+    t.string "protectable_type", null: false
+    t.string "protectable_value", null: false
+    t.uuid "protected_by_id", null: false
+    t.text "reason"
+    t.datetime "updated_at", null: false
+    t.index ["discarded_at"], name: "index_phish_protections_on_discarded_at"
+    t.index ["protectable_type", "protectable_value"], name: "index_protections_on_type_and_value", unique: true
+    t.index ["protected_by_id"], name: "index_phish_protections_on_protected_by_id"
+  end
+
   create_table "phish_urls", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "discarded_at"
@@ -708,6 +721,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_18_061612) do
   add_foreign_key "oauth_access_tokens", "oauth_applications", column: "application_id"
   add_foreign_key "oauth_access_tokens", "users", column: "resource_owner_id"
   add_foreign_key "phish_domains", "verdicts"
+  add_foreign_key "phish_protections", "users", column: "protected_by_id"
   add_foreign_key "phish_urls", "verdicts"
   add_foreign_key "report_case_emails", "action_mailbox_inbound_emails"
   add_foreign_key "report_case_emails", "report_cases", column: "case_id"

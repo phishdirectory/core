@@ -138,6 +138,7 @@ Rails.application.routes.draw do
 
     resources :domains, controller: "phish_domains", only: [:index, :show]
     resources :urls, controller: "phish_urls", only: [:index, :show]
+    resources :protections, only: [:index, :show, :new, :create, :destroy]
 
     # Report/Abuse system
     namespace :report do
@@ -187,6 +188,7 @@ Rails.application.routes.draw do
         post "check", to: "domains#check"
         get "bulk", to: "domains#bulk"
         post "bulk", to: "domains#bulk"
+        resources :protections, only: [:index, :show, :create, :destroy]
       end
 
       # URL checking

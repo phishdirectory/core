@@ -11,4 +11,6 @@
 Dir[Rails.root.join("db/seeds/*.rb")].sort.each { |f| require f }
 
 # Run seeds
+Seeds::Users.seed!
 Seeds::AbuseContacts.seed!
+Seeds::Protections.seed!

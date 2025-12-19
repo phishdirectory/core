@@ -3,6 +3,7 @@
 class Phish::Domain < ApplicationRecord
   include SoftDeletable
   include PublicIdentifiable
+  include Protectable
 
   self.table_name = "phish_domains"
   set_public_id_prefix "dom"
@@ -112,5 +113,12 @@ class Phish::Domain < ApplicationRecord
     rescue URI::InvalidURIError
       url_or_domain
     end
+  end
+
+  private
+
+  # Required by Protectable concern
+  def protectable_value
+    domain
   end
 end
