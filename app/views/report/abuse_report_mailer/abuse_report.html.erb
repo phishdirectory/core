@@ -27,7 +27,7 @@
     <div class="details">
       <dl>
         <dt>Domain:</dt>
-        <dd><code><%= @payload[:domain] %></code></dd>
+        <dd><code><%= @payload[:domain] || @case.domain_name || "Unknown" %></code></dd>
 
         <% if @payload[:url].present? %>
           <dt>Full URL:</dt>
@@ -35,16 +35,16 @@
         <% end %>
 
         <dt>Classification:</dt>
-        <dd><%= @payload[:classification]&.titleize %></dd>
+        <dd><%= @payload[:classification]&.titleize || "Phishing" %></dd>
 
         <dt>Confidence:</dt>
-        <dd><%= (@payload[:confidence].to_f * 100).round(1) %>%</dd>
+        <dd><%= @payload[:confidence].present? ? "#{(@payload[:confidence].to_f * 100).round(1)}%" : "High" %></dd>
 
         <dt>Detected At:</dt>
-        <dd><%= @payload[:detected_at] %></dd>
+        <dd><%= @payload[:detected_at] || @case.created_at&.iso8601 || Time.current.iso8601 %></dd>
 
         <dt>Case Reference:</dt>
-        <dd><code><%= @payload[:case_reference] %></code></dd>
+        <dd><code><%= @payload[:case_reference] || @case.case_number %></code></dd>
       </dl>
     </div>
 

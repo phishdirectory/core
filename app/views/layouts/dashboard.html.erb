@@ -11,105 +11,110 @@
   <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
   <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
 </head>
-<body class="bg-pd-primary text-slate-100 font-sans min-h-screen antialiased">
-  <%# Subtle background %>
-  <div class="fixed inset-0 bg-cover bg-center opacity-[0.08] pointer-events-none -z-20" style="background-image: url('<%= image_path("bg.JPG") %>');"></div>
-  <div class="fixed inset-0 bg-gradient-to-br from-pd-primary/[0.97] to-slate-900/95 pointer-events-none -z-10"></div>
+<body class="bg-surface-0 text-surface-800 font-sans min-h-screen antialiased overflow-x-hidden">
+  <%# Background layers %>
+  <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+    <%= image_tag "bg.jpg", class: "absolute inset-0 w-full h-full object-cover opacity-40" %>
+    <div class="absolute inset-0 bg-surface-0/60"></div>
+  </div>
 
-  <div class="flex min-h-screen">
+  <div class="relative z-10 flex min-h-screen">
     <%# Sidebar %>
-    <aside class="w-[260px] bg-pd-secondary border-r border-slate-700/20 flex flex-col fixed top-0 left-0 bottom-0 z-50">
-      <div class="p-6 border-b border-slate-700/20">
-        <a href="<%= root_path %>" class="flex items-center gap-3 text-slate-100 font-bold text-lg no-underline">
-          <%= image_tag "phish-logo.png", alt: "phish.directory", class: "w-9 h-9 rounded-xl shadow-[0_0_20px_rgba(63,196,224,0.4)]" %>
+    <aside class="w-56 bg-surface-50/70 backdrop-blur-xl flex flex-col fixed top-0 left-0 bottom-0 z-50">
+      <%# Logo %>
+      <div class="h-14 px-4 flex items-center border-b border-surface-200/50">
+        <a href="<%= root_path %>" class="flex items-center gap-2.5 text-surface-900 font-semibold text-sm">
+          <%= image_tag "phish-logo.png", alt: "phish.directory", class: "w-8 h-8 rounded-lg shadow-[0_0_15px_rgba(34,211,238,0.25)]" %>
           <span>phish.directory</span>
         </a>
       </div>
 
-      <nav class="flex-1 p-3 overflow-y-auto">
+      <%# Navigation %>
+      <nav class="flex-1 px-3 py-4 overflow-y-auto">
         <div class="mb-6">
-          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-2">Overview</div>
-          <%= link_to dashboard_root_path, class: "flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium transition-all #{controller_path == 'dashboard/dashboard' ? 'bg-cyan-accent/15 text-cyan-accent' : 'text-slate-400 hover:bg-pd-tertiary hover:text-slate-100'}" do %>
-            <span class="w-5 text-center opacity-80">&#9632;</span>
+          <div class="text-[10px] font-semibold text-surface-500 uppercase tracking-wider px-2 mb-2">Overview</div>
+          <%= link_to dashboard_root_path, class: "flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium transition-colors #{controller_path == 'dashboard/dashboard' ? 'bg-accent/10 text-accent' : 'text-surface-600 hover:bg-surface-100 hover:text-surface-800'}" do %>
+            <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
             <span>Dashboard</span>
           <% end %>
-          <%= link_to dashboard_domain_check_path, class: "flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium transition-all #{controller_path == 'dashboard/domain_checks' ? 'bg-cyan-accent/15 text-cyan-accent' : 'text-slate-400 hover:bg-pd-tertiary hover:text-slate-100'}" do %>
-            <span class="w-5 text-center opacity-80">&#128269;</span>
+          <%= link_to dashboard_domain_check_path, class: "flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium transition-colors #{controller_path == 'dashboard/domain_checks' ? 'bg-accent/10 text-accent' : 'text-surface-600 hover:bg-surface-100 hover:text-surface-800'}" do %>
+            <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             <span>Check Domain</span>
           <% end %>
         </div>
 
         <div class="mb-6">
-          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-2">Developer</div>
-          <%= link_to dashboard_api_keys_path, class: "flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium transition-all #{controller_path == 'dashboard/api_keys' ? 'bg-cyan-accent/15 text-cyan-accent' : 'text-slate-400 hover:bg-pd-tertiary hover:text-slate-100'}" do %>
-            <span class="w-5 text-center opacity-80">&#9829;</span>
+          <div class="text-[10px] font-semibold text-surface-500 uppercase tracking-wider px-2 mb-2">Developer</div>
+          <%= link_to dashboard_api_keys_path, class: "flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium transition-colors #{controller_path == 'dashboard/api_keys' ? 'bg-accent/10 text-accent' : 'text-surface-600 hover:bg-surface-100 hover:text-surface-800'}" do %>
+            <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
             <span>API Keys</span>
           <% end %>
-          <%= link_to docs_path, class: "flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-pd-tertiary hover:text-slate-100" do %>
-            <span class="w-5 text-center opacity-80">&#128214;</span>
+          <%= link_to docs_path, class: "flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium text-surface-600 hover:bg-surface-100 hover:text-surface-800 transition-colors" do %>
+            <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
             <span>Documentation</span>
           <% end %>
         </div>
 
         <div class="mb-6">
-          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-2">Account</div>
-          <%= link_to dashboard_profile_path, class: "flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium transition-all #{controller_path == 'dashboard/profiles' ? 'bg-cyan-accent/15 text-cyan-accent' : 'text-slate-400 hover:bg-pd-tertiary hover:text-slate-100'}" do %>
-            <span class="w-5 text-center opacity-80">&#9786;</span>
+          <div class="text-[10px] font-semibold text-surface-500 uppercase tracking-wider px-2 mb-2">Account</div>
+          <%= link_to dashboard_profile_path, class: "flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium transition-colors #{controller_path == 'dashboard/profiles' ? 'bg-accent/10 text-accent' : 'text-surface-600 hover:bg-surface-100 hover:text-surface-800'}" do %>
+            <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
             <span>Profile</span>
           <% end %>
-          <%= link_to dashboard_sessions_path, class: "flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium transition-all #{controller_path == 'dashboard/sessions' ? 'bg-cyan-accent/15 text-cyan-accent' : 'text-slate-400 hover:bg-pd-tertiary hover:text-slate-100'}" do %>
-            <span class="w-5 text-center opacity-80">&#9788;</span>
+          <%= link_to dashboard_sessions_path, class: "flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium transition-colors #{controller_path == 'dashboard/sessions' ? 'bg-accent/10 text-accent' : 'text-surface-600 hover:bg-surface-100 hover:text-surface-800'}" do %>
+            <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
             <span>Sessions</span>
           <% end %>
         </div>
 
         <% if current_user&.admin? %>
         <div class="mb-6">
-          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-2">Admin</div>
-          <%= link_to admin_root_path, class: "flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium text-slate-400 hover:bg-pd-tertiary hover:text-slate-100 transition-all" do %>
-            <span class="w-5 text-center opacity-80">&#9881;</span>
+          <div class="text-[10px] font-semibold text-surface-500 uppercase tracking-wider px-2 mb-2">Admin</div>
+          <%= link_to admin_root_path, class: "flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium text-surface-600 hover:bg-surface-100 hover:text-surface-800 transition-colors" do %>
+            <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
             <span>Admin Panel</span>
           <% end %>
         </div>
         <% end %>
       </nav>
 
-      <div class="p-3 border-t border-slate-700/20">
-        <%= link_to dashboard_profile_path, class: "flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-pd-tertiary transition-colors" do %>
-          <div class="w-9 h-9 bg-gradient-to-br from-pd-elevated to-pd-tertiary border border-slate-700/30 rounded-full flex items-center justify-center font-semibold text-sm text-slate-400">
+      <%# User section %>
+      <div class="p-3 border-t border-surface-200/50">
+        <%= link_to dashboard_profile_path, class: "flex items-center gap-2.5 px-2 py-2 rounded-md hover:bg-surface-100 transition-colors" do %>
+          <div class="w-8 h-8 bg-surface-200 rounded-full flex items-center justify-center font-medium text-xs text-surface-600">
             <%= current_user.initials %>
           </div>
           <div class="flex-1 min-w-0">
-            <div class="font-semibold text-sm text-slate-100 truncate"><%= current_user.full_name %></div>
-            <div class="text-xs text-slate-500 truncate"><%= current_user.email %></div>
+            <div class="font-medium text-sm text-surface-800 truncate"><%= current_user.full_name %></div>
+            <div class="text-xs text-surface-500 truncate"><%= current_user.email %></div>
           </div>
         <% end %>
-        <%= button_to logout_path, method: :delete, class: "w-full mt-2 px-3 py-2 text-sm font-medium text-slate-400 bg-pd-elevated border border-slate-700/30 rounded-xl hover:bg-pd-hover hover:border-slate-600/50 transition-all cursor-pointer" do %>
+        <%= button_to logout_path, method: :delete, class: "w-full mt-2 px-3 py-2 text-sm font-medium text-surface-600 bg-surface-100 rounded-md hover:bg-surface-200 hover:text-surface-700 transition-colors cursor-pointer" do %>
           Sign out
         <% end %>
       </div>
     </aside>
 
     <%# Main Content %>
-    <main class="flex-1 ml-[260px] min-h-screen">
+    <main class="flex-1 ml-56 min-h-screen">
       <% if impersonating? %>
-        <div class="bg-amber-500/15 border-b border-amber-500/30 px-10 py-2.5 flex items-center justify-between text-sm text-amber-500">
-          <span>You are impersonating <%= current_user.full_name %></span>
-          <%= button_to "Stop Impersonating", admin_stop_impersonating_path, method: :delete, class: "px-3 py-1.5 text-xs font-medium bg-pd-elevated border border-slate-700/30 rounded-lg hover:bg-pd-hover transition-all cursor-pointer" %>
+        <div class="bg-warning/10 px-6 py-2 flex items-center justify-between text-sm text-warning">
+          <span>Impersonating <%= current_user.full_name %></span>
+          <%= button_to "Stop", admin_stop_impersonating_path, method: :delete, class: "px-2.5 py-1 text-xs font-medium bg-surface-100 text-surface-700 rounded-md hover:bg-surface-200 transition-colors cursor-pointer" %>
         </div>
       <% end %>
 
       <% if flash[:notice] || flash[:alert] %>
-        <div class="px-10 pt-5">
+        <div class="px-8 pt-4">
           <% if flash[:notice] && !flash[:api_key] %>
-            <div class="bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 px-5 py-3.5 rounded-xl text-sm font-medium flex items-center gap-2 mb-5 animate-slide-down">
-              <span>&#10003;</span>
+            <div class="bg-success/10 text-success px-4 py-3 rounded-lg text-sm font-medium flex items-center gap-2 mb-4 animate-slide-down">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
               <%= flash[:notice] %>
             </div>
           <% end %>
           <% if flash[:alert] %>
-            <div class="bg-red-500/15 border border-red-500/30 text-red-400 px-5 py-3.5 rounded-xl text-sm font-medium flex items-center gap-2 mb-5 animate-slide-down">
-              <span>!</span>
+            <div class="bg-danger/10 text-danger px-4 py-3 rounded-lg text-sm font-medium flex items-center gap-2 mb-4 animate-slide-down">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
               <%= flash[:alert] %>
             </div>
           <% end %>

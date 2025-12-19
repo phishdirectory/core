@@ -141,10 +141,18 @@ module Phish
     end
 
     def import_domain(domain)
-      # Only import truly new domains to save resources on nightly syncs
-      return if Phish::Domain.exists?(domain: domain.downcase)
+      normalized = domain.downcase
+      existing = Phish::Domain.find_by(domain: normalized)
 
-      record = Phish::Domain.create(domain: domain.downcase)
+      if existing
+        # Schedule check for existing domains that don't have a verdict yet
+        if existing.verdict.nil?
+          PhishDomainCheckJob.perform_later(existing.id)
+        end
+        return
+      end
+
+      record = Phish::Domain.create(domain: normalized)
       PhishDomainCheckJob.perform_later(record.id) if record.persisted?
     end
 

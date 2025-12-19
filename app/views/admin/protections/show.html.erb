@@ -1,48 +1,47 @@
 <% content_for :title, "Protection: #{@protection.protectable_value}" %>
 
-<header class="px-10 py-6 border-b border-slate-700/20 flex items-center justify-between bg-pd-secondary sticky top-0 z-40">
-  <div>
-    <div class="flex items-center gap-3 mb-2">
-      <%= link_to admin_protections_path, class: "text-slate-500 hover:text-slate-300 transition-colors" do %>
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-        </svg>
-      <% end %>
-      <h1 class="text-2xl font-bold text-slate-100">Protection Details</h1>
+<header class="px-8 py-6 border-b border-surface-200/50 flex items-center justify-between bg-surface-50/50 sticky top-0 z-40 backdrop-blur-sm">
+  <div class="flex items-center gap-4">
+    <%= link_to admin_protections_path, class: "text-surface-500 hover:text-surface-900 transition-colors" do %>
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19l-7-7 7-7"/></svg>
+    <% end %>
+    <div>
+      <h1 class="text-xl font-semibold text-surface-900">Protection Details</h1>
+      <p class="text-sm text-surface-500 mt-0.5 font-mono"><%= @protection.public_id %></p>
     </div>
-    <p class="text-sm text-slate-500 font-mono"><%= @protection.public_id %></p>
   </div>
   <div class="flex items-center gap-3">
-    <%= button_to "Remove Protection", admin_protection_path(@protection), method: :delete, data: { turbo_confirm: "Are you sure you want to remove this protection?" }, class: "px-4 py-2 text-sm font-medium text-red-400 bg-pd-elevated border border-red-500/30 rounded-lg hover:bg-red-500/20 transition-all" %>
+    <%= button_to "Remove Protection", admin_protection_path(@protection), method: :delete, data: { turbo_confirm: "Are you sure you want to remove this protection?" }, class: "px-4 py-2 text-sm font-medium text-danger bg-danger/10 rounded-md hover:bg-danger/20 transition-colors cursor-pointer" %>
   </div>
 </header>
 
-<div class="p-8 px-10">
+<div class="p-8">
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <%# Main info %>
     <div class="lg:col-span-2 space-y-6">
-      <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl p-6">
-        <h2 class="text-lg font-semibold text-slate-200 mb-4">Protected Entry</h2>
-
-        <div class="space-y-4">
+      <div class="bg-surface-100 rounded-lg overflow-hidden">
+        <div class="px-5 py-4 border-b border-surface-200/50">
+          <h2 class="text-sm font-semibold text-surface-900">Protected Entry</h2>
+        </div>
+        <div class="p-5 space-y-4">
           <div>
-            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Type</div>
+            <div class="text-xs font-medium text-surface-500 mb-1.5">Type</div>
             <% if @protection.protectable_type == "Phish::Domain" %>
-              <span class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold font-mono uppercase tracking-wide bg-sky-500/15 text-sky-500">Domain</span>
+              <span class="inline-flex items-center px-2.5 py-1 rounded text-xs font-medium bg-info/10 text-info">Domain</span>
             <% else %>
-              <span class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold font-mono uppercase tracking-wide bg-purple-500/15 text-purple-500">URL</span>
+              <span class="inline-flex items-center px-2.5 py-1 rounded text-xs font-medium bg-accent/10 text-accent">URL</span>
             <% end %>
           </div>
 
           <div>
-            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Value</div>
-            <code class="text-lg text-slate-100 font-mono"><%= @protection.protectable_value %></code>
+            <div class="text-xs font-medium text-surface-500 mb-1.5">Value</div>
+            <code class="text-sm text-surface-800 font-mono"><%= @protection.protectable_value %></code>
           </div>
 
           <% if @protection.reason.present? %>
             <div>
-              <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Reason</div>
-              <p class="text-slate-300"><%= @protection.reason %></p>
+              <div class="text-xs font-medium text-surface-500 mb-1.5">Reason</div>
+              <p class="text-sm text-surface-700"><%= @protection.reason %></p>
             </div>
           <% end %>
         </div>
@@ -51,31 +50,32 @@
 
     <%# Sidebar %>
     <div class="space-y-6">
-      <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl p-6">
-        <h2 class="text-lg font-semibold text-slate-200 mb-4">Details</h2>
-
-        <div class="space-y-4">
+      <div class="bg-surface-100 rounded-lg overflow-hidden">
+        <div class="px-5 py-4 border-b border-surface-200/50">
+          <h2 class="text-sm font-semibold text-surface-900">Details</h2>
+        </div>
+        <div class="p-5 space-y-4">
           <div>
-            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Protected By</div>
+            <div class="text-xs font-medium text-surface-500 mb-1">Protected By</div>
             <% if @protection.protected_by %>
-              <%= link_to admin_user_path(@protection.protected_by), class: "text-sky-400 hover:text-sky-300 transition-colors" do %>
+              <%= link_to admin_user_path(@protection.protected_by), class: "text-sm text-accent hover:underline transition-colors" do %>
                 <%= @protection.protected_by.name || @protection.protected_by.email %>
               <% end %>
-              <div class="text-xs text-slate-500 font-mono mt-1"><%= @protection.protected_by.public_id %></div>
+              <div class="text-xs text-surface-500 font-mono mt-0.5"><%= @protection.protected_by.public_id %></div>
             <% else %>
-              <span class="text-slate-500">Unknown</span>
+              <span class="text-sm text-surface-500">Unknown</span>
             <% end %>
           </div>
 
           <div>
-            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Created</div>
-            <div class="text-slate-300"><%= @protection.created_at.strftime("%B %d, %Y at %l:%M %p") %></div>
-            <div class="text-xs text-slate-500 mt-1"><%= time_ago_in_words(@protection.created_at) %> ago</div>
+            <div class="text-xs font-medium text-surface-500 mb-1">Created</div>
+            <div class="text-sm text-surface-700"><%= @protection.created_at.strftime("%B %d, %Y at %l:%M %p") %></div>
+            <div class="text-xs text-surface-500 mt-0.5"><%= time_ago_in_words(@protection.created_at) %> ago</div>
           </div>
 
           <div>
-            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">ID</div>
-            <code class="text-xs text-slate-400 font-mono"><%= @protection.public_id %></code>
+            <div class="text-xs font-medium text-surface-500 mb-1">ID</div>
+            <code class="text-xs text-surface-600 font-mono"><%= @protection.public_id %></code>
           </div>
         </div>
       </div>

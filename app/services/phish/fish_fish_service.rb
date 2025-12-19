@@ -57,7 +57,7 @@ module Phish
       check_domain(uri.host)
     end
 
-    # Sync the full FishFish domain list to local cache
+    # Sync the full FishFish domain list to local cache and database
     # Called by FishFishSyncJob
     # Uses unauthenticated endpoint - no API key needed
     def sync_domain_list
@@ -73,18 +73,24 @@ module Phish
         return { success: false, error: "Unexpected response format" }
       end
 
-      # Cache each domain - for simple list, we just mark as phishing
+      # Cache and import each domain
       cached = 0
+      imported = 0
       response.each do |domain|
         next unless domain.is_a?(String)
 
         cache_domain(domain, { "domain" => domain, "category" => "phishing" })
         cached += 1
+
+        # Import domain to database and schedule verdict check
+        if import_domain(domain)
+          imported += 1
+        end
       end
 
-      log_info("Synced #{cached} domains from FishFish")
+      log_info("Synced #{cached} domains from FishFish (#{imported} new imports)")
 
-      { success: true, count: cached }
+      { success: true, count: cached, imported: imported }
     end
 
     private
@@ -138,6 +144,28 @@ module Phish
         0.85
       else
         0.95
+      end
+    end
+
+    def import_domain(domain)
+      normalized = domain.downcase
+      existing = Phish::Domain.find_by(domain: normalized)
+
+      if existing
+        # Schedule check for existing domains that don't have a verdict yet
+        if existing.verdict.nil?
+          PhishDomainCheckJob.perform_later(existing.id)
+          return true
+        end
+        return false
+      end
+
+      record = Phish::Domain.create(domain: normalized)
+      if record.persisted?
+        PhishDomainCheckJob.perform_later(record.id)
+        true
+      else
+        false
       end
     end
 

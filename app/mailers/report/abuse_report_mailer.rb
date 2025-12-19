@@ -8,7 +8,7 @@ module Report
       @submission = params[:submission]
       @case = params[:case]
       @contact = params[:contact]
-      @payload = @submission.payload
+      @payload = (@submission.payload.presence || @submission.build_payload).with_indifferent_access
 
       # No env_subject - reports are always sent to real external contacts
       # regardless of environment (only legit phishing domains are reported)

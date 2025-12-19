@@ -1,67 +1,67 @@
 <% content_for :title, @domain.domain %>
 
-<header class="px-10 py-6 border-b border-slate-700/20 flex items-center justify-between bg-pd-secondary sticky top-0 z-40">
+<header class="px-8 py-6 border-b border-surface-200/50 flex items-center justify-between bg-surface-50/50 sticky top-0 z-40 backdrop-blur-sm">
   <div class="flex items-center gap-4">
-    <%= link_to admin_domains_path, class: "text-slate-400 hover:text-slate-100 transition-colors" do %>
-      <span class="text-lg">&larr;</span>
+    <%= link_to admin_domains_path, class: "text-surface-500 hover:text-surface-900 transition-colors" do %>
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19l-7-7 7-7"/></svg>
     <% end %>
     <div>
-      <h1 class="text-2xl font-bold text-slate-100 font-mono"><%= @domain.domain %></h1>
-      <p class="text-sm text-slate-500 mt-1">Domain details</p>
+      <h1 class="text-xl font-semibold text-surface-900 font-mono"><%= @domain.domain %></h1>
+      <p class="text-sm text-surface-500 mt-0.5 font-mono"><%= @domain.public_id %></p>
     </div>
   </div>
 </header>
 
-<div class="p-8 px-10">
+<div class="p-8">
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <%# Left column - Verdict details %>
     <div class="lg:col-span-2 space-y-6">
       <%# Verdict card %>
-      <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl overflow-hidden">
-        <div class="px-6 py-5 border-b border-slate-700/20">
-          <h2 class="text-lg font-semibold text-slate-100">Verdict</h2>
+      <div class="bg-surface-100 rounded-lg overflow-hidden">
+        <div class="px-5 py-4 border-b border-surface-200/50">
+          <h2 class="text-sm font-semibold text-surface-900">Verdict</h2>
         </div>
-        <div class="p-6">
+        <div class="p-5">
           <% if @domain.verdict %>
             <div class="flex items-center gap-6 mb-6">
               <div>
-                <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Classification</div>
+                <div class="text-xs font-medium text-surface-500 mb-1.5">Classification</div>
                 <% case @domain.classification %>
                 <% when 'phishing' %>
-                  <span class="inline-flex items-center px-4 py-2 rounded-xl text-lg font-bold font-mono uppercase tracking-wide bg-red-500/15 text-red-500">Phishing</span>
+                  <span class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium bg-danger/10 text-danger">Phishing</span>
                 <% when 'suspicious' %>
-                  <span class="inline-flex items-center px-4 py-2 rounded-xl text-lg font-bold font-mono uppercase tracking-wide bg-amber-500/15 text-amber-500">Suspicious</span>
+                  <span class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium bg-warning/10 text-warning">Suspicious</span>
                 <% when 'clean' %>
-                  <span class="inline-flex items-center px-4 py-2 rounded-xl text-lg font-bold font-mono uppercase tracking-wide bg-emerald-500/15 text-emerald-500">Clean</span>
+                  <span class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium bg-success/10 text-success">Clean</span>
                 <% when 'unknown' %>
-                  <span class="inline-flex items-center px-4 py-2 rounded-xl text-lg font-bold font-mono uppercase tracking-wide bg-slate-600/30 text-slate-400">Unknown</span>
+                  <span class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium bg-surface-300 text-surface-600">Unknown</span>
                 <% end %>
               </div>
               <div>
-                <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Confidence</div>
+                <div class="text-xs font-medium text-surface-500 mb-1.5">Confidence</div>
                 <div class="flex items-center gap-3">
-                  <div class="w-24 h-2 bg-pd-tertiary rounded-full overflow-hidden">
-                    <div class="h-full rounded-full <%= @domain.confidence_score && @domain.confidence_score >= 0.8 ? 'bg-emerald-500' : @domain.confidence_score && @domain.confidence_score >= 0.5 ? 'bg-amber-500' : 'bg-red-500' %>" style="width: <%= @domain.confidence_score ? (@domain.confidence_score * 100).to_i : 0 %>%"></div>
+                  <div class="w-24 h-2 bg-surface-200 rounded-full overflow-hidden">
+                    <div class="h-full rounded-full <%= @domain.confidence_score && @domain.confidence_score >= 0.8 ? 'bg-success' : @domain.confidence_score && @domain.confidence_score >= 0.5 ? 'bg-warning' : 'bg-danger' %>" style="width: <%= @domain.confidence_score ? (@domain.confidence_score * 100).to_i : 0 %>%"></div>
                   </div>
-                  <span class="text-2xl font-bold font-mono text-slate-100"><%= @domain.confidence_score ? "#{(@domain.confidence_score * 100).to_i}%" : "—" %></span>
+                  <span class="text-xl font-semibold font-mono text-surface-800"><%= @domain.confidence_score ? "#{(@domain.confidence_score * 100).to_i}%" : "—" %></span>
                 </div>
               </div>
             </div>
 
             <%# Sources %>
             <% if @domain.verdict.sources_list.any? %>
-              <div class="border-t border-slate-700/20 pt-6">
-                <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-4">Detection Sources</div>
+              <div class="border-t border-surface-200/50 pt-5">
+                <div class="text-xs font-medium text-surface-500 mb-3">Detection Sources</div>
                 <div class="space-y-3">
                   <% @domain.verdict.sources_list.each do |source| %>
-                    <div class="bg-pd-elevated rounded-xl p-4 flex items-center justify-between">
+                    <div class="bg-surface-200 rounded-md p-4 flex items-center justify-between">
                       <div>
-                        <div class="font-semibold text-slate-100"><%= source["name"] || source[:name] %></div>
-                        <div class="text-xs text-slate-500 mt-1">
+                        <div class="font-medium text-sm text-surface-800"><%= source["name"] || source[:name] %></div>
+                        <div class="text-xs text-surface-500 mt-0.5">
                           Checked <%= source["checked_at"] ? time_ago_in_words(Time.parse(source["checked_at"])) + " ago" : "unknown" %>
                         </div>
                       </div>
-                      <div class="text-sm text-slate-400 font-mono">
+                      <div class="text-sm text-surface-600 font-mono">
                         <%= source["result"] || source[:result] %>
                       </div>
                     </div>
@@ -72,17 +72,17 @@
 
             <%# Metadata %>
             <% if @domain.verdict.metadata_hash.any? %>
-              <div class="border-t border-slate-700/20 pt-6 mt-6">
-                <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-4">Additional Metadata</div>
-                <div class="bg-pd-elevated rounded-xl p-4 font-mono text-sm overflow-x-auto">
-                  <pre class="text-slate-300"><%= JSON.pretty_generate(@domain.verdict.metadata_hash) %></pre>
+              <div class="border-t border-surface-200/50 pt-5 mt-5">
+                <div class="text-xs font-medium text-surface-500 mb-3">Additional Metadata</div>
+                <div class="bg-surface-200 rounded-md p-4 font-mono text-xs overflow-x-auto">
+                  <pre class="text-surface-700"><%= JSON.pretty_generate(@domain.verdict.metadata_hash) %></pre>
                 </div>
               </div>
             <% end %>
           <% else %>
-            <div class="text-center py-10 text-slate-500">
-              <div class="text-lg font-semibold text-slate-400 mb-1">No verdict yet</div>
-              <p class="text-sm">This domain has not been checked by any detection services</p>
+            <div class="text-center py-10">
+              <div class="text-sm font-medium text-surface-600 mb-1">No verdict yet</div>
+              <p class="text-xs text-surface-500">This domain has not been checked by any detection services</p>
             </div>
           <% end %>
         </div>
@@ -92,57 +92,57 @@
     <%# Right column - Details %>
     <div class="space-y-6">
       <%# Info card %>
-      <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl overflow-hidden">
-        <div class="px-6 py-5 border-b border-slate-700/20">
-          <h2 class="text-lg font-semibold text-slate-100">Details</h2>
+      <div class="bg-surface-100 rounded-lg overflow-hidden">
+        <div class="px-5 py-4 border-b border-surface-200/50">
+          <h2 class="text-sm font-semibold text-surface-900">Details</h2>
         </div>
-        <div class="p-6 space-y-4">
+        <div class="p-5 space-y-4">
           <div>
-            <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">Domain</div>
-            <code class="text-slate-100 font-mono"><%= @domain.domain %></code>
+            <div class="text-xs font-medium text-surface-500 mb-1">Domain</div>
+            <code class="text-sm text-surface-800 font-mono"><%= @domain.domain %></code>
           </div>
           <div>
-            <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">ID</div>
-            <code class="text-slate-400 font-mono text-sm break-all"><%= @domain.id %></code>
+            <div class="text-xs font-medium text-surface-500 mb-1">Public ID</div>
+            <code class="text-xs text-surface-600 font-mono break-all"><%= @domain.public_id %></code>
           </div>
           <div>
-            <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">First Seen</div>
-            <div class="text-slate-100"><%= @domain.created_at.strftime("%B %d, %Y at %I:%M %p") %></div>
+            <div class="text-xs font-medium text-surface-500 mb-1">First Seen</div>
+            <div class="text-sm text-surface-700"><%= @domain.created_at.strftime("%B %d, %Y at %I:%M %p") %></div>
           </div>
           <div>
-            <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">Last Checked</div>
-            <div class="text-slate-100"><%= @domain.last_checked_at ? @domain.last_checked_at.strftime("%B %d, %Y at %I:%M %p") : "Never" %></div>
+            <div class="text-xs font-medium text-surface-500 mb-1">Last Checked</div>
+            <div class="text-sm text-surface-700"><%= @domain.last_checked_at ? @domain.last_checked_at.strftime("%B %d, %Y at %I:%M %p") : "Never" %></div>
           </div>
           <div>
-            <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">Status</div>
+            <div class="text-xs font-medium text-surface-500 mb-1">Status</div>
             <% if @domain.stale? %>
-              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-amber-500/15 text-amber-500">Stale</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-warning/10 text-warning">Stale</span>
             <% elsif @domain.checked? %>
-              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-emerald-500/15 text-emerald-500">Current</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-success/10 text-success">Current</span>
             <% else %>
-              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-slate-600/30 text-slate-400">Unchecked</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-surface-300 text-surface-600">Unchecked</span>
             <% end %>
           </div>
         </div>
       </div>
 
       <%# External links %>
-      <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl overflow-hidden">
-        <div class="px-6 py-5 border-b border-slate-700/20">
-          <h2 class="text-lg font-semibold text-slate-100">External Tools</h2>
+      <div class="bg-surface-100 rounded-lg overflow-hidden">
+        <div class="px-5 py-4 border-b border-surface-200/50">
+          <h2 class="text-sm font-semibold text-surface-900">External Tools</h2>
         </div>
-        <div class="p-6 space-y-3">
-          <a href="https://www.virustotal.com/gui/domain/<%= @domain.domain %>" target="_blank" rel="noopener" class="flex items-center justify-between px-4 py-3 bg-pd-elevated rounded-xl hover:bg-pd-hover transition-colors">
-            <span class="text-slate-100">VirusTotal</span>
-            <span class="text-slate-500">&rarr;</span>
+        <div class="p-5 space-y-2">
+          <a href="https://www.virustotal.com/gui/domain/<%= @domain.domain %>" target="_blank" rel="noopener" class="flex items-center justify-between px-4 py-3 bg-surface-200 rounded-md hover:bg-surface-300 transition-colors">
+            <span class="text-sm text-surface-800">VirusTotal</span>
+            <svg class="w-4 h-4 text-surface-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
           </a>
-          <a href="https://urlscan.io/search/#domain:<%= @domain.domain %>" target="_blank" rel="noopener" class="flex items-center justify-between px-4 py-3 bg-pd-elevated rounded-xl hover:bg-pd-hover transition-colors">
-            <span class="text-slate-100">urlscan.io</span>
-            <span class="text-slate-500">&rarr;</span>
+          <a href="https://urlscan.io/search/#domain:<%= @domain.domain %>" target="_blank" rel="noopener" class="flex items-center justify-between px-4 py-3 bg-surface-200 rounded-md hover:bg-surface-300 transition-colors">
+            <span class="text-sm text-surface-800">urlscan.io</span>
+            <svg class="w-4 h-4 text-surface-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
           </a>
-          <a href="https://transparencyreport.google.com/safe-browsing/search?url=<%= @domain.domain %>" target="_blank" rel="noopener" class="flex items-center justify-between px-4 py-3 bg-pd-elevated rounded-xl hover:bg-pd-hover transition-colors">
-            <span class="text-slate-100">Google Safe Browsing</span>
-            <span class="text-slate-500">&rarr;</span>
+          <a href="https://transparencyreport.google.com/safe-browsing/search?url=<%= @domain.domain %>" target="_blank" rel="noopener" class="flex items-center justify-between px-4 py-3 bg-surface-200 rounded-md hover:bg-surface-300 transition-colors">
+            <span class="text-sm text-surface-800">Google Safe Browsing</span>
+            <svg class="w-4 h-4 text-surface-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
           </a>
         </div>
       </div>

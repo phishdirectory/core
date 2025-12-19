@@ -1,75 +1,75 @@
 <% content_for :title, "Dashboard" %>
 
-<header class="px-10 py-6 border-b border-slate-700/20 flex items-center justify-between bg-pd-secondary sticky top-0 z-40">
+<header class="px-8 py-6 border-b border-surface-200/50 flex items-center justify-between bg-surface-50/50 sticky top-0 z-40 backdrop-blur-sm">
   <div>
-    <h1 class="text-2xl font-bold text-slate-100">Dashboard</h1>
-    <p class="text-sm text-slate-500 mt-1">Welcome back, <%= current_user.first_name %></p>
+    <h1 class="text-xl font-semibold text-surface-900">Dashboard</h1>
+    <p class="text-sm text-surface-500 mt-0.5">Welcome back, <%= current_user.first_name %></p>
   </div>
 </header>
 
-<div class="p-8 px-10">
+<div class="p-8">
   <%# Quick stats %>
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-    <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl p-6">
-      <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">API Keys</div>
-      <div class="text-3xl font-bold font-mono text-cyan-accent"><%= current_user.user_api_keys.active.count %></div>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div class="bg-surface-100 rounded-lg p-5">
+      <div class="text-xs font-medium text-surface-500 uppercase tracking-wide mb-1">API Keys</div>
+      <div class="text-2xl font-semibold font-mono text-surface-900"><%= current_user.user_api_keys.active.count %></div>
     </div>
-    <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl p-6">
-      <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Active Sessions</div>
-      <div class="text-3xl font-bold font-mono text-slate-100"><%= current_user.user_sessions.active.count %></div>
+    <div class="bg-surface-100 rounded-lg p-5">
+      <div class="text-xs font-medium text-surface-500 uppercase tracking-wide mb-1">Active Sessions</div>
+      <div class="text-2xl font-semibold font-mono text-surface-900"><%= current_user.user_sessions.active.count %></div>
     </div>
-    <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl p-6">
-      <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Account Status</div>
-      <div class="mt-1">
-        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-emerald-500/15 text-emerald-500"><%= current_user.status.titleize %></span>
+    <div class="bg-surface-100 rounded-lg p-5">
+      <div class="text-xs font-medium text-surface-500 uppercase tracking-wide mb-1">Account Status</div>
+      <div class="mt-1.5">
+        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-success/10 text-success"><%= current_user.status.titleize %></span>
       </div>
     </div>
-    <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl p-6">
-      <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Access Level</div>
-      <div class="mt-1">
-        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-blue-500/15 text-blue-400"><%= current_user.access_level.titleize %></span>
+    <div class="bg-surface-100 rounded-lg p-5">
+      <div class="text-xs font-medium text-surface-500 uppercase tracking-wide mb-1">Access Level</div>
+      <div class="mt-1.5">
+        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-info/10 text-info"><%= current_user.access_level.titleize %></span>
       </div>
     </div>
   </div>
 
   <%# Recent API Keys %>
-  <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl overflow-hidden mb-6">
-    <div class="px-6 py-5 border-b border-slate-700/20 flex items-center justify-between">
-      <h2 class="text-lg font-semibold text-slate-100">Recent API Keys</h2>
-      <%= link_to "Manage all", dashboard_api_keys_path, class: "px-4 py-2 text-sm font-medium text-slate-400 bg-pd-elevated border border-slate-700/30 rounded-xl hover:bg-pd-hover hover:border-slate-600/50 transition-all" %>
+  <div class="bg-surface-100 rounded-lg overflow-hidden mb-6">
+    <div class="px-5 py-4 flex items-center justify-between">
+      <h2 class="text-sm font-semibold text-surface-900">API Keys</h2>
+      <%= link_to "Manage", dashboard_api_keys_path, class: "text-xs font-medium text-surface-500 hover:text-surface-700 transition-colors" %>
     </div>
 
     <% if @api_keys.any? %>
       <div class="overflow-x-auto">
         <table class="w-full">
           <thead>
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Name</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Status</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Last Used</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Created</th>
+            <tr class="border-t border-surface-200/50">
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Name</th>
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Status</th>
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Last Used</th>
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Created</th>
             </tr>
           </thead>
           <tbody>
             <% @api_keys.each do |key| %>
-              <tr class="hover:bg-pd-tertiary transition-colors">
-                <td class="px-6 py-4 border-b border-slate-700/20">
-                  <span class="font-semibold text-slate-100"><%= key.name %></span>
-                  <div class="text-xs text-slate-500 font-mono mt-1">pdat_****<%= key.key_digest.last(8) %></div>
+              <tr class="border-t border-surface-200/50 hover:bg-surface-200/30 transition-colors">
+                <td class="px-5 py-3">
+                  <span class="font-medium text-sm text-surface-800"><%= key.name %></span>
+                  <div class="text-xs text-surface-500 font-mono mt-0.5">pdat_****<%= key.key_digest.last(8) %></div>
                 </td>
-                <td class="px-6 py-4 border-b border-slate-700/20">
+                <td class="px-5 py-3">
                   <% if key.usable? %>
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-emerald-500/15 text-emerald-500">Active</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-success/10 text-success">Active</span>
                   <% elsif key.expired? %>
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-amber-500/15 text-amber-500">Expired</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-warning/10 text-warning">Expired</span>
                   <% else %>
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-red-500/15 text-red-500">Revoked</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-danger/10 text-danger">Revoked</span>
                   <% end %>
                 </td>
-                <td class="px-6 py-4 border-b border-slate-700/20 text-slate-400 text-sm">
+                <td class="px-5 py-3 text-surface-600 text-sm">
                   <%= key.last_used_at ? time_ago_in_words(key.last_used_at) + " ago" : "Never" %>
                 </td>
-                <td class="px-6 py-4 border-b border-slate-700/20 text-slate-400 text-sm">
+                <td class="px-5 py-3 text-surface-600 text-sm">
                   <%= key.created_at.strftime("%b %d, %Y") %>
                 </td>
               </tr>
@@ -78,57 +78,57 @@
         </table>
       </div>
     <% else %>
-      <div class="text-center py-16 text-slate-500">
-        <div class="text-5xl mb-4 opacity-50">&#9829;</div>
-        <div class="text-lg font-semibold text-slate-400 mb-2">No API keys yet</div>
-        <p class="text-slate-500 mb-4">Create your first API key to start making requests</p>
-        <%= link_to "Create API Key", dashboard_api_keys_path, class: "px-5 py-2.5 bg-cyan-accent text-pd-primary font-semibold rounded-xl hover:shadow-[0_0_20px_rgba(63,196,224,0.4)] transition-all" %>
+      <div class="text-center py-12 border-t border-surface-200/50">
+        <svg class="w-10 h-10 mx-auto text-surface-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+        <div class="text-sm font-medium text-surface-600 mb-1">No API keys yet</div>
+        <p class="text-xs text-surface-500 mb-4">Create your first API key to start making requests</p>
+        <%= link_to "Create API Key", dashboard_api_keys_path, class: "px-4 py-2 bg-surface-900 text-surface-0 text-sm font-medium rounded-md hover:bg-surface-800 transition-colors inline-block" %>
       </div>
     <% end %>
   </div>
 
   <%# Recent Sessions %>
-  <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl overflow-hidden mb-6">
-    <div class="px-6 py-5 border-b border-slate-700/20 flex items-center justify-between">
-      <h2 class="text-lg font-semibold text-slate-100">Recent Sessions</h2>
-      <%= link_to "View all", dashboard_sessions_path, class: "px-4 py-2 text-sm font-medium text-slate-400 bg-pd-elevated border border-slate-700/30 rounded-xl hover:bg-pd-hover hover:border-slate-600/50 transition-all" %>
+  <div class="bg-surface-100 rounded-lg overflow-hidden mb-6">
+    <div class="px-5 py-4 flex items-center justify-between">
+      <h2 class="text-sm font-semibold text-surface-900">Recent Sessions</h2>
+      <%= link_to "View all", dashboard_sessions_path, class: "text-xs font-medium text-surface-500 hover:text-surface-700 transition-colors" %>
     </div>
 
     <% if @recent_sessions.any? %>
       <div class="overflow-x-auto">
         <table class="w-full">
           <thead>
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Device</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Location</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Last Active</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Status</th>
+            <tr class="border-t border-surface-200/50">
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Device</th>
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Location</th>
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Last Active</th>
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Status</th>
             </tr>
           </thead>
           <tbody>
             <% @recent_sessions.each do |session| %>
-              <tr class="hover:bg-pd-tertiary transition-colors">
-                <td class="px-6 py-4 border-b border-slate-700/20">
-                  <span class="font-semibold text-slate-100"><%= session.device_info&.truncate(40) || "Unknown device" %></span>
-                  <div class="text-xs text-slate-500 mt-1"><%= session.ip || "Unknown IP" %></div>
+              <tr class="border-t border-surface-200/50 hover:bg-surface-200/30 transition-colors">
+                <td class="px-5 py-3">
+                  <span class="font-medium text-sm text-surface-800"><%= session.device_info&.truncate(40) || "Unknown device" %></span>
+                  <div class="text-xs text-surface-500 mt-0.5"><%= session.ip || "Unknown IP" %></div>
                 </td>
-                <td class="px-6 py-4 border-b border-slate-700/20 text-slate-400 text-sm">
+                <td class="px-5 py-3 text-surface-600 text-sm">
                   <% if session.latitude && session.longitude %>
                     <%= session.latitude.round(2) %>, <%= session.longitude.round(2) %>
                   <% else %>
                     Unknown
                   <% end %>
                 </td>
-                <td class="px-6 py-4 border-b border-slate-700/20 text-slate-400 text-sm">
+                <td class="px-5 py-3 text-surface-600 text-sm">
                   <%= session.last_seen_at ? time_ago_in_words(session.last_seen_at) + " ago" : "Just now" %>
                 </td>
-                <td class="px-6 py-4 border-b border-slate-700/20">
+                <td class="px-5 py-3">
                   <% if session == current_session %>
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-emerald-500/15 text-emerald-500">Current</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-success/10 text-success">Current</span>
                   <% elsif session.active? %>
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-blue-500/15 text-blue-400">Active</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-info/10 text-info">Active</span>
                   <% else %>
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-slate-600/30 text-slate-400">Expired</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-surface-300 text-surface-600">Expired</span>
                   <% end %>
                 </td>
               </tr>
@@ -137,26 +137,26 @@
         </table>
       </div>
     <% else %>
-      <div class="text-center py-16 text-slate-500">
-        <div class="text-5xl mb-4 opacity-50">&#9788;</div>
-        <div class="text-lg font-semibold text-slate-400 mb-2">No sessions</div>
-        <p class="text-slate-500">Your session history will appear here</p>
+      <div class="text-center py-12 border-t border-surface-200/50">
+        <svg class="w-10 h-10 mx-auto text-surface-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+        <div class="text-sm font-medium text-surface-600 mb-1">No sessions</div>
+        <p class="text-xs text-surface-500">Your session history will appear here</p>
       </div>
     <% end %>
   </div>
 
   <%# Quick start guide %>
-  <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl overflow-hidden">
-    <div class="px-6 py-5 border-b border-slate-700/20">
-      <h2 class="text-lg font-semibold text-slate-100">Quick Start</h2>
+  <div class="bg-surface-100 rounded-lg overflow-hidden">
+    <div class="px-5 py-4">
+      <h2 class="text-sm font-semibold text-surface-900">Quick Start</h2>
     </div>
-    <div class="p-6">
-      <p class="text-slate-400 mb-4">
+    <div class="px-5 pb-5 border-t border-surface-200/50 pt-4">
+      <p class="text-sm text-surface-600 mb-4">
         Use your API key to check domains and URLs for phishing threats:
       </p>
-      <div class="bg-pd-primary rounded-xl p-4 font-mono text-sm overflow-x-auto">
-        <div class="text-slate-500"># Check a domain</div>
-        <div class="text-slate-100 mt-2">
+      <div class="bg-surface-200 rounded-md p-4 font-mono text-xs overflow-x-auto">
+        <div class="text-surface-500 mb-2"># Check a domain</div>
+        <div class="text-surface-700">
           curl -X POST https://phish.directory/api/v1/domain/check \<br>
           <span class="pl-4">-H "Authorization: Bearer YOUR_API_KEY" \</span><br>
           <span class="pl-4">-H "Content-Type: application/json" \</span><br>
@@ -164,8 +164,8 @@
         </div>
       </div>
       <div class="mt-4">
-        <a href="/docs" class="px-4 py-2 text-sm font-medium text-slate-400 bg-pd-elevated border border-slate-700/30 rounded-xl hover:bg-pd-hover hover:border-slate-600/50 transition-all inline-block">
-          View full documentation
+        <a href="/docs" class="text-sm font-medium text-surface-600 hover:text-surface-800 transition-colors">
+          View documentation &rarr;
         </a>
       </div>
     </div>

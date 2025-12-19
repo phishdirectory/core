@@ -1,25 +1,25 @@
 <% content_for :title, "API Keys" %>
 
-<header class="px-10 py-6 border-b border-slate-700/20 flex items-center justify-between bg-pd-secondary sticky top-0 z-40">
+<header class="px-8 py-6 border-b border-surface-200/50 flex items-center justify-between bg-surface-50/50 sticky top-0 z-40 backdrop-blur-sm">
   <div>
-    <h1 class="text-2xl font-bold text-slate-100">API Keys</h1>
-    <p class="text-sm text-slate-500 mt-1">Manage your API keys for authentication</p>
+    <h1 class="text-xl font-semibold text-surface-900">API Keys</h1>
+    <p class="text-sm text-surface-500 mt-0.5">Manage your API keys for authentication</p>
   </div>
 </header>
 
-<div class="p-8 px-10">
+<div class="p-8">
   <% if flash[:api_key] %>
-    <div class="bg-pd-tertiary border-2 border-cyan-accent rounded-2xl p-6 mb-6 animate-pulse-glow" id="new-api-key-reveal">
-      <div class="flex items-start justify-between gap-4 mb-4">
+    <div class="bg-accent/10 border border-accent/30 rounded-lg p-5 mb-6" id="new-api-key-reveal">
+      <div class="flex items-start justify-between gap-4 mb-3">
         <div>
-          <div class="text-xs font-bold text-cyan-accent uppercase tracking-widest mb-1">Your New API Key</div>
-          <div class="text-sm text-slate-400">Copy this key now - it won't be shown again!</div>
+          <div class="text-xs font-semibold text-accent uppercase tracking-wide mb-1">Your New API Key</div>
+          <div class="text-sm text-surface-600">Copy this key now - it won't be shown again!</div>
         </div>
-        <button id="copy-key-btn" class="px-4 py-2 bg-cyan-accent text-pd-primary font-semibold text-sm rounded-lg hover:shadow-[0_0_15px_rgba(63,196,224,0.4)] transition-all">
+        <button id="copy-key-btn" class="px-4 py-2 bg-surface-900 text-surface-0 font-medium text-sm rounded-md hover:bg-surface-800 transition-colors">
           Copy Key
         </button>
       </div>
-      <div class="bg-pd-primary rounded-xl p-4 font-mono text-base text-slate-100 break-all select-all" id="api-key-value">
+      <div class="bg-surface-200 rounded-md p-4 font-mono text-sm text-surface-900 break-all select-all" id="api-key-value">
         <%= flash[:api_key] %>
       </div>
     </div>
@@ -29,13 +29,14 @@
         const btn = this;
         navigator.clipboard.writeText(key).then(function() {
           btn.textContent = 'Copied!';
-          btn.style.backgroundColor = '#10b981';
+          btn.classList.add('bg-success');
+          btn.classList.remove('bg-surface-900');
           setTimeout(function() {
             btn.textContent = 'Copy Key';
-            btn.style.backgroundColor = '';
+            btn.classList.remove('bg-success');
+            btn.classList.add('bg-surface-900');
           }, 2000);
         }).catch(function() {
-          // Fallback for older browsers
           const textarea = document.createElement('textarea');
           textarea.value = key;
           document.body.appendChild(textarea);
@@ -43,106 +44,107 @@
           document.execCommand('copy');
           document.body.removeChild(textarea);
           btn.textContent = 'Copied!';
-          btn.style.backgroundColor = '#10b981';
+          btn.classList.add('bg-success');
+          btn.classList.remove('bg-surface-900');
           setTimeout(function() {
             btn.textContent = 'Copy Key';
-            btn.style.backgroundColor = '';
+            btn.classList.remove('bg-success');
+            btn.classList.add('bg-surface-900');
           }, 2000);
         });
       });
-      // Auto-scroll to show the key
       document.getElementById('new-api-key-reveal').scrollIntoView({ behavior: 'smooth', block: 'center' });
     </script>
   <% end %>
 
   <%# Create new key form %>
-  <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl overflow-hidden mb-6">
-    <div class="px-6 py-5 border-b border-slate-700/20">
-      <h2 class="text-lg font-semibold text-slate-100">Create New Key</h2>
+  <div class="bg-surface-100 rounded-lg overflow-hidden mb-6">
+    <div class="px-5 py-4 border-b border-surface-200/50">
+      <h2 class="text-sm font-semibold text-surface-900">Create New Key</h2>
     </div>
-    <div class="p-6">
+    <div class="p-5">
       <%= form_with url: dashboard_api_keys_path, method: :post do |f| %>
         <div class="flex flex-wrap gap-4 items-end">
           <div class="flex-1 min-w-[200px]">
-            <label for="api_key_name" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Key Name</label>
+            <label for="api_key_name" class="block text-xs font-medium text-surface-600 mb-1.5">Key Name</label>
             <%= text_field_tag "api_key[name]", nil,
-              class: "w-full px-4 py-3 bg-pd-primary border border-slate-600/40 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-accent focus:ring-2 focus:ring-cyan-accent/20 transition-all",
+              class: "w-full px-3 py-2.5 bg-surface-200 border border-surface-300/50 rounded-md text-surface-900 placeholder-surface-500 text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-colors",
               placeholder: "e.g., Production API",
               required: true,
               id: "api_key_name" %>
           </div>
           <div>
-            <label for="api_key_expires_at" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Expires (optional)</label>
+            <label for="api_key_expires_at" class="block text-xs font-medium text-surface-600 mb-1.5">Expires (optional)</label>
             <%= date_field_tag "api_key[expires_at]", nil,
-              class: "px-4 py-3 bg-pd-primary border border-slate-600/40 rounded-xl text-slate-100 focus:outline-none focus:border-cyan-accent focus:ring-2 focus:ring-cyan-accent/20 transition-all w-[180px]",
+              class: "px-3 py-2.5 bg-surface-200 border border-surface-300/50 rounded-md text-surface-900 text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-colors w-[180px]",
               id: "api_key_expires_at",
               min: Date.tomorrow.to_s %>
           </div>
-          <%= submit_tag "Create Key", class: "px-5 py-3 bg-cyan-accent text-pd-primary font-semibold rounded-xl hover:shadow-[0_0_20px_rgba(63,196,224,0.4)] hover:-translate-y-0.5 transition-all cursor-pointer" %>
+          <%= submit_tag "Create Key", class: "px-5 py-2.5 bg-surface-900 text-surface-0 font-medium text-sm rounded-md hover:bg-surface-800 transition-colors cursor-pointer" %>
         </div>
       <% end %>
     </div>
   </div>
 
   <%# API Keys list %>
-  <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl overflow-hidden mb-6">
-    <div class="px-6 py-5 border-b border-slate-700/20 flex items-center justify-between">
-      <h2 class="text-lg font-semibold text-slate-100">Your API Keys</h2>
-      <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-slate-600/30 text-slate-400"><%= @api_keys.count %> keys</span>
+  <div class="bg-surface-100 rounded-lg overflow-hidden mb-6">
+    <div class="px-5 py-4 border-b border-surface-200/50 flex items-center justify-between">
+      <h2 class="text-sm font-semibold text-surface-900">Your API Keys</h2>
+      <span class="text-xs font-medium text-surface-500"><%= @api_keys.count %> keys</span>
     </div>
 
     <% if @api_keys.any? %>
       <div class="overflow-x-auto">
         <table class="w-full">
           <thead>
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Name</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Key</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Status</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Last Used</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Expires</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Actions</th>
+            <tr class="border-b border-surface-200/50">
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Name</th>
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Key</th>
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Status</th>
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Last Used</th>
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Expires</th>
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Actions</th>
             </tr>
           </thead>
           <tbody>
             <% @api_keys.each do |key| %>
-              <tr class="hover:bg-pd-tertiary transition-colors">
-                <td class="px-6 py-4 border-b border-slate-700/20">
-                  <span class="font-semibold text-slate-100"><%= key.name %></span>
-                  <div class="text-xs text-slate-500 mt-1">Created <%= key.created_at.strftime("%b %d, %Y") %></div>
+              <tr class="border-b border-surface-200/50 hover:bg-surface-200/30 transition-colors">
+                <td class="px-5 py-3">
+                  <span class="font-medium text-sm text-surface-800"><%= key.name %></span>
+                  <div class="text-xs text-surface-500 mt-0.5">Created <%= key.created_at.strftime("%b %d, %Y") %></div>
                 </td>
-                <td class="px-6 py-4 border-b border-slate-700/20">
-                  <code class="font-mono text-sm text-slate-400 bg-pd-primary px-2 py-1 rounded-lg">pdat_****<%= key.key_digest.last(8) %></code>
+                <td class="px-5 py-3">
+                  <code class="font-mono text-xs text-surface-600 bg-surface-200 px-2 py-1 rounded">pdat_****<%= key.key_digest.last(8) %></code>
                 </td>
-                <td class="px-6 py-4 border-b border-slate-700/20">
+                <td class="px-5 py-3">
                   <% if key.usable? %>
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-emerald-500/15 text-emerald-500">Active</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-success/10 text-success">Active</span>
                   <% elsif key.expired? %>
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-amber-500/15 text-amber-500">Expired</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-warning/10 text-warning">Expired</span>
                   <% else %>
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-red-500/15 text-red-500">Revoked</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-danger/10 text-danger">Revoked</span>
                   <% end %>
                 </td>
-                <td class="px-6 py-4 border-b border-slate-700/20 text-slate-400 text-sm">
+                <td class="px-5 py-3 text-surface-600 text-sm">
                   <%= key.last_used_at ? time_ago_in_words(key.last_used_at) + " ago" : "Never" %>
                 </td>
-                <td class="px-6 py-4 border-b border-slate-700/20 text-sm">
+                <td class="px-5 py-3 text-sm">
                   <% if key.expires_at %>
                     <% if key.expired? %>
-                      <span class="text-red-400"><%= key.expires_at.strftime("%b %d, %Y") %></span>
+                      <span class="text-danger"><%= key.expires_at.strftime("%b %d, %Y") %></span>
                     <% else %>
-                      <span class="text-slate-400"><%= key.expires_at.strftime("%b %d, %Y") %></span>
+                      <span class="text-surface-600"><%= key.expires_at.strftime("%b %d, %Y") %></span>
                     <% end %>
                   <% else %>
-                    <span class="text-slate-500">Never</span>
+                    <span class="text-surface-500">Never</span>
                   <% end %>
                 </td>
-                <td class="px-6 py-4 border-b border-slate-700/20">
+                <td class="px-5 py-3">
                   <div class="flex gap-2">
                     <% if key.usable? %>
-                      <%= button_to "Regenerate", regenerate_dashboard_api_key_path(key), method: :post, class: "px-3 py-1.5 text-xs font-medium text-slate-400 bg-pd-elevated border border-slate-700/30 rounded-lg hover:bg-pd-hover transition-all cursor-pointer", data: { confirm: "This will revoke the current key and create a new one. Continue?" } %>
+                      <%= button_to "Regenerate", regenerate_dashboard_api_key_path(key), method: :post, class: "px-2.5 py-1.5 text-xs font-medium text-surface-600 bg-surface-200 rounded-md hover:bg-surface-300 transition-colors cursor-pointer", data: { confirm: "This will revoke the current key and create a new one. Continue?" } %>
                     <% end %>
-                    <%= button_to "Delete", dashboard_api_key_path(key), method: :delete, class: "px-3 py-1.5 text-xs font-medium text-red-400 bg-red-500/15 border border-red-500/30 rounded-lg hover:bg-red-500/25 transition-all cursor-pointer", data: { confirm: "Are you sure? This cannot be undone." } %>
+                    <%= button_to "Delete", dashboard_api_key_path(key), method: :delete, class: "px-2.5 py-1.5 text-xs font-medium text-danger bg-danger/10 rounded-md hover:bg-danger/20 transition-colors cursor-pointer", data: { confirm: "Are you sure? This cannot be undone." } %>
                   </div>
                 </td>
               </tr>
@@ -151,29 +153,29 @@
         </table>
       </div>
     <% else %>
-      <div class="text-center py-16 text-slate-500">
-        <div class="text-5xl mb-4 opacity-50">&#9829;</div>
-        <div class="text-lg font-semibold text-slate-400 mb-2">No API keys yet</div>
-        <p class="text-slate-500">Create your first API key above to start making requests</p>
+      <div class="text-center py-12 border-t border-surface-200/50">
+        <svg class="w-10 h-10 mx-auto text-surface-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+        <div class="text-sm font-medium text-surface-600 mb-1">No API keys yet</div>
+        <p class="text-xs text-surface-500">Create your first API key above to start making requests</p>
       </div>
     <% end %>
   </div>
 
   <%# Usage info %>
-  <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl overflow-hidden">
-    <div class="px-6 py-5 border-b border-slate-700/20">
-      <h2 class="text-lg font-semibold text-slate-100">Using Your API Key</h2>
+  <div class="bg-surface-100 rounded-lg overflow-hidden">
+    <div class="px-5 py-4 border-b border-surface-200/50">
+      <h2 class="text-sm font-semibold text-surface-900">Using Your API Key</h2>
     </div>
-    <div class="p-6">
-      <p class="text-slate-400 mb-4">
-        Include your API key in the <code class="font-mono text-cyan-accent">Authorization</code> header:
+    <div class="p-5">
+      <p class="text-sm text-surface-600 mb-4">
+        Include your API key in the <code class="font-mono text-accent">Authorization</code> header:
       </p>
-      <div class="bg-pd-primary rounded-xl p-4 font-mono text-sm">
-        <span class="text-slate-500">Authorization:</span>
-        <span class="text-cyan-accent"> Bearer pdat_your_api_key_here</span>
+      <div class="bg-surface-200 rounded-md p-4 font-mono text-xs overflow-x-auto">
+        <span class="text-surface-500">Authorization:</span>
+        <span class="text-surface-700"> Bearer pdat_your_api_key_here</span>
       </div>
-      <p class="text-slate-500 text-sm mt-3">
-        Alternatively, you can use the <code class="font-mono text-slate-400">X-API-Key</code> header.
+      <p class="text-xs text-surface-500 mt-3">
+        Alternatively, you can use the <code class="font-mono text-surface-600">X-API-Key</code> header.
       </p>
     </div>
   </div>

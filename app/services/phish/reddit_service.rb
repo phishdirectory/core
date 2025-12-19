@@ -172,17 +172,25 @@ module Phish
 
     def import_domains(domains)
       domains.each do |domain|
-        # Only import truly new domains to save resources on nightly syncs
-        next if Phish::Domain.exists?(domain: domain.downcase)
+        normalized = domain.downcase
+        existing = Phish::Domain.find_by(domain: normalized)
+
+        if existing
+          # Schedule check for existing domains that don't have a verdict yet
+          if existing.verdict.nil?
+            PhishDomainCheckJob.perform_later(existing.id)
+          end
+          next
+        end
 
         # Cache with note that it's from Reddit (user-reported)
         Rails.cache.write(
-          "reddit:domain:#{domain.downcase}",
+          "reddit:domain:#{normalized}",
           { reported_at: Time.current },
           expires_in: 12.hours
         )
 
-        record = Phish::Domain.create(domain: domain.downcase)
+        record = Phish::Domain.create(domain: normalized)
         PhishDomainCheckJob.perform_later(record.id) if record.persisted?
       end
     end

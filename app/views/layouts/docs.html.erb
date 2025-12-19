@@ -11,92 +11,102 @@
   <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
   <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
 </head>
-<body class="bg-pd-primary text-slate-100 font-sans min-h-screen antialiased">
-  <%# Background %>
-  <div class="fixed inset-0 bg-gradient-to-br from-pd-primary to-slate-900 pointer-events-none -z-10"></div>
+<body class="bg-surface-0 text-surface-800 font-sans min-h-screen antialiased overflow-x-hidden">
+  <%# Background layers %>
+  <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+    <%= image_tag "bg.jpg", class: "absolute inset-0 w-full h-full object-cover opacity-40" %>
+    <div class="absolute inset-0 bg-surface-0/60"></div>
+  </div>
 
-  <div class="flex min-h-screen">
+  <div class="relative z-10 flex min-h-screen">
     <%# Sidebar %>
-    <aside class="w-[280px] bg-pd-secondary border-r border-slate-700/20 flex flex-col fixed top-0 left-0 bottom-0 z-50">
-      <div class="p-6 border-b border-slate-700/20">
-        <a href="<%= root_path %>" class="flex items-center gap-3 text-slate-100 font-bold text-lg no-underline">
-          <%= image_tag "phish-logo.png", alt: "phish.directory", class: "w-9 h-9 rounded-xl shadow-[0_0_20px_rgba(63,196,224,0.4)]" rescue nil %>
-          <span>phish.directory</span>
+    <aside class="w-60 bg-surface-50/70 backdrop-blur-xl flex flex-col fixed top-0 left-0 bottom-0 z-50">
+      <%# Logo %>
+      <div class="h-14 px-4 flex items-center border-b border-surface-200/50">
+        <a href="<%= root_path %>" class="flex items-center gap-2.5 text-surface-900 font-semibold text-sm">
+          <%= image_tag "phish-logo.png", alt: "phish.directory", class: "w-8 h-8 rounded-lg shadow-[0_0_15px_rgba(34,211,238,0.25)]" %>
+          <div>
+            <span>phish.directory</span>
+            <div class="text-[10px] text-surface-500 font-normal">Documentation</div>
+          </div>
         </a>
-        <div class="text-xs text-slate-500 mt-2">Documentation</div>
       </div>
 
-      <nav class="flex-1 p-4 overflow-y-auto">
+      <%# Navigation %>
+      <nav class="flex-1 px-3 py-4 overflow-y-auto">
         <div class="mb-6">
-          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-2">Getting Started</div>
-          <%= link_to docs_path, class: "flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all #{action_name == 'index' ? 'bg-cyan-accent/15 text-cyan-accent' : 'text-slate-400 hover:bg-pd-tertiary hover:text-slate-100'}" do %>
+          <div class="text-[10px] font-semibold text-surface-500 uppercase tracking-wider px-2 mb-2">Getting Started</div>
+          <%= link_to docs_path, class: "flex items-center px-2.5 py-2 rounded-md text-sm font-medium transition-colors #{action_name == 'index' ? 'bg-accent/10 text-accent' : 'text-surface-600 hover:bg-surface-100 hover:text-surface-800'}" do %>
             <span>Introduction</span>
           <% end %>
-          <%= link_to docs_page_path(page: 'quickstart'), class: "flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all #{params[:page] == 'quickstart' ? 'bg-cyan-accent/15 text-cyan-accent' : 'text-slate-400 hover:bg-pd-tertiary hover:text-slate-100'}" do %>
+          <%= link_to docs_page_path(page: 'quickstart'), class: "flex items-center px-2.5 py-2 rounded-md text-sm font-medium transition-colors #{params[:page] == 'quickstart' ? 'bg-accent/10 text-accent' : 'text-surface-600 hover:bg-surface-100 hover:text-surface-800'}" do %>
             <span>Quickstart</span>
           <% end %>
-          <%= link_to docs_page_path(page: 'authentication'), class: "flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all #{params[:page] == 'authentication' ? 'bg-cyan-accent/15 text-cyan-accent' : 'text-slate-400 hover:bg-pd-tertiary hover:text-slate-100'}" do %>
+          <%= link_to docs_page_path(page: 'authentication'), class: "flex items-center px-2.5 py-2 rounded-md text-sm font-medium transition-colors #{params[:page] == 'authentication' ? 'bg-accent/10 text-accent' : 'text-surface-600 hover:bg-surface-100 hover:text-surface-800'}" do %>
             <span>Authentication</span>
           <% end %>
         </div>
 
         <div class="mb-6">
-          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-2">API Reference</div>
-          <a href="/docs/api" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-pd-tertiary hover:text-slate-100 transition-all">
+          <div class="text-[10px] font-semibold text-surface-500 uppercase tracking-wider px-2 mb-2">API Reference</div>
+          <a href="/docs/api" class="flex items-center justify-between px-2.5 py-2 rounded-md text-sm font-medium text-surface-600 hover:bg-surface-100 hover:text-surface-800 transition-colors">
             <span>Interactive API Docs</span>
-            <span class="text-xs text-cyan-accent">↗</span>
+            <svg class="w-3 h-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
           </a>
-          <%= link_to docs_page_path(page: 'endpoints'), class: "flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all #{params[:page] == 'endpoints' ? 'bg-cyan-accent/15 text-cyan-accent' : 'text-slate-400 hover:bg-pd-tertiary hover:text-slate-100'}" do %>
+          <%= link_to docs_page_path(page: 'endpoints'), class: "flex items-center px-2.5 py-2 rounded-md text-sm font-medium transition-colors #{params[:page] == 'endpoints' ? 'bg-accent/10 text-accent' : 'text-surface-600 hover:bg-surface-100 hover:text-surface-800'}" do %>
             <span>Endpoints</span>
           <% end %>
-          <%= link_to docs_page_path(page: 'errors'), class: "flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all #{params[:page] == 'errors' ? 'bg-cyan-accent/15 text-cyan-accent' : 'text-slate-400 hover:bg-pd-tertiary hover:text-slate-100'}" do %>
+          <%= link_to docs_page_path(page: 'errors'), class: "flex items-center px-2.5 py-2 rounded-md text-sm font-medium transition-colors #{params[:page] == 'errors' ? 'bg-accent/10 text-accent' : 'text-surface-600 hover:bg-surface-100 hover:text-surface-800'}" do %>
             <span>Error Handling</span>
           <% end %>
-          <%= link_to docs_page_path(page: 'rate-limits'), class: "flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all #{params[:page] == 'rate-limits' ? 'bg-cyan-accent/15 text-cyan-accent' : 'text-slate-400 hover:bg-pd-tertiary hover:text-slate-100'}" do %>
+          <%= link_to docs_page_path(page: 'rate-limits'), class: "flex items-center px-2.5 py-2 rounded-md text-sm font-medium transition-colors #{params[:page] == 'rate-limits' ? 'bg-accent/10 text-accent' : 'text-surface-600 hover:bg-surface-100 hover:text-surface-800'}" do %>
             <span>Rate Limits</span>
           <% end %>
         </div>
 
         <div class="mb-6">
-          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-2">Features</div>
-          <%= link_to docs_page_path(page: 'reporting'), class: "flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all #{params[:page] == 'reporting' ? 'bg-cyan-accent/15 text-cyan-accent' : 'text-slate-400 hover:bg-pd-tertiary hover:text-slate-100'}" do %>
+          <div class="text-[10px] font-semibold text-surface-500 uppercase tracking-wider px-2 mb-2">Features</div>
+          <%= link_to docs_page_path(page: 'reporting'), class: "flex items-center px-2.5 py-2 rounded-md text-sm font-medium transition-colors #{params[:page] == 'reporting' ? 'bg-accent/10 text-accent' : 'text-surface-600 hover:bg-surface-100 hover:text-surface-800'}" do %>
             <span>Automated Reporting</span>
           <% end %>
         </div>
 
         <div class="mb-6">
-          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-2">Resources</div>
-          <%= link_to docs_page_path(page: 'changelog'), class: "flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all #{params[:page] == 'changelog' ? 'bg-cyan-accent/15 text-cyan-accent' : 'text-slate-400 hover:bg-pd-tertiary hover:text-slate-100'}" do %>
+          <div class="text-[10px] font-semibold text-surface-500 uppercase tracking-wider px-2 mb-2">Resources</div>
+          <%= link_to docs_page_path(page: 'changelog'), class: "flex items-center px-2.5 py-2 rounded-md text-sm font-medium transition-colors #{params[:page] == 'changelog' ? 'bg-accent/10 text-accent' : 'text-surface-600 hover:bg-surface-100 hover:text-surface-800'}" do %>
             <span>Changelog</span>
           <% end %>
         </div>
       </nav>
 
-      <div class="p-4 border-t border-slate-700/20">
+      <%# Back link %>
+      <div class="p-3 border-t border-surface-200/50">
         <% if user_signed_in? %>
-          <%= link_to dashboard_root_path, class: "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-pd-tertiary hover:text-slate-100 transition-all" do %>
-            <span>&larr; Back to Dashboard</span>
+          <%= link_to dashboard_root_path, class: "flex items-center gap-2 px-2.5 py-2 rounded-md text-sm font-medium text-surface-600 hover:bg-surface-100 hover:text-surface-800 transition-colors" do %>
+            <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 17l-5-5m0 0l5-5m-5 5h12"/></svg>
+            <span>Back to Dashboard</span>
           <% end %>
         <% else %>
-          <%= link_to root_path, class: "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-pd-tertiary hover:text-slate-100 transition-all" do %>
-            <span>&larr; Back to Home</span>
+          <%= link_to root_path, class: "flex items-center gap-2 px-2.5 py-2 rounded-md text-sm font-medium text-surface-600 hover:bg-surface-100 hover:text-surface-800 transition-colors" do %>
+            <svg class="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 17l-5-5m0 0l5-5m-5 5h12"/></svg>
+            <span>Back to Home</span>
           <% end %>
         <% end %>
       </div>
     </aside>
 
     <%# Main Content %>
-    <main class="flex-1 ml-[280px] min-h-screen">
+    <main class="flex-1 ml-60 min-h-screen">
       <% if flash[:alert] %>
-        <div class="px-10 pt-5">
-          <div class="bg-amber-500/15 border border-amber-500/30 text-amber-400 px-5 py-3.5 rounded-xl text-sm font-medium flex items-center gap-2 mb-5">
-            <span>!</span>
+        <div class="px-8 pt-4">
+          <div class="bg-warning/10 text-warning px-4 py-3 rounded-lg text-sm font-medium flex items-center gap-2 mb-4">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
             <%= flash[:alert] %>
           </div>
         </div>
       <% end %>
 
-      <div class="max-w-4xl mx-auto px-10 py-12">
+      <div class="max-w-3xl mx-auto px-8 py-10">
         <%= yield %>
       </div>
     </main>

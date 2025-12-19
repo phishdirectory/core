@@ -1,44 +1,43 @@
 <% content_for :title, "Sign up" %>
 
-<div class="min-h-screen flex items-center justify-center p-10 relative bg-pd-primary">
-  <%# Background image %>
-  <div class="absolute inset-0 bg-cover bg-center opacity-25" style="background-image: url('<%= image_path("bg.JPG") %>');"></div>
+<div class="min-h-screen flex items-center justify-center p-6 bg-surface-0 relative overflow-hidden">
+  <%# Background layers %>
+  <div class="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+    <%= image_tag "bg.jpg", class: "absolute inset-0 w-full h-full object-cover opacity-40" %>
+    <div class="absolute inset-0 bg-gradient-to-b from-surface-0/50 via-surface-0/60 to-surface-0"></div>
+  </div>
 
-  <%# Radial gradient overlay %>
-  <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,#0a1210_75%)]"></div>
-
-  <%# Content %>
-  <div class="relative z-10 w-full max-w-[460px]">
+  <div class="relative z-10 w-full max-w-md">
     <%# Header %>
-    <div class="text-center mb-10">
-      <a href="<%= root_path %>" class="inline-flex items-center gap-3 text-slate-100 font-bold text-xl mb-8 no-underline">
-        <span class="w-11 h-11 bg-gradient-to-br from-cyan-accent to-cyan-dark rounded-xl flex items-center justify-center text-lg font-extrabold text-pd-primary shadow-[0_0_30px_rgba(63,196,224,0.4)]">PD</span>
+    <div class="text-center mb-8">
+      <a href="<%= root_path %>" class="inline-flex items-center gap-2.5 text-surface-900 font-semibold text-base mb-6">
+        <%= image_tag "phish-logo.png", alt: "phish.directory", class: "w-9 h-9 rounded-lg shadow-[0_0_15px_rgba(34,211,238,0.25)]" %>
         <span>phish.directory</span>
       </a>
-      <h1 class="text-3xl font-bold text-slate-100 mb-2">Create your account</h1>
-      <p class="text-slate-400">Start protecting your users from phishing</p>
+      <h1 class="text-2xl font-semibold text-surface-900 mb-1">Create your account</h1>
+      <p class="text-surface-500 text-sm">Start protecting your users from phishing</p>
     </div>
 
     <%# Card %>
-    <div class="bg-pd-secondary border border-slate-700/30 rounded-2xl p-8">
+    <div class="bg-surface-100 rounded-lg p-6">
       <%# Benefits box %>
-      <div class="bg-cyan-accent/10 border border-cyan-accent/20 rounded-xl p-4 mb-6">
-        <div class="text-sm font-bold text-cyan-accent mb-3">What you get</div>
-        <ul class="text-sm text-slate-400 space-y-2">
+      <div class="bg-accent/5 rounded-md p-4 mb-5">
+        <div class="text-xs font-medium text-accent mb-3">What you get</div>
+        <ul class="text-xs text-surface-600 space-y-2">
           <li class="flex items-center gap-2">
-            <span class="text-emerald-500">&#10003;</span>
+            <svg class="w-3.5 h-3.5 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
             Free API access with generous rate limits
           </li>
           <li class="flex items-center gap-2">
-            <span class="text-emerald-500">&#10003;</span>
+            <svg class="w-3.5 h-3.5 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
             Real-time domain and URL verification
           </li>
           <li class="flex items-center gap-2">
-            <span class="text-emerald-500">&#10003;</span>
+            <svg class="w-3.5 h-3.5 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
             Multi-source threat intelligence
           </li>
           <li class="flex items-center gap-2">
-            <span class="text-emerald-500">&#10003;</span>
+            <svg class="w-3.5 h-3.5 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
             Developer dashboard with analytics
           </li>
         </ul>
@@ -46,8 +45,8 @@
 
       <%# Error messages %>
       <% if @user.errors.any? %>
-        <div class="bg-red-500/15 border border-red-500/30 rounded-xl p-4 mb-5 text-red-400 text-sm">
-          <ul class="list-disc pl-5 space-y-1">
+        <div class="bg-danger/10 text-danger rounded-md p-3 mb-4 text-sm">
+          <ul class="list-disc pl-4 space-y-1">
             <% @user.errors.full_messages.each do |message| %>
               <li><%= message %></li>
             <% end %>
@@ -57,45 +56,45 @@
 
       <%# Form %>
       <%= form_with model: @user, url: signup_path, method: :post do |f| %>
-        <div class="grid grid-cols-2 gap-4 mb-5">
+        <div class="grid grid-cols-2 gap-3 mb-4">
           <div>
-            <label for="user_first_name" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">First Name</label>
+            <label for="user_first_name" class="block text-xs font-medium text-surface-600 mb-1.5">First Name</label>
             <%= f.text_field :first_name,
-              class: "w-full px-4 py-3.5 bg-pd-primary border border-slate-600/40 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-accent focus:ring-2 focus:ring-cyan-accent/20 transition-all",
+              class: "w-full px-3 py-2.5 bg-surface-200 border border-surface-300/50 rounded-md text-surface-900 placeholder-surface-500 text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-colors",
               placeholder: "Jane",
               required: true,
               autofocus: true %>
           </div>
           <div>
-            <label for="user_last_name" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Last Name</label>
+            <label for="user_last_name" class="block text-xs font-medium text-surface-600 mb-1.5">Last Name</label>
             <%= f.text_field :last_name,
-              class: "w-full px-4 py-3.5 bg-pd-primary border border-slate-600/40 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-accent focus:ring-2 focus:ring-cyan-accent/20 transition-all",
+              class: "w-full px-3 py-2.5 bg-surface-200 border border-surface-300/50 rounded-md text-surface-900 placeholder-surface-500 text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-colors",
               placeholder: "Doe",
               required: true %>
           </div>
         </div>
 
-        <div class="mb-5">
-          <label for="user_email" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Email address</label>
+        <div class="mb-4">
+          <label for="user_email" class="block text-xs font-medium text-surface-600 mb-1.5">Email address</label>
           <%= f.email_field :email,
-            class: "w-full px-4 py-3.5 bg-pd-primary border border-slate-600/40 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-accent focus:ring-2 focus:ring-cyan-accent/20 transition-all",
+            class: "w-full px-3 py-2.5 bg-surface-200 border border-surface-300/50 rounded-md text-surface-900 placeholder-surface-500 text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-colors",
             placeholder: "you@example.com",
             required: true %>
         </div>
 
         <%= f.submit "Create account",
-          class: "w-full py-3.5 bg-cyan-accent text-pd-primary font-semibold rounded-xl hover:shadow-[0_0_20px_rgba(63,196,224,0.4)] hover:-translate-y-0.5 transition-all cursor-pointer" %>
+          class: "w-full py-2.5 bg-surface-900 text-surface-0 font-medium text-sm rounded-md hover:bg-surface-800 transition-colors cursor-pointer" %>
       <% end %>
 
-      <p class="mt-4 text-xs text-slate-500 text-center">
+      <p class="mt-4 text-xs text-surface-500 text-center">
         By signing up, you agree to our Terms of Service and Privacy Policy.
       </p>
     </div>
 
     <%# Footer %>
-    <p class="text-center mt-6 text-slate-400 text-sm">
+    <p class="text-center mt-5 text-surface-500 text-sm">
       Already have an account?
-      <%= link_to "Sign in", login_path, class: "text-cyan-accent font-semibold hover:opacity-80 transition-opacity" %>
+      <%= link_to "Sign in", login_path, class: "text-surface-700 font-medium hover:text-surface-900 transition-colors" %>
     </p>
   </div>
 </div>

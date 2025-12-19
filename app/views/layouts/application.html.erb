@@ -12,16 +12,16 @@
   <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
   <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
 </head>
-<body class="bg-pd-primary text-slate-100 font-sans min-h-screen antialiased">
+<body class="bg-surface-0 text-surface-800 font-sans min-h-screen antialiased">
   <% if flash[:notice] %>
-    <div class="fixed top-4 right-4 z-50 bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 px-5 py-3 rounded-xl text-sm font-medium flex items-center gap-2 animate-slide-down">
-      <span>&#10003;</span>
+    <div class="fixed top-4 right-4 z-50 bg-success/10 text-success px-4 py-3 rounded-lg text-sm font-medium flex items-center gap-2 animate-slide-down shadow-lg">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
       <%= flash[:notice] %>
     </div>
   <% end %>
   <% if flash[:alert] %>
-    <div class="fixed top-4 right-4 z-50 bg-red-500/15 border border-red-500/30 text-red-400 px-5 py-3 rounded-xl text-sm font-medium flex items-center gap-2 animate-slide-down">
-      <span>!</span>
+    <div class="fixed top-4 right-4 z-50 bg-danger/10 text-danger px-4 py-3 rounded-lg text-sm font-medium flex items-center gap-2 animate-slide-down shadow-lg">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
       <%= flash[:alert] %>
     </div>
   <% end %>

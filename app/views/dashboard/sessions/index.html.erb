@@ -1,75 +1,75 @@
 <% content_for :title, "Sessions" %>
 
-<header class="px-10 py-6 border-b border-slate-700/20 flex items-center justify-between bg-pd-secondary sticky top-0 z-40">
+<header class="px-8 py-6 border-b border-surface-200/50 flex items-center justify-between bg-surface-50/50 sticky top-0 z-40 backdrop-blur-sm">
   <div>
-    <h1 class="text-2xl font-bold text-slate-100">Sessions</h1>
-    <p class="text-sm text-slate-500 mt-1">Manage your active sessions across devices</p>
+    <h1 class="text-xl font-semibold text-surface-900">Sessions</h1>
+    <p class="text-sm text-surface-500 mt-0.5">Manage your active sessions across devices</p>
   </div>
 </header>
 
-<div class="p-8 px-10">
-  <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl overflow-hidden mb-6">
-    <div class="px-6 py-5 border-b border-slate-700/20 flex items-center justify-between">
-      <h2 class="text-lg font-semibold text-slate-100">Active Sessions</h2>
-      <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-slate-600/30 text-slate-400"><%= @sessions.active.count %> active</span>
+<div class="p-8">
+  <div class="bg-surface-100 rounded-lg overflow-hidden mb-6">
+    <div class="px-5 py-4 border-b border-surface-200/50 flex items-center justify-between">
+      <h2 class="text-sm font-semibold text-surface-900">Active Sessions</h2>
+      <span class="text-xs font-medium text-surface-500"><%= @sessions.active.count %> active</span>
     </div>
 
     <% if @sessions.any? %>
       <div class="overflow-x-auto">
         <table class="w-full">
           <thead>
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Device</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">IP Address</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Location</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Last Active</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Status</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest border-b border-slate-700/20">Actions</th>
+            <tr class="border-b border-surface-200/50">
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Device</th>
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">IP Address</th>
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Location</th>
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Last Active</th>
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Status</th>
+              <th class="px-5 py-2.5 text-left text-xs font-medium text-surface-500">Actions</th>
             </tr>
           </thead>
           <tbody>
             <% @sessions.each do |session| %>
-              <tr class="hover:bg-pd-tertiary transition-colors">
-                <td class="px-6 py-4 border-b border-slate-700/20">
-                  <div class="font-semibold text-slate-100"><%= session.device_info&.truncate(50) || "Unknown device" %></div>
+              <tr class="border-b border-surface-200/50 hover:bg-surface-200/30 transition-colors">
+                <td class="px-5 py-3">
+                  <div class="font-medium text-sm text-surface-800"><%= session.device_info&.truncate(50) || "Unknown device" %></div>
                   <% if session.os_info.present? %>
-                    <div class="text-xs text-slate-500 mt-1"><%= session.os_info %></div>
+                    <div class="text-xs text-surface-500 mt-0.5"><%= session.os_info %></div>
                   <% end %>
                 </td>
-                <td class="px-6 py-4 border-b border-slate-700/20">
-                  <code class="font-mono text-sm text-slate-400"><%= session.ip || "Unknown" %></code>
+                <td class="px-5 py-3">
+                  <code class="font-mono text-xs text-surface-600"><%= session.ip || "Unknown" %></code>
                 </td>
-                <td class="px-6 py-4 border-b border-slate-700/20 text-slate-400 text-sm">
+                <td class="px-5 py-3 text-surface-600 text-sm">
                   <% if session.latitude && session.longitude %>
                     <%= session.latitude.round(2) %>, <%= session.longitude.round(2) %>
                   <% else %>
-                    <span class="text-slate-500">Unknown</span>
+                    <span class="text-surface-500">Unknown</span>
                   <% end %>
                 </td>
-                <td class="px-6 py-4 border-b border-slate-700/20 text-slate-400 text-sm">
+                <td class="px-5 py-3 text-surface-600 text-sm">
                   <%= session.last_seen_at ? time_ago_in_words(session.last_seen_at) + " ago" : "Just now" %>
                 </td>
-                <td class="px-6 py-4 border-b border-slate-700/20">
+                <td class="px-5 py-3">
                   <% if session == @current_session %>
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-emerald-500/15 text-emerald-500">Current</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-success/10 text-success">Current</span>
                   <% elsif session.active? %>
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-blue-500/15 text-blue-400">Active</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-info/10 text-info">Active</span>
                   <% elsif session.signed_out? %>
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-slate-600/30 text-slate-400">Signed out</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-surface-300 text-surface-600">Signed out</span>
                   <% else %>
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-amber-500/15 text-amber-500">Expired</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-warning/10 text-warning">Expired</span>
                   <% end %>
                   <% if session.impersonated? %>
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-mono uppercase tracking-wide bg-amber-500/15 text-amber-500 ml-1">Impersonated</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-warning/10 text-warning ml-1">Impersonated</span>
                   <% end %>
                 </td>
-                <td class="px-6 py-4 border-b border-slate-700/20">
+                <td class="px-5 py-3">
                   <% if session == @current_session %>
-                    <span class="text-slate-500 text-sm">Current session</span>
+                    <span class="text-xs text-surface-500">Current session</span>
                   <% elsif session.active? %>
-                    <%= button_to "Terminate", dashboard_session_path(session), method: :delete, class: "px-3 py-1.5 text-xs font-medium text-red-400 bg-red-500/15 border border-red-500/30 rounded-lg hover:bg-red-500/25 transition-all cursor-pointer", data: { confirm: "This will sign out this device. Continue?" } %>
+                    <%= button_to "Terminate", dashboard_session_path(session), method: :delete, class: "px-2.5 py-1.5 text-xs font-medium text-danger bg-danger/10 rounded-md hover:bg-danger/20 transition-colors cursor-pointer", data: { confirm: "This will sign out this device. Continue?" } %>
                   <% else %>
-                    <span class="text-slate-500 text-sm">-</span>
+                    <span class="text-xs text-surface-500">-</span>
                   <% end %>
                 </td>
               </tr>
@@ -78,31 +78,31 @@
         </table>
       </div>
     <% else %>
-      <div class="text-center py-16 text-slate-500">
-        <div class="text-5xl mb-4 opacity-50">&#9788;</div>
-        <div class="text-lg font-semibold text-slate-400 mb-2">No sessions found</div>
-        <p class="text-slate-500">Your session history will appear here</p>
+      <div class="text-center py-12 border-t border-surface-200/50">
+        <svg class="w-10 h-10 mx-auto text-surface-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+        <div class="text-sm font-medium text-surface-600 mb-1">No sessions found</div>
+        <p class="text-xs text-surface-500">Your session history will appear here</p>
       </div>
     <% end %>
   </div>
 
   <%# Session info %>
-  <div class="bg-pd-secondary border border-slate-700/20 rounded-2xl overflow-hidden">
-    <div class="px-6 py-5 border-b border-slate-700/20">
-      <h2 class="text-lg font-semibold text-slate-100">About Sessions</h2>
+  <div class="bg-surface-100 rounded-lg overflow-hidden">
+    <div class="px-5 py-4 border-b border-surface-200/50">
+      <h2 class="text-sm font-semibold text-surface-900">About Sessions</h2>
     </div>
-    <div class="p-6">
-      <div class="space-y-4 text-slate-400 text-sm leading-relaxed">
+    <div class="p-5">
+      <div class="space-y-4 text-sm text-surface-600 leading-relaxed">
         <p>
-          <strong class="text-slate-100">What are sessions?</strong><br>
+          <strong class="text-surface-800">What are sessions?</strong><br>
           Sessions represent each time you sign in to your account. Each device or browser creates a new session.
         </p>
         <p>
-          <strong class="text-slate-100">Security tip</strong><br>
+          <strong class="text-surface-800">Security tip</strong><br>
           If you see a session you don't recognize, terminate it immediately and consider changing your account security settings.
         </p>
         <p>
-          <strong class="text-slate-100">Session expiration</strong><br>
+          <strong class="text-surface-800">Session expiration</strong><br>
           Sessions automatically expire after a period of inactivity. You can also manually terminate sessions you no longer need.
         </p>
       </div>
