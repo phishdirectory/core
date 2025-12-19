@@ -43,3 +43,9 @@ domain_availability_check:
   class: DomainAvailabilityCheckJob
   queue: maintenance
   schedule: every hour at minute 30
+
+# Sync TLD support data from CleanDNS API
+cleandns_tld_sync:
+  class: CleandnsTldSyncJob
+  queue: maintenance
+  schedule: every day at 3am

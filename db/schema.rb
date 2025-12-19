@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_18_235245) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_19_002227) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "fuzzystrmatch"
   enable_extension "pg_catalog.plpgsql"
@@ -364,6 +364,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_18_235245) do
     t.boolean "http_reachable"
     t.datetime "last_checked_at"
     t.datetime "last_seen_at"
+    t.uuid "tld_id"
     t.datetime "updated_at", null: false
     t.uuid "verdict_id"
     t.index ["availability_checked_at"], name: "index_phish_domains_on_availability_checked_at"
@@ -371,6 +372,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_18_235245) do
     t.index ["domain"], name: "index_phish_domains_on_domain", unique: true
     t.index ["last_checked_at"], name: "index_phish_domains_on_last_checked_at"
     t.index ["last_seen_at"], name: "index_phish_domains_on_last_seen_at"
+    t.index ["tld_id"], name: "index_phish_domains_on_tld_id"
     t.index ["verdict_id"], name: "index_phish_domains_on_verdict_id"
   end
 
@@ -385,6 +387,22 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_18_235245) do
     t.index ["discarded_at"], name: "index_phish_protections_on_discarded_at"
     t.index ["protectable_type", "protectable_value"], name: "index_protections_on_type_and_value", unique: true
     t.index ["protected_by_id"], name: "index_phish_protections_on_protected_by_id"
+  end
+
+  create_table "phish_tlds", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.boolean "cleandns_supported", default: false, null: false
+    t.datetime "cleandns_synced_at"
+    t.datetime "created_at", null: false
+    t.datetime "discarded_at"
+    t.integer "domains_count", default: 0, null: false
+    t.string "name", null: false
+    t.jsonb "registrars", default: []
+    t.jsonb "resellers", default: []
+    t.datetime "updated_at", null: false
+    t.index ["cleandns_supported"], name: "index_phish_tlds_on_cleandns_supported"
+    t.index ["discarded_at"], name: "index_phish_tlds_on_discarded_at"
+    t.index ["domains_count"], name: "index_phish_tlds_on_domains_count"
+    t.index ["name"], name: "index_phish_tlds_on_name", unique: true
   end
 
   create_table "phish_urls", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -720,6 +738,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_18_235245) do
   add_foreign_key "oauth_access_grants", "users", column: "resource_owner_id"
   add_foreign_key "oauth_access_tokens", "oauth_applications", column: "application_id"
   add_foreign_key "oauth_access_tokens", "users", column: "resource_owner_id"
+  add_foreign_key "phish_domains", "phish_tlds", column: "tld_id"
   add_foreign_key "phish_domains", "verdicts"
   add_foreign_key "phish_protections", "users", column: "protected_by_id"
   add_foreign_key "phish_urls", "verdicts"

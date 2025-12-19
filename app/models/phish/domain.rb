@@ -10,6 +10,7 @@ class Phish::Domain < ApplicationRecord
 
   # Associations
   belongs_to :verdict, optional: true
+  belongs_to :tld, class_name: "Phish::Tld", optional: true, counter_cache: :domains_count
 
   # Validations
   validates :domain, presence: true, uniqueness: true
@@ -20,6 +21,9 @@ class Phish::Domain < ApplicationRecord
 
   # Normalizations
   normalizes :domain, with: ->(domain) { domain.strip.downcase }
+
+  # Callbacks
+  before_validation :associate_tld, on: [ :create, :update ], if: :domain_changed?
 
   # Scopes
   scope :checked, -> { where.not(last_checked_at: nil) }
@@ -41,9 +45,15 @@ class Phish::Domain < ApplicationRecord
   scope :reachable, -> { where(http_reachable: true) }
   scope :active_domains, -> { resolvable.reachable }
 
+  # TLD-related scopes
+  scope :with_tld, -> { where.not(tld_id: nil) }
+  scope :without_tld, -> { where(tld_id: nil) }
+  scope :cleandns_reportable, -> { joins(:tld).where(phish_tlds: { cleandns_supported: true }) }
+
   # Delegations
   delegate :classification, :confidence_score, :phishing?, :suspicious?, :clean?, :dangerous?, :safe?,
            to: :verdict, allow_nil: true
+  delegate :cleandns_supported?, to: :tld, allow_nil: true, prefix: true
 
   # ===========================================
   # Check status helpers
@@ -98,6 +108,14 @@ class Phish::Domain < ApplicationRecord
   end
 
   # ===========================================
+  # TLD helpers
+  # ===========================================
+
+  def tld_name
+    tld&.name || Phish::Tld.extract_from_domain(domain)
+  end
+
+  # ===========================================
   # Class methods
   # ===========================================
 
@@ -116,6 +134,12 @@ class Phish::Domain < ApplicationRecord
   end
 
   private
+
+  def associate_tld
+    return if domain.blank?
+
+    self.tld = Phish::Tld.find_or_create_from_domain(domain)
+  end
 
   # Required by Protectable concern
   def protectable_value

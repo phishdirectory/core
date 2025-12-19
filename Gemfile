@@ -59,6 +59,7 @@ gem "rswag-api"                     # Serve OpenAPI JSON
 gem "rswag-ui"                      # Swagger UI for API docs
 gem "whois"                         # WHOIS lookups for domain info
 gem "whois-parser"                  # Parse WHOIS responses
+gem "public_suffix"                 # TLD parsing for compound TLDs (.co.uk, etc.)
 
 # ============================================
 # Browser Automation (for web form submissions)
@@ -106,6 +107,7 @@ group :development, :test do
   gem "brakeman", require: false
   gem "rubocop-rails-omakase", require: false
   gem "dotenv-rails"                # Environment variables
+  gem "webmock"                     # HTTP request stubbing
 end
 
 group :development do
