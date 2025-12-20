@@ -14,6 +14,7 @@ module Phish
       sinking_yachts
       openphish
       ipqualityscore
+      checkphish
     ].freeze
 
     attr_reader :services
