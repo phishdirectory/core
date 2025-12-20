@@ -14,7 +14,8 @@ module Phish
       fish_fish: "Phish::FishFishService",
       sinking_yachts: "Phish::SinkingYachtsService",
       openphish: "Phish::OpenphishService",
-      ipqualityscore: "Phish::IpqualityscoreService"
+      ipqualityscore: "Phish::IpqualityscoreService",
+      pulsedive: "Phish::PulsediveService"
     }.freeze
 
     class << self
