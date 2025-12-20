@@ -328,6 +328,11 @@ GEM
     pghero (3.7.0)
       activerecord (>= 7.1)
     phonelib (0.10.14)
+    postmark (1.25.1)
+      json
+    postmark-rails (0.22.1)
+      actionmailer (>= 3.0.0)
+      postmark (>= 1.21.3, < 2.0)
     pp (0.6.3)
       prettyprint
     prettyprint (0.2.0)
@@ -583,6 +588,7 @@ DEPENDENCIES
   pg_search
   pghero
   phonelib
+  postmark-rails
   public_suffix
   puma (>= 5.0)
   rack-attack

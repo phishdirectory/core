@@ -75,6 +75,11 @@ gem "wicked_pdf"                    # PDF generation from HTML
 gem "wkhtmltopdf-binary"            # wkhtmltopdf binary
 
 # ============================================
+# Email
+# ============================================
+gem "postmark-rails"                # Postmark email delivery
+
+# ============================================
 # Background Jobs
 # ============================================
 gem "mission_control-jobs"          # Job dashboard
