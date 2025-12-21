@@ -1,0 +1,66 @@
+# Blazer configuration
+# https://github.com/ankane/blazer
+
+data_sources:
+  main:
+    url: <%= Rails.application.credentials.dig(:blazer, :database_url) || ENV["BLAZER_DATABASE_URL"] || ENV["DATABASE_URL"] %>
+
+    # Statement timeout, in seconds
+    # Applies to PostgreSQL, MySQL, and MariaDB
+    timeout: 15
+
+    # Caching - requires a cache store
+    # cache:
+    #   mode: slow # or all
+    #   expires_in: 60 # min
+    #   slow_threshold: 15 # sec, only used in slow mode
+
+    # Wrap queries in a transaction for databases that support it
+    # This prevents modifications to data
+    # Postgres set by default
+    # use_transaction: true
+
+    smart_variables:
+      user_id: "SELECT id, email FROM users ORDER BY email ASC"
+      service_id: "SELECT id, name FROM services ORDER BY name ASC"
+
+    linked_columns:
+      user_id: "/admin/users/{value}"
+      service_id: "/admin/services/{value}"
+
+# Audit queries and data sources
+audit: true
+
+# Minimum time for a query to be logged in audit
+# Time in seconds
+# slow_query_threshold: 5
+
+# Method name to get the current user
+# user_method: current_user
+
+# Method name to get the current user's name for display
+# user_name: current_user.name
+
+# Customize user display
+# user_class: User
+
+# Time zone
+# time_zone: "Pacific Time (US & Canada)"
+
+# Enable query edits without approval
+# override_caching: true
+
+# Turn off variable caching
+# variable_caching: false
+
+# Enable anomaly detection with the Prophet library
+# anomaly_checks: true
+
+# Enable forecasting
+# forecasting: true
+
+# Mapbox access token for maps
+# mapbox_access_token: pk.xxx
+
+# Enable async option for charts
+# async: true
