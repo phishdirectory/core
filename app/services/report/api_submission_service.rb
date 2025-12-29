@@ -351,6 +351,18 @@ module Report
     # Submits domains to FishFish via Lilly's yuri bot
     # =========================================
     def submit_fishfish
+      # Check if domain is already on the FishFish list - no need to report
+      domain = payload[:domain]
+      if domain.present? && domain_already_on_fishfish?(domain)
+        log_info("Domain #{domain} already on FishFish list, skipping Yuri submission")
+        submission.record_response!(
+          status_code: 200,
+          body: { skipped: true, reason: "already_on_fishfish" }.to_json,
+          reference: nil
+        )
+        return true
+      end
+
       # Yuri is the bot that submits to FishFish - check both credential keys
       api_key = api_key_for(:yuri) || api_key_for(:fishfish)
       raise ServiceError, "FishFish/Yuri API key not configured" if api_key.blank?
@@ -410,6 +422,15 @@ module Report
       "Confidence: #{(payload[:confidence].to_f * 100).round}%. " \
       "Sources: #{source_text}. " \
       "Case: #{payload[:case_reference]}"
+    end
+
+    def domain_already_on_fishfish?(domain)
+      result = Phish::FishFishService.new.check_domain(domain)
+      result.present? && result[:verdict] == "phishing"
+    rescue StandardError => e
+      # If we can't check, err on the side of reporting
+      log_info("Could not check FishFish for #{domain}: #{e.message}")
+      false
     end
 
     # =========================================
