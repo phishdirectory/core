@@ -364,6 +364,7 @@ module Report
       )
 
       url_to_report = payload[:url] || payload[:domain]
+      url_to_report = "https://#{url_to_report}" unless url_to_report =~ %r{\Ahttps?://}
 
       body = {
         url: url_to_report,
