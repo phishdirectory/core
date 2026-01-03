@@ -41,8 +41,8 @@ info:
     name: phish.directory Support
     email: support@phish.directory
   license:
-    name: Proprietary
-    url: https://phish.directory/terms
+    name: O'Saasy License
+    url: https://phish.directory/docs/terms
 
 servers:
   - url: https://phish.directory/api/v1

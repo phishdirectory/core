@@ -1,0 +1,108 @@
+<%= form_with model: [:admin, :saml, @service_provider], local: true, class: "space-y-6" do |f| %>
+  <% if @service_provider.errors.any? %>
+    <div class="bg-danger/10 border border-danger/20 rounded-lg p-4">
+      <div class="text-sm font-medium text-danger mb-2">Please fix the following errors:</div>
+      <ul class="text-sm text-danger/80 list-disc list-inside">
+        <% @service_provider.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <%# Basic Info %>
+  <div class="bg-surface-100 rounded-lg overflow-hidden">
+    <div class="px-5 py-4 border-b border-surface-200/50">
+      <h2 class="text-sm font-semibold text-surface-900">Basic Information</h2>
+    </div>
+    <div class="p-5 space-y-4">
+      <div>
+        <%= f.label :name, class: "block text-xs font-medium text-surface-700 mb-1.5" %>
+        <%= f.text_field :name, class: "w-full px-3 py-2 text-sm bg-surface-200 border border-surface-300/50 rounded-md text-surface-900 placeholder-surface-500 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-colors", placeholder: "My Application" %>
+      </div>
+
+      <div>
+        <%= f.label :service_id, "Linked Service", class: "block text-xs font-medium text-surface-700 mb-1.5" %>
+        <%= f.select :service_id, @services.map { |s| [s.name, s.id] }, { include_blank: "None" }, class: "w-full px-3 py-2 text-sm bg-surface-200 border border-surface-300/50 rounded-md text-surface-900 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-colors" %>
+        <p class="text-xs text-surface-500 mt-1">Optionally link this SAML SP to an existing service for unified management</p>
+      </div>
+    </div>
+  </div>
+
+  <%# SAML Configuration %>
+  <div class="bg-surface-100 rounded-lg overflow-hidden">
+    <div class="px-5 py-4 border-b border-surface-200/50">
+      <h2 class="text-sm font-semibold text-surface-900">SAML Configuration</h2>
+    </div>
+    <div class="p-5 space-y-4">
+      <div>
+        <%= f.label :entity_id, class: "block text-xs font-medium text-surface-700 mb-1.5" %>
+        <%= f.text_field :entity_id, class: "w-full px-3 py-2 text-sm bg-surface-200 border border-surface-300/50 rounded-md text-surface-900 placeholder-surface-500 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-colors font-mono", placeholder: "https://app.example.com/saml/metadata" %>
+        <p class="text-xs text-surface-500 mt-1">The unique identifier for this service provider (from their SAML metadata)</p>
+      </div>
+
+      <div>
+        <%= f.label :assertion_consumer_service_url, "ACS URL", class: "block text-xs font-medium text-surface-700 mb-1.5" %>
+        <%= f.text_field :assertion_consumer_service_url, class: "w-full px-3 py-2 text-sm bg-surface-200 border border-surface-300/50 rounded-md text-surface-900 placeholder-surface-500 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-colors font-mono", placeholder: "https://app.example.com/saml/acs" %>
+        <p class="text-xs text-surface-500 mt-1">The URL where SAML assertions are sent (POST binding)</p>
+      </div>
+
+      <div>
+        <%= f.label :single_logout_service_url, "SLO URL (optional)", class: "block text-xs font-medium text-surface-700 mb-1.5" %>
+        <%= f.text_field :single_logout_service_url, class: "w-full px-3 py-2 text-sm bg-surface-200 border border-surface-300/50 rounded-md text-surface-900 placeholder-surface-500 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-colors font-mono", placeholder: "https://app.example.com/saml/logout" %>
+        <p class="text-xs text-surface-500 mt-1">Optional: URL for Single Logout requests</p>
+      </div>
+
+      <div>
+        <%= f.label :metadata_url, "Metadata URL (optional)", class: "block text-xs font-medium text-surface-700 mb-1.5" %>
+        <%= f.text_field :metadata_url, class: "w-full px-3 py-2 text-sm bg-surface-200 border border-surface-300/50 rounded-md text-surface-900 placeholder-surface-500 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-colors font-mono", placeholder: "https://app.example.com/saml/metadata" %>
+      </div>
+
+      <div>
+        <%= f.label :name_id_format, class: "block text-xs font-medium text-surface-700 mb-1.5" %>
+        <%= f.select :name_id_format, [
+          ["Email Address", "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"],
+          ["Persistent (pd_id)", "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent"],
+          ["Transient", "urn:oasis:names:tc:SAML:2.0:nameid-format:transient"],
+          ["Unspecified", "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified"]
+        ], {}, class: "w-full px-3 py-2 text-sm bg-surface-200 border border-surface-300/50 rounded-md text-surface-900 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-colors" %>
+        <p class="text-xs text-surface-500 mt-1">The format of the NameID sent in SAML assertions</p>
+      </div>
+    </div>
+  </div>
+
+  <%# Security Options %>
+  <div class="bg-surface-100 rounded-lg overflow-hidden">
+    <div class="px-5 py-4 border-b border-surface-200/50">
+      <h2 class="text-sm font-semibold text-surface-900">Security Options</h2>
+    </div>
+    <div class="p-5 space-y-4">
+      <div class="flex items-center gap-3">
+        <%= f.check_box :sign_assertions, class: "w-4 h-4 rounded border-surface-300 text-accent focus:ring-accent/30" %>
+        <%= f.label :sign_assertions, "Sign assertions", class: "text-sm text-surface-700" %>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <%= f.check_box :encrypt_assertions, class: "w-4 h-4 rounded border-surface-300 text-accent focus:ring-accent/30" %>
+        <%= f.label :encrypt_assertions, "Encrypt assertions", class: "text-sm text-surface-700" %>
+      </div>
+
+      <div>
+        <%= f.label :certificate, "SP Certificate (for encryption)", class: "block text-xs font-medium text-surface-700 mb-1.5" %>
+        <%= f.text_area :certificate, rows: 6, class: "w-full px-3 py-2 text-sm bg-surface-200 border border-surface-300/50 rounded-md text-surface-900 placeholder-surface-500 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-colors font-mono", placeholder: "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----" %>
+        <p class="text-xs text-surface-500 mt-1">Required if encryption is enabled. The SP's X.509 certificate.</p>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <%= f.check_box :enabled, class: "w-4 h-4 rounded border-surface-300 text-accent focus:ring-accent/30" %>
+        <%= f.label :enabled, "Enable this service provider", class: "text-sm text-surface-700" %>
+      </div>
+    </div>
+  </div>
+
+  <%# Submit %>
+  <div class="flex items-center justify-end gap-3">
+    <%= link_to "Cancel", (@service_provider.persisted? ? admin_saml_service_provider_path(@service_provider) : admin_saml_service_providers_path), class: "px-4 py-2 text-sm font-medium text-surface-600 bg-surface-200 rounded-md hover:bg-surface-300 transition-colors" %>
+    <%= f.submit (@service_provider.persisted? ? "Update Service Provider" : "Create Service Provider"), class: "px-4 py-2.5 text-sm font-medium text-surface-0 bg-surface-900 rounded-md hover:bg-surface-800 transition-colors cursor-pointer" %>
+  </div>
+<% end %>

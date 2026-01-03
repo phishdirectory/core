@@ -1,11 +1,51 @@
 # frozen_string_literal: true
 
 class AuthController < ApplicationController
-  before_action :redirect_if_authenticated, only: [:login, :send_magic_link, :magic_link_login]
+  before_action :redirect_if_authenticated, only: [:login, :send_magic_link, :magic_link_login, :password_login]
 
   # GET /auth/login
   def login
     # Renders login form
+  end
+
+  # POST /auth/password_login
+  def password_login
+    email = params[:email]&.strip&.downcase
+    password = params[:password]
+
+    if email.blank? || password.blank?
+      flash.now[:alert] = "Please enter your email and password."
+      render :login, status: :unprocessable_entity
+      return
+    end
+
+    user = User.find_by(email: email)
+
+    if user.nil?
+      flash.now[:alert] = "Invalid email or password."
+      render :login, status: :unprocessable_entity
+      return
+    end
+
+    unless user.has_password?
+      flash.now[:alert] = "This account uses magic link login. Please use the magic link option."
+      render :login, status: :unprocessable_entity
+      return
+    end
+
+    unless user.can_authenticate?
+      flash.now[:alert] = "Your account is not active. Please contact support."
+      render :login, status: :unprocessable_entity
+      return
+    end
+
+    if user.authenticate(password)
+      sign_in(user)
+      redirect_back_or(dashboard_root_path)
+    else
+      flash.now[:alert] = "Invalid email or password."
+      render :login, status: :unprocessable_entity
+    end
   end
 
   # POST /auth/login

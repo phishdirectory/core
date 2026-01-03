@@ -1,0 +1,159 @@
+<% content_for :title, "OAuth 2.0" %>
+
+<div class="prose prose-invert max-w-none">
+  <h1 class="text-4xl font-bold text-slate-100 mb-4">OAuth 2.0</h1>
+  <p class="text-xl text-slate-400 mb-8">
+    Integrate with phish.directory using OAuth 2.0 authorization flows.
+  </p>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Overview</h2>
+  <p class="text-slate-300 mb-4">
+    phish.directory supports OAuth 2.0 for secure third-party integrations. Applications can request
+    authorization to access user data on behalf of users.
+  </p>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Supported Grant Types</h2>
+  <ul class="text-slate-300 space-y-2 mb-6">
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">✓</span>
+      <span><strong class="text-slate-100">Authorization Code</strong> — For server-side applications</span>
+    </li>
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">✓</span>
+      <span><strong class="text-slate-100">Authorization Code with PKCE</strong> — For single-page and mobile apps</span>
+    </li>
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">✓</span>
+      <span><strong class="text-slate-100">Client Credentials</strong> — For service-to-service authentication</span>
+    </li>
+  </ul>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Endpoints</h2>
+  <div class="overflow-x-auto not-prose mb-8">
+    <table class="w-full text-left">
+      <thead>
+        <tr class="border-b border-slate-700/50">
+          <th class="py-3 pr-4 text-sm font-semibold text-slate-300">Endpoint</th>
+          <th class="py-3 text-sm font-semibold text-slate-300">URL</th>
+        </tr>
+      </thead>
+      <tbody class="text-sm">
+        <tr class="border-b border-slate-700/30">
+          <td class="py-3 pr-4 text-slate-100">Authorization</td>
+          <td class="py-3 text-slate-400 font-mono">https://phish.directory/oauth/authorize</td>
+        </tr>
+        <tr class="border-b border-slate-700/30">
+          <td class="py-3 pr-4 text-slate-100">Token</td>
+          <td class="py-3 text-slate-400 font-mono">https://phish.directory/oauth/token</td>
+        </tr>
+        <tr class="border-b border-slate-700/30">
+          <td class="py-3 pr-4 text-slate-100">Token Revocation</td>
+          <td class="py-3 text-slate-400 font-mono">https://phish.directory/oauth/revoke</td>
+        </tr>
+        <tr class="border-b border-slate-700/30">
+          <td class="py-3 pr-4 text-slate-100">UserInfo</td>
+          <td class="py-3 text-slate-400 font-mono">https://phish.directory/oauth/userinfo</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Scopes</h2>
+  <p class="text-slate-300 mb-4">
+    Available OAuth scopes:
+  </p>
+  <div class="overflow-x-auto not-prose mb-8">
+    <table class="w-full text-left">
+      <thead>
+        <tr class="border-b border-slate-700/50">
+          <th class="py-3 pr-4 text-sm font-semibold text-slate-300">Scope</th>
+          <th class="py-3 text-sm font-semibold text-slate-300">Description</th>
+        </tr>
+      </thead>
+      <tbody class="text-sm">
+        <tr class="border-b border-slate-700/30">
+          <td class="py-3 pr-4 text-slate-100 font-mono">openid</td>
+          <td class="py-3 text-slate-400">Required for OpenID Connect</td>
+        </tr>
+        <tr class="border-b border-slate-700/30">
+          <td class="py-3 pr-4 text-slate-100 font-mono">profile</td>
+          <td class="py-3 text-slate-400">User's name and profile information</td>
+        </tr>
+        <tr class="border-b border-slate-700/30">
+          <td class="py-3 pr-4 text-slate-100 font-mono">email</td>
+          <td class="py-3 text-slate-400">User's email address and verification status</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Authorization Code Flow</h2>
+
+  <h3 class="text-xl font-semibold text-slate-100 mt-6 mb-3">Step 1: Redirect to Authorization</h3>
+  <div class="bg-pd-tertiary rounded-xl p-5 font-mono text-sm overflow-x-auto not-prose mb-6">
+    <div class="text-slate-100">
+      GET https://phish.directory/oauth/authorize<br>
+      <span class="pl-4">?client_id=YOUR_CLIENT_ID</span><br>
+      <span class="pl-4">&redirect_uri=https://yourapp.com/callback</span><br>
+      <span class="pl-4">&response_type=code</span><br>
+      <span class="pl-4">&scope=openid+profile+email</span><br>
+      <span class="pl-4">&state=RANDOM_STATE</span>
+    </div>
+  </div>
+
+  <h3 class="text-xl font-semibold text-slate-100 mt-6 mb-3">Step 2: Exchange Code for Token</h3>
+  <div class="bg-pd-tertiary rounded-xl p-5 font-mono text-sm overflow-x-auto not-prose mb-6">
+<pre class="text-slate-100">POST https://phish.directory/oauth/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=authorization_code
+&code=AUTHORIZATION_CODE
+&redirect_uri=https://yourapp.com/callback
+&client_id=YOUR_CLIENT_ID
+&client_secret=YOUR_CLIENT_SECRET</pre>
+  </div>
+
+  <h3 class="text-xl font-semibold text-slate-100 mt-6 mb-3">Token Response</h3>
+  <div class="bg-pd-tertiary rounded-xl p-5 font-mono text-sm overflow-x-auto not-prose mb-6">
+<pre class="text-slate-100">{
+  "access_token": "eyJhbGciOiJSUzI1NiIs...",
+  "token_type": "Bearer",
+  "expires_in": 7200,
+  "refresh_token": "abc123...",
+  "scope": "openid profile email"
+}</pre>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">UserInfo Endpoint</h2>
+  <p class="text-slate-300 mb-4">
+    After obtaining an access token, retrieve user information:
+  </p>
+  <div class="bg-pd-tertiary rounded-xl p-5 font-mono text-sm overflow-x-auto not-prose mb-6">
+    <div class="text-slate-100">
+      curl https://phish.directory/oauth/userinfo \<br>
+      <span class="pl-4">-H "Authorization: Bearer ACCESS_TOKEN"</span>
+    </div>
+  </div>
+
+  <h3 class="text-xl font-semibold text-slate-100 mt-6 mb-3">Response</h3>
+  <div class="bg-pd-tertiary rounded-xl p-5 font-mono text-sm overflow-x-auto not-prose mb-6">
+<pre class="text-slate-100">{
+  "sub": "PDU1a2b3c4d",
+  "email": "user@example.com",
+  "email_verified": true,
+  "name": "John Doe",
+  "given_name": "John",
+  "family_name": "Doe",
+  "preferred_username": "johndoe",
+  "picture": "https://phish.directory/u/PDU1a2b3c4d/avatar"
+}</pre>
+  </div>
+
+  <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 not-prose mb-8">
+    <div class="font-semibold text-amber-400 mb-1">Note</div>
+    <p class="text-sm text-slate-300">
+      OAuth application registration is currently managed by phish.directory administrators.
+      Contact us if you need to integrate with OAuth.
+    </p>
+  </div>
+</div>

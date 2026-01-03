@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_19_235059) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_03_000003) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "fuzzystrmatch"
   enable_extension "pg_catalog.plpgsql"
@@ -674,6 +674,47 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_19_235059) do
     t.index ["name", "interval", "time", "dimensions"], name: "index_rollups_on_name_and_interval_and_time_and_dimensions", unique: true
   end
 
+  create_table "saml_authentications", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "authn_context"
+    t.datetime "created_at", null: false
+    t.text "error_message"
+    t.string "ip_address"
+    t.string "name_id"
+    t.uuid "service_provider_id"
+    t.string "session_index"
+    t.string "status"
+    t.string "user_agent"
+    t.uuid "user_id"
+    t.index ["created_at"], name: "index_saml_authentications_on_created_at"
+    t.index ["service_provider_id"], name: "index_saml_authentications_on_service_provider_id"
+    t.index ["status"], name: "index_saml_authentications_on_status"
+    t.index ["user_id", "created_at"], name: "index_saml_authentications_on_user_id_and_created_at"
+    t.index ["user_id"], name: "index_saml_authentications_on_user_id"
+  end
+
+  create_table "saml_service_providers", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.text "assertion_consumer_service_url", null: false
+    t.jsonb "attribute_statement", default: {}
+    t.string "authn_context_class_ref"
+    t.text "certificate"
+    t.datetime "created_at", null: false
+    t.datetime "discarded_at"
+    t.boolean "enabled", default: true
+    t.boolean "encrypt_assertions", default: false
+    t.string "entity_id", null: false
+    t.text "metadata_url"
+    t.string "name", null: false
+    t.string "name_id_format", default: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"
+    t.uuid "service_id"
+    t.boolean "sign_assertions", default: true
+    t.text "single_logout_service_url"
+    t.datetime "updated_at", null: false
+    t.index ["discarded_at"], name: "index_saml_service_providers_on_discarded_at"
+    t.index ["enabled"], name: "index_saml_service_providers_on_enabled"
+    t.index ["entity_id"], name: "index_saml_service_providers_on_entity_id", unique: true
+    t.index ["service_id"], name: "index_saml_service_providers_on_service_id"
+  end
+
   create_table "scam_classifications", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "classifiable_id", null: false
     t.string "classifiable_type", null: false
@@ -783,6 +824,23 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_19_235059) do
     t.index ["user_id", "active"], name: "index_user_api_keys_on_user_id_and_active"
   end
 
+  create_table "user_service_roles", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "discarded_at"
+    t.datetime "granted_at"
+    t.uuid "granted_by_id"
+    t.enum "role", default: "user", null: false, enum_type: "access_level"
+    t.uuid "service_id", null: false
+    t.datetime "updated_at", null: false
+    t.uuid "user_id", null: false
+    t.index ["discarded_at"], name: "index_user_service_roles_on_discarded_at"
+    t.index ["granted_by_id"], name: "index_user_service_roles_on_granted_by_id"
+    t.index ["role"], name: "index_user_service_roles_on_role"
+    t.index ["service_id"], name: "index_user_service_roles_on_service_id"
+    t.index ["user_id", "service_id"], name: "index_user_service_roles_on_user_id_and_service_id", unique: true, where: "(discarded_at IS NULL)"
+    t.index ["user_id"], name: "index_user_service_roles_on_user_id"
+  end
+
   create_table "user_sessions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "device_info"
@@ -807,6 +865,9 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_19_235059) do
 
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.enum "access_level", default: "user", null: false, enum_type: "access_level"
+    t.datetime "confirmation_sent_at"
+    t.string "confirmation_token"
+    t.datetime "confirmed_at"
     t.datetime "created_at", null: false
     t.datetime "discarded_at"
     t.string "email", null: false
@@ -820,6 +881,10 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_19_235059) do
     t.string "magic_link_token"
     t.datetime "magic_link_token_sent_at"
     t.datetime "magic_link_used_at"
+    t.string "password_digest"
+    t.datetime "password_reset_expires_at"
+    t.datetime "password_reset_sent_at"
+    t.string "password_reset_token"
     t.boolean "pd_dev", default: false, null: false
     t.string "pd_id", null: false
     t.boolean "pretend_is_not_admin", default: false, null: false
@@ -828,11 +893,13 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_19_235059) do
     t.enum "status", default: "active", null: false, enum_type: "status"
     t.datetime "updated_at", null: false
     t.string "username", null: false
+    t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
     t.index ["discarded_at"], name: "index_users_on_discarded_at"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["last_api_activity_at"], name: "index_users_on_last_api_activity_at"
     t.index ["locked_at"], name: "index_users_on_locked_at"
     t.index ["magic_link_token"], name: "index_users_on_magic_link_token", unique: true
+    t.index ["password_reset_token"], name: "index_users_on_password_reset_token", unique: true
     t.index ["pd_id"], name: "index_users_on_pd_id", unique: true
     t.index ["username"], name: "index_users_on_username", unique: true
   end
@@ -901,11 +968,17 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_19_235059) do
   add_foreign_key "report_submissions", "report_abuse_contacts", column: "abuse_contact_id"
   add_foreign_key "report_submissions", "report_cases", column: "case_id"
   add_foreign_key "report_submissions", "report_submissions", column: "depends_on_submission_id"
+  add_foreign_key "saml_authentications", "saml_service_providers", column: "service_provider_id"
+  add_foreign_key "saml_authentications", "users"
+  add_foreign_key "saml_service_providers", "services"
   add_foreign_key "service_key_usages", "service_keys", column: "key_id"
   add_foreign_key "service_key_usages", "users", on_delete: :nullify
   add_foreign_key "service_keys", "services"
   add_foreign_key "service_webhooks", "services"
   add_foreign_key "user_api_keys", "users"
+  add_foreign_key "user_service_roles", "services"
+  add_foreign_key "user_service_roles", "users"
+  add_foreign_key "user_service_roles", "users", column: "granted_by_id"
   add_foreign_key "user_sessions", "users"
   add_foreign_key "user_sessions", "users", column: "impersonated_by_id"
 end

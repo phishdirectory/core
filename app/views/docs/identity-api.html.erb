@@ -1,0 +1,249 @@
+<% content_for :title, "Identity API" %>
+
+<div class="prose prose-invert max-w-none">
+  <h1 class="text-4xl font-bold text-slate-100 mb-4">Identity API</h1>
+  <p class="text-xl text-slate-400 mb-8">
+    Service-to-service user management endpoints for integrated applications.
+  </p>
+
+  <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 not-prose mb-8">
+    <div class="font-semibold text-amber-400 mb-1">Service Authentication Required</div>
+    <p class="text-sm text-slate-300">
+      These endpoints require service-level authentication using an X-Api-Key header.
+      Contact phish.directory administrators to obtain service credentials.
+    </p>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Base URL</h2>
+  <div class="bg-pd-tertiary rounded-xl p-4 font-mono text-sm not-prose mb-6">
+    <span class="text-slate-100">https://phish.directory/api/v1/identity</span>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Authentication</h2>
+  <p class="text-slate-300 mb-4">
+    All Identity API requests must include a service API key:
+  </p>
+  <div class="bg-pd-tertiary rounded-xl p-4 font-mono text-sm not-prose mb-6">
+    <span class="text-slate-400">X-Api-Key:</span> <span class="text-slate-100">your_service_api_key</span>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-12 mb-4">Endpoints</h2>
+
+  <%# GET User %>
+  <div class="bg-pd-secondary rounded-xl overflow-hidden mb-6 not-prose">
+    <div class="px-5 py-3 border-b border-slate-700/50 flex items-center gap-3">
+      <span class="px-2 py-1 bg-cyan-accent/20 text-cyan-accent text-xs font-semibold rounded">GET</span>
+      <code class="text-slate-100">/users/:id</code>
+    </div>
+    <div class="p-5">
+      <p class="text-slate-300 mb-4">Retrieve a user by pd_id or public_id.</p>
+
+      <h4 class="text-sm font-semibold text-slate-100 mb-2">Path Parameters</h4>
+      <div class="overflow-x-auto mb-4">
+        <table class="w-full text-sm">
+          <tr class="border-b border-slate-700/30">
+            <td class="py-2 pr-4 text-slate-100 font-mono">id</td>
+            <td class="py-2 text-slate-400">User's pd_id (PDU...) or public_id (usr_...)</td>
+          </tr>
+        </table>
+      </div>
+
+      <h4 class="text-sm font-semibold text-slate-100 mb-2">Response</h4>
+      <div class="bg-pd-tertiary rounded-lg p-4 font-mono text-sm overflow-x-auto">
+<pre class="text-slate-100">{
+  "id": "usr_4k8xJm2pN9qW",
+  "pd_id": "PDU1a2b3c4d",
+  "email": "user@example.com",
+  "email_verified": true,
+  "first_name": "John",
+  "last_name": "Doe",
+  "username": "johndoe",
+  "access_level": "user",
+  "avatar_url": "https://phish.directory/u/PDU1a2b3c4d/avatar",
+  "created_at": "2024-01-15T10:30:00Z"
+}</pre>
+      </div>
+    </div>
+  </div>
+
+  <%# GET User by Email %>
+  <div class="bg-pd-secondary rounded-xl overflow-hidden mb-6 not-prose">
+    <div class="px-5 py-3 border-b border-slate-700/50 flex items-center gap-3">
+      <span class="px-2 py-1 bg-cyan-accent/20 text-cyan-accent text-xs font-semibold rounded">GET</span>
+      <code class="text-slate-100">/users/by_email</code>
+    </div>
+    <div class="p-5">
+      <p class="text-slate-300 mb-4">Find a user by email address.</p>
+
+      <h4 class="text-sm font-semibold text-slate-100 mb-2">Query Parameters</h4>
+      <div class="overflow-x-auto mb-4">
+        <table class="w-full text-sm">
+          <tr class="border-b border-slate-700/30">
+            <td class="py-2 pr-4 text-slate-100 font-mono">email</td>
+            <td class="py-2 text-slate-400">User's email address</td>
+          </tr>
+        </table>
+      </div>
+
+      <h4 class="text-sm font-semibold text-slate-100 mb-2">Example</h4>
+      <div class="bg-pd-tertiary rounded-lg p-4 font-mono text-sm overflow-x-auto">
+        <span class="text-slate-100">GET /api/v1/identity/users/by_email?email=user@example.com</span>
+      </div>
+    </div>
+  </div>
+
+  <%# POST Create User %>
+  <div class="bg-pd-secondary rounded-xl overflow-hidden mb-6 not-prose">
+    <div class="px-5 py-3 border-b border-slate-700/50 flex items-center gap-3">
+      <span class="px-2 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-semibold rounded">POST</span>
+      <code class="text-slate-100">/users</code>
+    </div>
+    <div class="p-5">
+      <p class="text-slate-300 mb-4">Create a new user account.</p>
+
+      <h4 class="text-sm font-semibold text-slate-100 mb-2">Request Body</h4>
+      <div class="bg-pd-tertiary rounded-lg p-4 font-mono text-sm overflow-x-auto mb-4">
+<pre class="text-slate-100">{
+  "email": "newuser@example.com",
+  "first_name": "Jane",
+  "last_name": "Smith",
+  "username": "janesmith",
+  "password": "SecurePassword123!"
+}</pre>
+      </div>
+
+      <h4 class="text-sm font-semibold text-slate-100 mb-2">Parameters</h4>
+      <div class="overflow-x-auto mb-4">
+        <table class="w-full text-sm">
+          <tr class="border-b border-slate-700/30">
+            <td class="py-2 pr-4 text-slate-100 font-mono">email</td>
+            <td class="py-2 pr-4 text-amber-400 text-xs">required</td>
+            <td class="py-2 text-slate-400">User's email address</td>
+          </tr>
+          <tr class="border-b border-slate-700/30">
+            <td class="py-2 pr-4 text-slate-100 font-mono">first_name</td>
+            <td class="py-2 pr-4 text-slate-500 text-xs">optional</td>
+            <td class="py-2 text-slate-400">User's first name</td>
+          </tr>
+          <tr class="border-b border-slate-700/30">
+            <td class="py-2 pr-4 text-slate-100 font-mono">last_name</td>
+            <td class="py-2 pr-4 text-slate-500 text-xs">optional</td>
+            <td class="py-2 text-slate-400">User's last name</td>
+          </tr>
+          <tr class="border-b border-slate-700/30">
+            <td class="py-2 pr-4 text-slate-100 font-mono">username</td>
+            <td class="py-2 pr-4 text-slate-500 text-xs">optional</td>
+            <td class="py-2 text-slate-400">Unique username</td>
+          </tr>
+          <tr class="border-b border-slate-700/30">
+            <td class="py-2 pr-4 text-slate-100 font-mono">password</td>
+            <td class="py-2 pr-4 text-slate-500 text-xs">optional</td>
+            <td class="py-2 text-slate-400">Password (if not set, user can only use magic links)</td>
+          </tr>
+        </table>
+      </div>
+
+      <h4 class="text-sm font-semibold text-slate-100 mb-2">Response (201 Created)</h4>
+      <div class="bg-pd-tertiary rounded-lg p-4 font-mono text-sm overflow-x-auto">
+<pre class="text-slate-100">{
+  "id": "usr_7x9yKm4pR2sT",
+  "pd_id": "PDU2b3c4d5e",
+  "email": "newuser@example.com",
+  ...
+}</pre>
+      </div>
+    </div>
+  </div>
+
+  <%# PUT Update User %>
+  <div class="bg-pd-secondary rounded-xl overflow-hidden mb-6 not-prose">
+    <div class="px-5 py-3 border-b border-slate-700/50 flex items-center gap-3">
+      <span class="px-2 py-1 bg-amber-500/20 text-amber-400 text-xs font-semibold rounded">PUT</span>
+      <code class="text-slate-100">/users/:id</code>
+    </div>
+    <div class="p-5">
+      <p class="text-slate-300 mb-4">Update an existing user's information.</p>
+
+      <h4 class="text-sm font-semibold text-slate-100 mb-2">Request Body</h4>
+      <div class="bg-pd-tertiary rounded-lg p-4 font-mono text-sm overflow-x-auto mb-4">
+<pre class="text-slate-100">{
+  "first_name": "Jane",
+  "last_name": "Doe",
+  "username": "janedoe"
+}</pre>
+      </div>
+
+      <p class="text-sm text-slate-400 mb-4">Only include fields you want to update.</p>
+    </div>
+  </div>
+
+  <%# POST Authenticate %>
+  <div class="bg-pd-secondary rounded-xl overflow-hidden mb-6 not-prose">
+    <div class="px-5 py-3 border-b border-slate-700/50 flex items-center gap-3">
+      <span class="px-2 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-semibold rounded">POST</span>
+      <code class="text-slate-100">/authenticate</code>
+    </div>
+    <div class="p-5">
+      <p class="text-slate-300 mb-4">Verify a user's credentials (email + password).</p>
+
+      <h4 class="text-sm font-semibold text-slate-100 mb-2">Request Body</h4>
+      <div class="bg-pd-tertiary rounded-lg p-4 font-mono text-sm overflow-x-auto mb-4">
+<pre class="text-slate-100">{
+  "email": "user@example.com",
+  "password": "UserPassword123!"
+}</pre>
+      </div>
+
+      <h4 class="text-sm font-semibold text-slate-100 mb-2">Success Response</h4>
+      <div class="bg-pd-tertiary rounded-lg p-4 font-mono text-sm overflow-x-auto mb-4">
+<pre class="text-slate-100">{
+  "authenticated": true,
+  "user": {
+    "id": "usr_4k8xJm2pN9qW",
+    "pd_id": "PDU1a2b3c4d",
+    "email": "user@example.com",
+    ...
+  }
+}</pre>
+      </div>
+
+      <h4 class="text-sm font-semibold text-slate-100 mb-2">Failure Response (401)</h4>
+      <div class="bg-pd-tertiary rounded-lg p-4 font-mono text-sm overflow-x-auto">
+<pre class="text-slate-100">{
+  "authenticated": false,
+  "error": "Invalid credentials"
+}</pre>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-12 mb-4">Error Responses</h2>
+  <div class="overflow-x-auto not-prose mb-8">
+    <table class="w-full text-left">
+      <thead>
+        <tr class="border-b border-slate-700/50">
+          <th class="py-3 pr-4 text-sm font-semibold text-slate-300">Status</th>
+          <th class="py-3 text-sm font-semibold text-slate-300">Description</th>
+        </tr>
+      </thead>
+      <tbody class="text-sm">
+        <tr class="border-b border-slate-700/30">
+          <td class="py-3 pr-4 text-slate-100">401 Unauthorized</td>
+          <td class="py-3 text-slate-400">Invalid or missing service API key</td>
+        </tr>
+        <tr class="border-b border-slate-700/30">
+          <td class="py-3 pr-4 text-slate-100">403 Forbidden</td>
+          <td class="py-3 text-slate-400">Identity API is not enabled</td>
+        </tr>
+        <tr class="border-b border-slate-700/30">
+          <td class="py-3 pr-4 text-slate-100">404 Not Found</td>
+          <td class="py-3 text-slate-400">User not found</td>
+        </tr>
+        <tr class="border-b border-slate-700/30">
+          <td class="py-3 pr-4 text-slate-100">422 Unprocessable Entity</td>
+          <td class="py-3 text-slate-400">Validation error (details in response body)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

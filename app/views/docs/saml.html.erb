@@ -1,0 +1,213 @@
+<% content_for :title, "SAML 2.0 SSO" %>
+
+<div class="prose prose-invert max-w-none">
+  <h1 class="text-4xl font-bold text-slate-100 mb-4">SAML 2.0 SSO</h1>
+  <p class="text-xl text-slate-400 mb-8">
+    Configure your application to use phish.directory as a SAML Identity Provider.
+  </p>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Overview</h2>
+  <p class="text-slate-300 mb-4">
+    phish.directory Core acts as a SAML 2.0 Identity Provider (IdP). This allows integrated applications
+    (Service Providers) to authenticate users through Core using SAML assertions.
+  </p>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">IdP Metadata</h2>
+  <p class="text-slate-300 mb-4">
+    Download or reference our IdP metadata for your Service Provider configuration:
+  </p>
+  <div class="bg-pd-tertiary rounded-xl p-4 font-mono text-sm not-prose mb-6">
+    <span class="text-slate-400">Metadata URL:</span> <span class="text-slate-100">https://phish.directory/saml/metadata</span>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">IdP Configuration Details</h2>
+  <div class="overflow-x-auto not-prose mb-8">
+    <table class="w-full text-left">
+      <thead>
+        <tr class="border-b border-slate-700/50">
+          <th class="py-3 pr-4 text-sm font-semibold text-slate-300">Setting</th>
+          <th class="py-3 text-sm font-semibold text-slate-300">Value</th>
+        </tr>
+      </thead>
+      <tbody class="text-sm">
+        <tr class="border-b border-slate-700/30">
+          <td class="py-3 pr-4 text-slate-100">Entity ID / Issuer</td>
+          <td class="py-3 text-slate-400 font-mono">https://phish.directory/saml/metadata</td>
+        </tr>
+        <tr class="border-b border-slate-700/30">
+          <td class="py-3 pr-4 text-slate-100">SSO URL (Redirect)</td>
+          <td class="py-3 text-slate-400 font-mono">https://phish.directory/saml/auth</td>
+        </tr>
+        <tr class="border-b border-slate-700/30">
+          <td class="py-3 pr-4 text-slate-100">SSO URL (POST)</td>
+          <td class="py-3 text-slate-400 font-mono">https://phish.directory/saml/auth</td>
+        </tr>
+        <tr class="border-b border-slate-700/30">
+          <td class="py-3 pr-4 text-slate-100">SLO URL</td>
+          <td class="py-3 text-slate-400 font-mono">https://phish.directory/saml/logout</td>
+        </tr>
+        <tr class="border-b border-slate-700/30">
+          <td class="py-3 pr-4 text-slate-100">Signing Algorithm</td>
+          <td class="py-3 text-slate-400">SHA-256</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Name ID Formats</h2>
+  <p class="text-slate-300 mb-4">
+    We support the following Name ID formats:
+  </p>
+  <div class="overflow-x-auto not-prose mb-8">
+    <table class="w-full text-left">
+      <thead>
+        <tr class="border-b border-slate-700/50">
+          <th class="py-3 pr-4 text-sm font-semibold text-slate-300">Format</th>
+          <th class="py-3 text-sm font-semibold text-slate-300">Value</th>
+        </tr>
+      </thead>
+      <tbody class="text-sm">
+        <tr class="border-b border-slate-700/30">
+          <td class="py-3 pr-4 text-slate-100">Email Address (default)</td>
+          <td class="py-3 text-slate-400">User's email (e.g., user@example.com)</td>
+        </tr>
+        <tr class="border-b border-slate-700/30">
+          <td class="py-3 pr-4 text-slate-100">Persistent</td>
+          <td class="py-3 text-slate-400">User's pd_id (e.g., PDU1a2b3c4d)</td>
+        </tr>
+        <tr class="border-b border-slate-700/30">
+          <td class="py-3 pr-4 text-slate-100">Transient</td>
+          <td class="py-3 text-slate-400">Random UUID per session</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">SAML Attributes</h2>
+  <p class="text-slate-300 mb-4">
+    The following attributes are included in SAML assertions:
+  </p>
+  <div class="overflow-x-auto not-prose mb-8">
+    <table class="w-full text-left">
+      <thead>
+        <tr class="border-b border-slate-700/50">
+          <th class="py-3 pr-4 text-sm font-semibold text-slate-300">Attribute</th>
+          <th class="py-3 text-sm font-semibold text-slate-300">Description</th>
+        </tr>
+      </thead>
+      <tbody class="text-sm">
+        <tr class="border-b border-slate-700/30">
+          <td class="py-3 pr-4 text-slate-100 font-mono">email</td>
+          <td class="py-3 text-slate-400">User's email address</td>
+        </tr>
+        <tr class="border-b border-slate-700/30">
+          <td class="py-3 pr-4 text-slate-100 font-mono">pd_id</td>
+          <td class="py-3 text-slate-400">User's phish.directory ID</td>
+        </tr>
+        <tr class="border-b border-slate-700/30">
+          <td class="py-3 pr-4 text-slate-100 font-mono">name</td>
+          <td class="py-3 text-slate-400">User's full name</td>
+        </tr>
+        <tr class="border-b border-slate-700/30">
+          <td class="py-3 pr-4 text-slate-100 font-mono">first_name</td>
+          <td class="py-3 text-slate-400">User's first name</td>
+        </tr>
+        <tr class="border-b border-slate-700/30">
+          <td class="py-3 pr-4 text-slate-100 font-mono">last_name</td>
+          <td class="py-3 text-slate-400">User's last name</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Setting Up Your Application</h2>
+  <p class="text-slate-300 mb-4">
+    To configure your application as a SAML Service Provider:
+  </p>
+  <ol class="text-slate-300 space-y-3 mb-6">
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent font-semibold">1.</span>
+      <span>Contact phish.directory administrators to register your Service Provider</span>
+    </li>
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent font-semibold">2.</span>
+      <span>Provide your SP metadata or the following information:
+        <ul class="mt-2 ml-4 space-y-1 text-slate-400">
+          <li>• Entity ID (unique identifier for your SP)</li>
+          <li>• Assertion Consumer Service (ACS) URL</li>
+          <li>• Single Logout Service URL (optional)</li>
+          <li>• X.509 certificate (if encryption is needed)</li>
+        </ul>
+      </span>
+    </li>
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent font-semibold">3.</span>
+      <span>Configure your application with our IdP metadata URL</span>
+    </li>
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent font-semibold">4.</span>
+      <span>Test the SSO flow in your environment</span>
+    </li>
+  </ol>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Authentication Flow</h2>
+  <div class="bg-pd-secondary rounded-xl p-6 not-prose mb-8">
+    <ol class="space-y-4">
+      <li class="flex items-start gap-4">
+        <span class="flex-shrink-0 w-6 h-6 bg-cyan-accent text-pd-primary rounded-full flex items-center justify-center text-sm font-semibold">1</span>
+        <div>
+          <div class="text-slate-100 font-medium">User initiates login</div>
+          <p class="text-sm text-slate-400 mt-1">User clicks "Sign in with phish.directory" on your application</p>
+        </div>
+      </li>
+      <li class="flex items-start gap-4">
+        <span class="flex-shrink-0 w-6 h-6 bg-cyan-accent text-pd-primary rounded-full flex items-center justify-center text-sm font-semibold">2</span>
+        <div>
+          <div class="text-slate-100 font-medium">Redirect to IdP</div>
+          <p class="text-sm text-slate-400 mt-1">Your SP sends an AuthnRequest to phish.directory</p>
+        </div>
+      </li>
+      <li class="flex items-start gap-4">
+        <span class="flex-shrink-0 w-6 h-6 bg-cyan-accent text-pd-primary rounded-full flex items-center justify-center text-sm font-semibold">3</span>
+        <div>
+          <div class="text-slate-100 font-medium">User authenticates</div>
+          <p class="text-sm text-slate-400 mt-1">User signs in to phish.directory (if not already logged in)</p>
+        </div>
+      </li>
+      <li class="flex items-start gap-4">
+        <span class="flex-shrink-0 w-6 h-6 bg-cyan-accent text-pd-primary rounded-full flex items-center justify-center text-sm font-semibold">4</span>
+        <div>
+          <div class="text-slate-100 font-medium">Assertion delivered</div>
+          <p class="text-sm text-slate-400 mt-1">IdP posts signed SAML assertion to your ACS URL</p>
+        </div>
+      </li>
+      <li class="flex items-start gap-4">
+        <span class="flex-shrink-0 w-6 h-6 bg-cyan-accent text-pd-primary rounded-full flex items-center justify-center text-sm font-semibold">5</span>
+        <div>
+          <div class="text-slate-100 font-medium">Session created</div>
+          <p class="text-sm text-slate-400 mt-1">Your SP validates the assertion and creates a local session</p>
+        </div>
+      </li>
+    </ol>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Security Considerations</h2>
+  <ul class="text-slate-300 space-y-2 mb-6">
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">✓</span>
+      <span>All assertions are digitally signed with SHA-256</span>
+    </li>
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">✓</span>
+      <span>Optional assertion encryption for sensitive environments</span>
+    </li>
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">✓</span>
+      <span>Assertions expire after 1 hour</span>
+    </li>
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">✓</span>
+      <span>Authentication events are logged for audit purposes</span>
+    </li>
+  </ul>
+</div>

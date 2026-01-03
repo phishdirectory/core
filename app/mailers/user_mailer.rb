@@ -48,4 +48,27 @@ class UserMailer < ApplicationMailer
       subject: env_subject("New API Key Created")
     )
   end
+
+  def password_reset
+    @user = params[:user]
+    @reset_url = reset_password_url(token: @user.password_reset_token)
+    @expires_at = @user.password_reset_expires_at
+
+    mail(
+      to: email_address_with_name(@user.email, @user.full_name),
+      from: email_address_with_name("security@transactional.phish.directory", "phish.directory"),
+      subject: env_subject("Reset your password - phish.directory")
+    )
+  end
+
+  def email_confirmation
+    @user = params[:user]
+    @confirmation_url = confirm_email_url(token: @user.confirmation_token)
+
+    mail(
+      to: email_address_with_name(@user.email, @user.full_name),
+      from: email_address_with_name("verify@transactional.phish.directory", "phish.directory"),
+      subject: env_subject("Confirm your email - phish.directory")
+    )
+  end
 end

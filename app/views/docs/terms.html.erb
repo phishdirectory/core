@@ -1,0 +1,147 @@
+<% content_for :title, "Terms of Service" %>
+
+<div class="prose prose-invert max-w-none">
+  <h1 class="text-4xl font-bold text-slate-100 mb-4">Terms of Service</h1>
+  <p class="text-xl text-slate-400 mb-8">
+    Last updated: January 2026
+  </p>
+
+  <p class="text-slate-300 mb-6">
+    These Terms of Service ("Terms") govern your access to and use of phish.directory's
+    API and services ("Services"). By accessing or using our Services, you agree to be bound by these Terms.
+  </p>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-10 mb-4">1. Acceptance of Terms</h2>
+  <p class="text-slate-300 mb-4">
+    By creating an account or using the phish.directory API, you acknowledge that you have read,
+    understood, and agree to be bound by these Terms. If you are using the Services on behalf of
+    an organization, you represent that you have the authority to bind that organization to these Terms.
+  </p>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-10 mb-4">2. Description of Services</h2>
+  <p class="text-slate-300 mb-4">
+    phish.directory provides a phishing detection API that aggregates threat intelligence from
+    multiple sources to help identify malicious domains, URLs, phone numbers, and email addresses.
+    Our Services include:
+  </p>
+  <ul class="list-disc list-inside text-slate-300 mb-4 space-y-2">
+    <li>Real-time domain and URL checking</li>
+    <li>Phone number and email verification</li>
+    <li>Threat intelligence aggregation</li>
+    <li>Webhook notifications</li>
+    <li>API access for integration into your applications</li>
+  </ul>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-10 mb-4">3. Account Registration</h2>
+  <p class="text-slate-300 mb-4">
+    To use certain features of our Services, you must create an account. You agree to:
+  </p>
+  <ul class="list-disc list-inside text-slate-300 mb-4 space-y-2">
+    <li>Provide accurate and complete registration information</li>
+    <li>Maintain the security of your account credentials and API keys</li>
+    <li>Promptly notify us of any unauthorized access to your account</li>
+    <li>Accept responsibility for all activities that occur under your account</li>
+  </ul>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-10 mb-4">4. Acceptable Use</h2>
+  <p class="text-slate-300 mb-4">
+    You agree to use our Services only for lawful purposes. You shall not:
+  </p>
+  <ul class="list-disc list-inside text-slate-300 mb-4 space-y-2">
+    <li>Use the Services to facilitate phishing, fraud, or other malicious activities</li>
+    <li>Attempt to circumvent rate limits or other technical restrictions</li>
+    <li>Reverse engineer, decompile, or attempt to extract source code from our Services</li>
+    <li>Share API keys or allow unauthorized third parties to access your account</li>
+    <li>Use the Services in a way that could damage, disable, or impair our infrastructure</li>
+    <li>Resell or redistribute our Services without written authorization</li>
+  </ul>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-10 mb-4">5. API Usage and Rate Limits</h2>
+  <p class="text-slate-300 mb-4">
+    Our API is subject to rate limits as documented in our
+    <%= link_to "Rate Limits documentation", docs_page_path(page: 'rate-limits'), class: "text-cyan-accent hover:underline" %>.
+    We reserve the right to throttle or suspend access to accounts that exceed these limits or
+    engage in abusive behavior.
+  </p>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-10 mb-4">6. Data and Privacy</h2>
+  <p class="text-slate-300 mb-4">
+    We collect and process data as described in our Privacy Policy. By using our Services, you
+    acknowledge that:
+  </p>
+  <ul class="list-disc list-inside text-slate-300 mb-4 space-y-2">
+    <li>Queries you submit may be logged for service improvement and abuse prevention</li>
+    <li>We may share aggregated, anonymized data with third parties</li>
+    <li>Threat intelligence data is sourced from multiple providers with their own terms</li>
+  </ul>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-10 mb-4">7. Intellectual Property & License</h2>
+  <p class="text-slate-300 mb-4">
+    The phish.directory software is released under the
+    <strong class="text-slate-100">O'Saasy License</strong>, which permits use, modification,
+    and distribution with the following key conditions:
+  </p>
+  <ul class="list-disc list-inside text-slate-300 mb-4 space-y-2">
+    <li>The copyright notice and license must be included in all copies</li>
+    <li>You may not use the software to directly compete with phish.directory by offering it as a hosted SaaS product</li>
+  </ul>
+  <p class="text-slate-300 mb-4">
+    The full license text is available in our
+    <a href="https://github.com/phishdirectory/core/blob/main/LICENSE.md" class="text-cyan-accent hover:underline" target="_blank" rel="noopener">GitHub repository</a>.
+  </p>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-10 mb-4">8. Disclaimer of Warranties</h2>
+  <div class="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 mb-4">
+    <p class="text-slate-300">
+      <strong class="text-amber-400">THE SERVICES ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND.</strong>
+      We do not guarantee that our threat detection is complete or error-free. False positives
+      and false negatives may occur. You should not rely solely on our Services for security decisions.
+    </p>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-10 mb-4">9. Limitation of Liability</h2>
+  <p class="text-slate-300 mb-4">
+    To the maximum extent permitted by law, phish.directory shall not be liable for any
+    indirect, incidental, special, consequential, or punitive damages, including but not
+    limited to loss of profits, data, or business opportunities, arising from your use of
+    or inability to use the Services.
+  </p>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-10 mb-4">10. Indemnification</h2>
+  <p class="text-slate-300 mb-4">
+    You agree to indemnify and hold harmless phish.directory, its officers, directors,
+    employees, and agents from any claims, damages, losses, or expenses arising from your
+    use of the Services or violation of these Terms.
+  </p>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-10 mb-4">11. Termination</h2>
+  <p class="text-slate-300 mb-4">
+    We may suspend or terminate your access to the Services at any time, with or without cause,
+    and with or without notice. Upon termination, your right to use the Services will immediately
+    cease. You may also terminate your account at any time by contacting us.
+  </p>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-10 mb-4">12. Changes to Terms</h2>
+  <p class="text-slate-300 mb-4">
+    We reserve the right to modify these Terms at any time. We will notify users of material
+    changes via email or through the Services. Your continued use of the Services after such
+    modifications constitutes acceptance of the updated Terms.
+  </p>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-10 mb-4">13. Governing Law</h2>
+  <p class="text-slate-300 mb-4">
+    These Terms shall be governed by and construed in accordance with the laws of the
+    United States, without regard to its conflict of law provisions.
+  </p>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-10 mb-4">14. Contact</h2>
+  <p class="text-slate-300 mb-4">
+    If you have any questions about these Terms, please contact us at:
+  </p>
+  <div class="bg-pd-tertiary rounded-xl p-4 not-prose mb-6">
+    <p class="text-slate-100">
+      <strong>Email:</strong>
+      <a href="mailto:legal@phish.directory" class="text-cyan-accent hover:underline">legal@phish.directory</a>
+    </p>
+  </div>
+</div>

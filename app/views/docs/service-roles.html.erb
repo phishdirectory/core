@@ -1,0 +1,163 @@
+<% content_for :title, "Service Roles" %>
+
+<div class="prose prose-invert max-w-none">
+  <h1 class="text-4xl font-bold text-slate-100 mb-4">Service Roles</h1>
+  <p class="text-xl text-slate-400 mb-8">
+    Fine-grained access control with per-service role assignments.
+  </p>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Overview</h2>
+  <p class="text-slate-300 mb-4">
+    phish.directory uses a flexible role system where users can have different access levels for different services.
+    This allows precise control over what each user can do in each integrated application.
+  </p>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Role Hierarchy</h2>
+  <p class="text-slate-300 mb-4">
+    Roles are hierarchical — higher roles include all permissions of lower roles:
+  </p>
+
+  <div class="not-prose mb-8">
+    <div class="space-y-3">
+      <div class="bg-pd-secondary rounded-xl p-5 border-l-4 border-purple-500">
+        <div class="flex items-center gap-3 mb-2">
+          <span class="px-2 py-1 bg-purple-500/20 text-purple-400 text-xs font-semibold rounded">owner</span>
+          <span class="text-slate-100 font-semibold">Owner</span>
+        </div>
+        <p class="text-sm text-slate-400">Full control over the service, including billing and deletion. Can manage all other roles.</p>
+      </div>
+
+      <div class="bg-pd-secondary rounded-xl p-5 border-l-4 border-red-500">
+        <div class="flex items-center gap-3 mb-2">
+          <span class="px-2 py-1 bg-red-500/20 text-red-400 text-xs font-semibold rounded">superadmin</span>
+          <span class="text-slate-100 font-semibold">Super Admin</span>
+        </div>
+        <p class="text-sm text-slate-400">Full administrative access. Can manage admins and all settings except billing.</p>
+      </div>
+
+      <div class="bg-pd-secondary rounded-xl p-5 border-l-4 border-amber-500">
+        <div class="flex items-center gap-3 mb-2">
+          <span class="px-2 py-1 bg-amber-500/20 text-amber-400 text-xs font-semibold rounded">admin</span>
+          <span class="text-slate-100 font-semibold">Admin</span>
+        </div>
+        <p class="text-sm text-slate-400">Can manage users and content. Cannot promote users to admin or higher.</p>
+      </div>
+
+      <div class="bg-pd-secondary rounded-xl p-5 border-l-4 border-cyan-accent">
+        <div class="flex items-center gap-3 mb-2">
+          <span class="px-2 py-1 bg-cyan-accent/20 text-cyan-accent text-xs font-semibold rounded">trusted</span>
+          <span class="text-slate-100 font-semibold">Trusted</span>
+        </div>
+        <p class="text-sm text-slate-400">Elevated user with additional permissions. Can access trusted-only features.</p>
+      </div>
+
+      <div class="bg-pd-secondary rounded-xl p-5 border-l-4 border-slate-500">
+        <div class="flex items-center gap-3 mb-2">
+          <span class="px-2 py-1 bg-slate-500/20 text-slate-400 text-xs font-semibold rounded">user</span>
+          <span class="text-slate-100 font-semibold">User</span>
+        </div>
+        <p class="text-sm text-slate-400">Standard user access. Default role for new users.</p>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">How Roles Work</h2>
+
+  <h3 class="text-xl font-semibold text-slate-100 mt-6 mb-3">Global vs Service Roles</h3>
+  <p class="text-slate-300 mb-4">
+    Each user has two types of roles:
+  </p>
+  <ul class="text-slate-300 space-y-2 mb-6">
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">•</span>
+      <span><strong class="text-slate-100">Global access level</strong> — The user's default role across all services</span>
+    </li>
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">•</span>
+      <span><strong class="text-slate-100">Per-service roles</strong> — Override roles for specific services</span>
+    </li>
+  </ul>
+
+  <h3 class="text-xl font-semibold text-slate-100 mt-6 mb-3">Role Resolution</h3>
+  <p class="text-slate-300 mb-4">
+    When checking a user's role for a service:
+  </p>
+  <ol class="text-slate-300 space-y-2 mb-6">
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent font-semibold">1.</span>
+      <span>Check for a service-specific role assignment</span>
+    </li>
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent font-semibold">2.</span>
+      <span>If none exists, fall back to the user's global access level</span>
+    </li>
+  </ol>
+
+  <div class="bg-pd-tertiary rounded-xl p-5 font-mono text-sm overflow-x-auto not-prose mb-8">
+<pre class="text-slate-100"><span class="text-slate-400"># Example: User has global "user" role but "admin" for Service A</span>
+
+user.access_level           <span class="text-slate-400"># => "user"</span>
+user.role_for_service(a)    <span class="text-slate-400"># => "admin" (service-specific)</span>
+user.role_for_service(b)    <span class="text-slate-400"># => "user"  (falls back to global)</span></pre>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Role Checks in Code</h2>
+  <p class="text-slate-300 mb-4">
+    Services can check roles using the User model methods:
+  </p>
+
+  <div class="bg-pd-tertiary rounded-xl p-5 font-mono text-sm overflow-x-auto not-prose mb-8">
+<pre class="text-slate-100"><span class="text-slate-400"># Check if user has admin access for a service</span>
+user.admin_for_service?(service)
+
+<span class="text-slate-400"># Get the user's role for a service</span>
+user.role_for_service(service)
+
+<span class="text-slate-400"># Check if user has at least "trusted" level</span>
+role = user.role_for_service(service)
+%w[trusted admin superadmin owner].include?(role)</pre>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">SAML Role Attributes</h2>
+  <p class="text-slate-300 mb-4">
+    When authenticating via SAML, role information can be included in the assertion:
+  </p>
+  <div class="overflow-x-auto not-prose mb-8">
+    <table class="w-full text-left">
+      <thead>
+        <tr class="border-b border-slate-700/50">
+          <th class="py-3 pr-4 text-sm font-semibold text-slate-300">Attribute</th>
+          <th class="py-3 text-sm font-semibold text-slate-300">Value</th>
+        </tr>
+      </thead>
+      <tbody class="text-sm">
+        <tr class="border-b border-slate-700/30">
+          <td class="py-3 pr-4 text-slate-100 font-mono">access_level</td>
+          <td class="py-3 text-slate-400">User's global access level</td>
+        </tr>
+        <tr class="border-b border-slate-700/30">
+          <td class="py-3 pr-4 text-slate-100 font-mono">service_role</td>
+          <td class="py-3 text-slate-400">Role for the specific SAML SP (if configured)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Managing Roles</h2>
+  <p class="text-slate-300 mb-4">
+    Service roles are managed by phish.directory administrators through:
+  </p>
+  <ul class="text-slate-300 space-y-2 mb-6">
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">•</span>
+      <span>Admin dashboard (UI)</span>
+    </li>
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">•</span>
+      <span>Identity API (programmatic)</span>
+    </li>
+  </ul>
+  <p class="text-slate-300 mb-4">
+    Contact an administrator to request role changes for your service.
+  </p>
+</div>

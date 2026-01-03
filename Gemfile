@@ -35,6 +35,11 @@ gem "blind_index"                   # Searchable encrypted fields
 gem "rack-attack"                   # Rate limiting
 gem "rack-cors"                     # CORS handling
 gem "geocoder"                      # IP geolocation for sessions
+gem "bcrypt"                        # Password hashing (has_secure_password)
+
+# SAML 2.0 Identity Provider
+gem "ruby-saml", "~> 1.17"          # SAML core library
+gem "saml_idp", "~> 0.16"           # SAML IdP functionality
 
 # ============================================
 # Database & Models

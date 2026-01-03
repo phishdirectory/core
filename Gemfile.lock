@@ -101,6 +101,7 @@ GEM
       rouge
       turbo-rails
     base64 (0.3.0)
+    bcrypt (3.1.21)
     benchmark (0.5.0)
     bigdecimal (4.0.1)
     blazer (3.3.0)
@@ -444,10 +445,19 @@ GEM
       rubocop-performance (>= 1.24)
       rubocop-rails (>= 2.30)
     ruby-progressbar (1.13.0)
+    ruby-saml (1.18.1)
+      nokogiri (>= 1.13.10)
+      rexml
     ruby-vips (2.3.0)
       ffi (~> 1.12)
       logger
     safely_block (0.5.0)
+    saml_idp (0.16.0)
+      activesupport (>= 5.2)
+      builder (>= 3.0)
+      nokogiri (>= 1.6.2)
+      rexml
+      xmlenc (>= 0.7.1)
     sanitize (7.0.0)
       crass (~> 1.0.2)
       nokogiri (>= 1.16.8)
@@ -534,6 +544,13 @@ GEM
       activesupport
       ostruct
     wkhtmltopdf-binary (0.12.6.10)
+    xmlenc (0.8.0)
+      activemodel (>= 3.0.0)
+      activesupport (>= 3.0.0)
+      nokogiri (>= 1.6.0, < 2.0.0)
+      xmlmapper (>= 0.7.3)
+    xmlmapper (0.8.1)
+      nokogiri (~> 1.11)
     zeitwerk (2.7.3)
 
 PLATFORMS
@@ -554,6 +571,7 @@ DEPENDENCIES
   ahoy_matey
   annotaterb
   audits1984
+  bcrypt
   blazer
   blind_index
   bootsnap
@@ -600,6 +618,8 @@ DEPENDENCIES
   rswag-api
   rswag-ui
   rubocop-rails-omakase
+  ruby-saml (~> 1.17)
+  saml_idp (~> 0.16)
   solid_cable
   solid_cache
   solid_queue

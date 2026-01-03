@@ -7,7 +7,7 @@
     <div class="absolute inset-0 bg-gradient-to-b from-surface-0/50 via-surface-0/60 to-surface-0"></div>
   </div>
 
-  <div class="relative z-10 w-full max-w-sm">
+  <div class="relative z-10 w-full max-w-sm" id="login-container">
     <%# Flash messages %>
     <% if flash[:notice] %>
       <div class="mb-4 bg-success/10 text-success px-4 py-3 rounded-lg text-sm font-medium flex items-center gap-2">
@@ -34,27 +34,67 @@
 
     <%# Card %>
     <div class="bg-surface-100 rounded-lg p-6">
-      <%# Info box %>
-      <div class="bg-accent/5 rounded-md p-3 mb-5">
-        <p class="text-xs text-surface-600 leading-relaxed">
-          <span class="font-medium text-accent">Passwordless login</span> - We'll send a secure link to your email.
-        </p>
+      <%# Toggle buttons %>
+      <div class="flex rounded-md bg-surface-200 p-1 mb-5">
+        <button type="button" id="magic-btn" onclick="showMagicForm()"
+          class="flex-1 py-2 text-xs font-medium rounded transition-colors bg-surface-0 text-surface-900 shadow-sm">
+          Magic Link
+        </button>
+        <button type="button" id="password-btn" onclick="showPasswordForm()"
+          class="flex-1 py-2 text-xs font-medium rounded transition-colors text-surface-500 hover:text-surface-700">
+          Password
+        </button>
       </div>
 
-      <%# Form %>
-      <%= form_with url: login_path, method: :post do |f| %>
-        <div class="mb-4">
-          <label for="email" class="block text-xs font-medium text-surface-600 mb-1.5">Email address</label>
-          <%= email_field_tag :email, params[:email],
-            class: "w-full px-3 py-2.5 bg-surface-200 border border-surface-300/50 rounded-md text-surface-900 placeholder-surface-500 text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-colors",
-            placeholder: "you@example.com",
-            autofocus: true,
-            required: true %>
+      <%# Magic Link Form %>
+      <div id="magic-form">
+        <div class="bg-accent/5 rounded-md p-3 mb-5">
+          <p class="text-xs text-surface-600 leading-relaxed">
+            <span class="font-medium text-accent">Passwordless login</span> - We'll send a secure link to your email.
+          </p>
         </div>
 
-        <%= submit_tag "Send magic link",
-          class: "w-full py-2.5 bg-surface-900 text-surface-0 font-medium text-sm rounded-md hover:bg-surface-800 transition-colors cursor-pointer" %>
-      <% end %>
+        <%= form_with url: login_path, method: :post do |f| %>
+          <div class="mb-4">
+            <label for="email" class="block text-xs font-medium text-surface-600 mb-1.5">Email address</label>
+            <%= email_field_tag :email, params[:email],
+              class: "w-full px-3 py-2.5 bg-surface-200 border border-surface-300/50 rounded-md text-surface-900 placeholder-surface-500 text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-colors",
+              placeholder: "you@example.com",
+              autofocus: true,
+              required: true %>
+          </div>
+
+          <%= submit_tag "Send magic link",
+            class: "w-full py-2.5 bg-surface-900 text-surface-0 font-medium text-sm rounded-md hover:bg-surface-800 transition-colors cursor-pointer" %>
+        <% end %>
+      </div>
+
+      <%# Password Form %>
+      <div id="password-form" class="hidden">
+        <%= form_with url: password_login_path, method: :post do |f| %>
+          <div class="mb-4">
+            <label for="email" class="block text-xs font-medium text-surface-600 mb-1.5">Email address</label>
+            <%= email_field_tag :email, params[:email],
+              class: "w-full px-3 py-2.5 bg-surface-200 border border-surface-300/50 rounded-md text-surface-900 placeholder-surface-500 text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-colors",
+              placeholder: "you@example.com",
+              required: true %>
+          </div>
+
+          <div class="mb-4">
+            <div class="flex items-center justify-between mb-1.5">
+              <label for="password" class="block text-xs font-medium text-surface-600">Password</label>
+              <%= link_to "Forgot password?", forgot_password_path, class: "text-xs text-accent hover:text-accent-dark transition-colors" %>
+            </div>
+            <%= password_field_tag :password, nil,
+              class: "w-full px-3 py-2.5 bg-surface-200 border border-surface-300/50 rounded-md text-surface-900 placeholder-surface-500 text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-colors",
+              placeholder: "••••••••",
+              required: true %>
+          </div>
+
+          <%= submit_tag "Sign in",
+            class: "w-full py-2.5 bg-surface-900 text-surface-0 font-medium text-sm rounded-md hover:bg-surface-800 transition-colors cursor-pointer" %>
+        <% end %>
+      </div>
     </div>
 
     <%# Footer %>
@@ -64,3 +104,19 @@
     </p>
   </div>
 </div>
+
+<script>
+  function showMagicForm() {
+    document.getElementById('magic-form').classList.remove('hidden');
+    document.getElementById('password-form').classList.add('hidden');
+    document.getElementById('magic-btn').className = 'flex-1 py-2 text-xs font-medium rounded transition-colors bg-surface-0 text-surface-900 shadow-sm';
+    document.getElementById('password-btn').className = 'flex-1 py-2 text-xs font-medium rounded transition-colors text-surface-500 hover:text-surface-700';
+  }
+
+  function showPasswordForm() {
+    document.getElementById('magic-form').classList.add('hidden');
+    document.getElementById('password-form').classList.remove('hidden');
+    document.getElementById('password-btn').className = 'flex-1 py-2 text-xs font-medium rounded transition-colors bg-surface-0 text-surface-900 shadow-sm';
+    document.getElementById('magic-btn').className = 'flex-1 py-2 text-xs font-medium rounded transition-colors text-surface-500 hover:text-surface-700';
+  }
+</script>

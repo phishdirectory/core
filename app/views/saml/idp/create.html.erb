@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Redirecting...</title>
+</head>
+<body onload="document.forms[0].submit();">
+  <noscript>
+    <p>JavaScript is required to complete this authentication. Please enable JavaScript and try again.</p>
+  </noscript>
+
+  <form method="post" action="<%= @service_provider.assertion_consumer_service_url %>">
+    <input type="hidden" name="SAMLResponse" value="<%= Base64.strict_encode64(@saml_response) %>">
+    <% if params[:RelayState].present? %>
+      <input type="hidden" name="RelayState" value="<%= params[:RelayState] %>">
+    <% end %>
+
+    <noscript>
+      <p>Click the button below to continue:</p>
+      <input type="submit" value="Continue">
+    </noscript>
+  </form>
+</body>
+</html>

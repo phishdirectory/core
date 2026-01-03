@@ -1,0 +1,143 @@
+<% content_for :title, "Identity & Authentication" %>
+
+<div class="prose prose-invert max-w-none">
+  <h1 class="text-4xl font-bold text-slate-100 mb-4">Identity & Authentication</h1>
+  <p class="text-xl text-slate-400 mb-8">
+    phish.directory Core provides centralized identity management for all phish.directory services.
+  </p>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12 not-prose">
+    <%= link_to docs_page_path(page: 'oauth'), class: "bg-pd-secondary border border-slate-700/20 rounded-2xl p-6 hover:border-cyan-accent/30 transition-all group" do %>
+      <div class="text-2xl mb-3">🔐</div>
+      <h3 class="text-lg font-semibold text-slate-100 mb-2 group-hover:text-cyan-accent transition-colors">OAuth 2.0</h3>
+      <p class="text-sm text-slate-400">Integrate with phish.directory using OAuth 2.0 authorization flows.</p>
+    <% end %>
+
+    <%= link_to docs_page_path(page: 'saml'), class: "bg-pd-secondary border border-slate-700/20 rounded-2xl p-6 hover:border-cyan-accent/30 transition-all group" do %>
+      <div class="text-2xl mb-3">🏢</div>
+      <h3 class="text-lg font-semibold text-slate-100 mb-2 group-hover:text-cyan-accent transition-colors">SAML 2.0 SSO</h3>
+      <p class="text-sm text-slate-400">Configure SAML SSO for enterprise applications.</p>
+    <% end %>
+
+    <%= link_to docs_page_path(page: 'identity-api'), class: "bg-pd-secondary border border-slate-700/20 rounded-2xl p-6 hover:border-cyan-accent/30 transition-all group" do %>
+      <div class="text-2xl mb-3">🔌</div>
+      <h3 class="text-lg font-semibold text-slate-100 mb-2 group-hover:text-cyan-accent transition-colors">Identity API</h3>
+      <p class="text-sm text-slate-400">Service-to-service user management endpoints.</p>
+    <% end %>
+
+    <%= link_to docs_page_path(page: 'service-roles'), class: "bg-pd-secondary border border-slate-700/20 rounded-2xl p-6 hover:border-cyan-accent/30 transition-all group" do %>
+      <div class="text-2xl mb-3">👥</div>
+      <h3 class="text-lg font-semibold text-slate-100 mb-2 group-hover:text-cyan-accent transition-colors">Service Roles</h3>
+      <p class="text-sm text-slate-400">Per-service role assignments for fine-grained access control.</p>
+    <% end %>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-12 mb-4">Authentication Methods</h2>
+  <p class="text-slate-300 mb-4">
+    Users can authenticate to phish.directory using several methods:
+  </p>
+
+  <h3 class="text-xl font-semibold text-slate-100 mt-8 mb-3">Magic Links</h3>
+  <p class="text-slate-300 mb-4">
+    The simplest authentication method. Users enter their email address and receive a one-time login link.
+  </p>
+  <ul class="text-slate-300 space-y-2 mb-6">
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">✓</span>
+      <span>No passwords to remember or manage</span>
+    </li>
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">✓</span>
+      <span>Links expire after 15 minutes</span>
+    </li>
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">✓</span>
+      <span>Single-use tokens for security</span>
+    </li>
+  </ul>
+
+  <h3 class="text-xl font-semibold text-slate-100 mt-8 mb-3">Password Authentication</h3>
+  <p class="text-slate-300 mb-4">
+    Users can also set a password for traditional email/password authentication.
+  </p>
+  <ul class="text-slate-300 space-y-2 mb-6">
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">✓</span>
+      <span>Minimum 8 characters with complexity requirements</span>
+    </li>
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">✓</span>
+      <span>Secure password hashing with bcrypt</span>
+    </li>
+    <li class="flex items-start gap-3">
+      <span class="text-cyan-accent mt-1">✓</span>
+      <span>Password reset via email</span>
+    </li>
+  </ul>
+
+  <h3 class="text-xl font-semibold text-slate-100 mt-8 mb-3">SAML Single Sign-On</h3>
+  <p class="text-slate-300 mb-4">
+    For integrated services, users can authenticate via SAML 2.0 SSO.
+    Core acts as the Identity Provider (IdP) for all phish.directory services.
+  </p>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-12 mb-4">User Identifiers</h2>
+  <p class="text-slate-300 mb-4">
+    Each user has multiple identifiers for different use cases:
+  </p>
+
+  <div class="overflow-x-auto not-prose mb-8">
+    <table class="w-full text-left">
+      <thead>
+        <tr class="border-b border-slate-700/50">
+          <th class="py-3 pr-4 text-sm font-semibold text-slate-300">Identifier</th>
+          <th class="py-3 pr-4 text-sm font-semibold text-slate-300">Format</th>
+          <th class="py-3 text-sm font-semibold text-slate-300">Usage</th>
+        </tr>
+      </thead>
+      <tbody class="text-sm">
+        <tr class="border-b border-slate-700/30">
+          <td class="py-3 pr-4 text-slate-100 font-mono">pd_id</td>
+          <td class="py-3 pr-4 text-slate-400 font-mono">PDU1XXXXXXX</td>
+          <td class="py-3 text-slate-400">Internal user ID, stable across services</td>
+        </tr>
+        <tr class="border-b border-slate-700/30">
+          <td class="py-3 pr-4 text-slate-100 font-mono">public_id</td>
+          <td class="py-3 pr-4 text-slate-400 font-mono">usr_XXXXXXXXX</td>
+          <td class="py-3 text-slate-400">API-friendly identifier, Base62 encoded</td>
+        </tr>
+        <tr class="border-b border-slate-700/30">
+          <td class="py-3 pr-4 text-slate-100 font-mono">email</td>
+          <td class="py-3 pr-4 text-slate-400 font-mono">user@example.com</td>
+          <td class="py-3 text-slate-400">Primary contact, used for login</td>
+        </tr>
+        <tr class="border-b border-slate-700/30">
+          <td class="py-3 pr-4 text-slate-100 font-mono">username</td>
+          <td class="py-3 pr-4 text-slate-400 font-mono">johndoe</td>
+          <td class="py-3 text-slate-400">Optional display name</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-12 mb-4">Sessions</h2>
+  <p class="text-slate-300 mb-4">
+    User sessions are tracked for security and audit purposes. Each session includes:
+  </p>
+  <ul class="text-slate-300 space-y-2 mb-6">
+    <li>• IP address and approximate geolocation</li>
+    <li>• Browser/user agent information</li>
+    <li>• Creation and last activity timestamps</li>
+    <li>• Expiration time (configurable, default 30 days)</li>
+  </ul>
+  <p class="text-slate-300 mb-4">
+    Users can view and revoke active sessions from their dashboard.
+  </p>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-12 mb-4">Email Verification</h2>
+  <p class="text-slate-300 mb-4">
+    New accounts require email verification before accessing certain features.
+    Verification happens automatically on first magic link login, or users can request
+    a verification email from their profile.
+  </p>
+</div>

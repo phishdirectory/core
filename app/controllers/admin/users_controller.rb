@@ -4,7 +4,7 @@ module Admin
   class UsersController < BaseController
     before_action :set_user, except: [:index, :new, :create, :search]
     before_action :authorize_view!, only: [:show]
-    before_action :authorize_manage!, only: [:edit, :update, :destroy, :impersonate, :suspend, :reactivate, :lock, :unlock, :make_admin, :remove_privileges]
+    before_action :authorize_manage!, only: [:edit, :update, :destroy, :impersonate, :suspend, :reactivate, :lock, :unlock, :make_admin, :remove_privileges, :add_service_role, :remove_service_role]
 
     def index
       @users = User.includes(:user_sessions).order(created_at: :desc).page(params[:page])
@@ -123,6 +123,38 @@ module Admin
 
       @user.remove_privileges!
       redirect_to admin_user_path(@user), notice: "User privileges removed."
+    end
+
+    # POST /admin/users/:id/service_roles
+    def add_service_role
+      service = Service.find(params[:service_id])
+      role = params[:role]
+
+      existing = @user.service_roles.find_by(service: service)
+      if existing
+        existing.promote_to!(role, by: current_user)
+        redirect_to admin_user_path(@user), notice: "Service role updated."
+      else
+        @user.service_roles.create!(
+          service: service,
+          role: role,
+          granted_by: current_user
+        )
+        redirect_to admin_user_path(@user), notice: "Service role added."
+      end
+    rescue ActiveRecord::RecordNotFound
+      redirect_to admin_user_path(@user), alert: "Service not found."
+    rescue ActiveRecord::RecordInvalid => e
+      redirect_to admin_user_path(@user), alert: "Failed to add role: #{e.message}"
+    end
+
+    # DELETE /admin/users/:id/service_roles/:role_id
+    def remove_service_role
+      role = @user.service_roles.find(params[:role_id])
+      role.revoke!(by: current_user)
+      redirect_to admin_user_path(@user), notice: "Service role removed."
+    rescue ActiveRecord::RecordNotFound
+      redirect_to admin_user_path(@user), alert: "Role not found."
     end
 
     private

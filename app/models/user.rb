@@ -8,12 +8,14 @@ class User < ApplicationRecord
   set_public_id_prefix "usr"
 
   has_paper_trail
+  has_secure_password validations: false # Password is optional (magic links still work)
 
   # Associations
   has_many :visits, class_name: "Ahoy::Visit", dependent: :destroy
   has_many :user_sessions, class_name: "User::Session", dependent: :destroy
   has_many :user_api_keys, dependent: :destroy
   has_many :scam_classifications, class_name: "Scam::Classification", dependent: :destroy
+  has_many :service_roles, class_name: "UserServiceRole", dependent: :destroy
   has_one_attached :profile_photo
 
   # Flipper integration - use pd_id for feature flags
@@ -63,6 +65,16 @@ class User < ApplicationRecord
   }
 
   validates :magic_link_token, uniqueness: true, allow_nil: true
+  validates :confirmation_token, uniqueness: true, allow_nil: true
+  validates :password_reset_token, uniqueness: true, allow_nil: true
+
+  # Password validation - only when password is being set
+  validates :password, length: { minimum: 8 },
+                       format: {
+                         with: /\A(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+\[\]{}|;:'",.<>?\/`~]).+\z/,
+                         message: "must include uppercase, lowercase, number, and special character"
+                       },
+                       if: -> { password.present? }
 
   validates :profile_photo,
             content_type: { in: %w[image/jpeg image/png image/webp], message: "must be a JPEG, PNG, or WebP image" },
@@ -202,6 +214,82 @@ class User < ApplicationRecord
   end
 
   # ===========================================
+  # Password authentication
+  # ===========================================
+
+  def has_password?
+    password_digest.present?
+  end
+
+  # ===========================================
+  # Email confirmation
+  # ===========================================
+
+  def generate_confirmation_token
+    self.confirmation_token = SecureRandom.urlsafe_base64(32)
+    self.confirmation_sent_at = Time.current
+    save!
+  end
+
+  def confirmation_token_valid?
+    confirmation_token.present? &&
+      confirmation_sent_at.present? &&
+      confirmation_sent_at > 24.hours.ago &&
+      confirmed_at.nil?
+  end
+
+  def confirm!
+    update!(
+      confirmed_at: Time.current,
+      confirmation_token: nil,
+      email_verified: true,
+      email_verified_at: Time.current
+    )
+  end
+
+  def confirmed?
+    confirmed_at.present?
+  end
+
+  def send_confirmation_email
+    generate_confirmation_token
+    EmailConfirmationJob.perform_later(self)
+  end
+
+  # ===========================================
+  # Password reset
+  # ===========================================
+
+  def generate_password_reset_token
+    self.password_reset_token = SecureRandom.urlsafe_base64(32)
+    self.password_reset_sent_at = Time.current
+    self.password_reset_expires_at = 2.hours.from_now
+    save!
+  end
+
+  def password_reset_token_valid?
+    password_reset_token.present? &&
+      password_reset_expires_at.present? &&
+      password_reset_expires_at > Time.current
+  end
+
+  def reset_password!(new_password, new_password_confirmation)
+    return false unless password_reset_token_valid?
+
+    self.password = new_password
+    self.password_confirmation = new_password_confirmation
+    self.password_reset_token = nil
+    self.password_reset_sent_at = nil
+    self.password_reset_expires_at = nil
+    save
+  end
+
+  def send_password_reset
+    generate_password_reset_token
+    PasswordResetJob.perform_later(self)
+  end
+
+  # ===========================================
   # Email verification
   # ===========================================
 
@@ -318,6 +406,47 @@ class User < ApplicationRecord
     else
       false
     end
+  end
+
+  # ===========================================
+  # Per-service role methods
+  # ===========================================
+
+  def role_for_service(service)
+    service_roles.kept.find_by(service: service)&.role || access_level
+  end
+
+  def service_role_for(service)
+    service_roles.kept.find_by(service: service)
+  end
+
+  def trusted_for_service?(service)
+    %w[trusted admin superadmin owner].include?(role_for_service(service))
+  end
+
+  def admin_for_service?(service)
+    %w[admin superadmin owner].include?(role_for_service(service))
+  end
+
+  def superadmin_for_service?(service)
+    %w[superadmin owner].include?(role_for_service(service))
+  end
+
+  def owner_for_service?(service)
+    role_for_service(service) == "owner"
+  end
+
+  def assign_service_role!(service, role, granted_by: nil)
+    existing = service_roles.kept.find_by(service: service)
+    if existing
+      existing.promote_to!(role, by: granted_by)
+    else
+      service_roles.create!(service: service, role: role, granted_by: granted_by)
+    end
+  end
+
+  def revoke_service_role!(service)
+    service_roles.kept.find_by(service: service)&.discard
   end
 
   private
