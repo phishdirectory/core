@@ -257,6 +257,10 @@ Services can register webhooks to receive real-time notifications:
 
 Verify webhook signatures using the secret provided during registration.
 
+## Threat Intelligence Sharing
+
+We share detected phishing indicators via [AlienVault OTX](https://otx.alienvault.com/pulse/6785dccb041b628fde283705). Subscribe to our pulse to receive real-time threat data.
+
 ## Security
 
 - **Encryption**: All sensitive data encrypted at rest (Lockbox)

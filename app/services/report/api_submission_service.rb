@@ -500,12 +500,13 @@ module Report
 
       domain = payload[:domain]
       url = payload[:url]
+      role = Phish::OtxService.role_for_classification(payload[:classification])
 
       # Add URL if available, otherwise add domain
       result = if url.present?
-        otx_service.add_url(url)
+        otx_service.add_url(url, role: role)
       elsif domain.present?
-        otx_service.add_domain(domain)
+        otx_service.add_domain(domain, role: role)
       else
         raise ServiceError, "No domain or URL in payload"
       end

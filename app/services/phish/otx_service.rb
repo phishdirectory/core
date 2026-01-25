@@ -8,24 +8,41 @@ module Phish
   class OtxService < BaseService
     OTX_BASE_URL = "https://otx.alienvault.com"
 
+    # OTX indicator roles
+    # See: https://otx.alienvault.com/api
+    ROLES = {
+      "phishing" => "phishing",
+      "suspicious" => "phishing",
+      "malware" => "malware",
+      "c2" => "c2",
+      "spam" => "spam"
+    }.freeze
+
+    DEFAULT_ROLE = "phishing"
+
     # Add a domain indicator to the configured OTX pulse
-    def add_domain(domain)
-      add_indicator(domain, type: "domain")
+    def add_domain(domain, role: DEFAULT_ROLE)
+      add_indicator(domain, type: "domain", role: role)
     end
 
     # Add a URL indicator to the configured OTX pulse
-    def add_url(url)
-      add_indicator(url, type: "URL")
+    def add_url(url, role: DEFAULT_ROLE)
+      add_indicator(url, type: "URL", role: role)
     end
 
     # Add multiple domain indicators in a single request
-    def add_domains(domains)
-      add_indicators(domains.map { |d| { indicator: d, type: "domain" } })
+    def add_domains(domains, role: DEFAULT_ROLE)
+      add_indicators(domains.map { |d| { indicator: d, type: "domain", role: role } })
     end
 
     # Add multiple URL indicators in a single request
-    def add_urls(urls)
-      add_indicators(urls.map { |u| { indicator: u, type: "URL" } })
+    def add_urls(urls, role: DEFAULT_ROLE)
+      add_indicators(urls.map { |u| { indicator: u, type: "URL", role: role } })
+    end
+
+    # Map verdict classification to OTX role
+    def self.role_for_classification(classification)
+      ROLES[classification] || DEFAULT_ROLE
     end
 
     # Check if the service is configured
@@ -44,7 +61,7 @@ module Phish
 
     private
 
-    def add_indicator(indicator, type:)
+    def add_indicator(indicator, type:, role: "phishing")
       return { success: false, error: "OTX not configured" } unless configured?
 
       with_error_handling do
@@ -52,7 +69,7 @@ module Phish
           req.body = {
             indicators: {
               add: [
-                { indicator: indicator, type: type }
+                { indicator: indicator, type: type, role: role }
               ]
             }
           }

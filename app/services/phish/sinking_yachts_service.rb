@@ -126,8 +126,9 @@ module Phish
     def process_full_list(domains)
       return { success: false, error: "Invalid response" } unless domains.is_a?(Array)
 
-      # Clear old cache entries
-      Rails.cache.delete_matched("sinking_yachts:domain:*")
+      # Bump cache version to invalidate all old entries
+      # (SolidCache doesn't support delete_matched)
+      bump_cache_version!
 
       imported = 0
       domains.each do |domain|
@@ -175,7 +176,18 @@ module Phish
     end
 
     def cache_key_for(domain)
-      "sinking_yachts:domain:#{domain.downcase}"
+      "sinking_yachts:v#{cache_version}:domain:#{domain.downcase}"
+    end
+
+    def cache_version
+      Rails.cache.fetch("sinking_yachts:cache_version") { 1 }
+    end
+
+    def bump_cache_version!
+      new_version = cache_version + 1
+      Rails.cache.write("sinking_yachts:cache_version", new_version, expires_in: 1.year)
+      @cache_version = nil # Clear memoization
+      log_info("Bumped cache version to #{new_version}")
     end
   end
 end
