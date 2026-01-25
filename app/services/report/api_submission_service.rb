@@ -14,6 +14,7 @@ module Report
       "urlscan" => :submit_urlscan,
       "fishfish" => :submit_fishfish,
       "phish_report" => :submit_phish_report,
+      "otx" => :submit_otx,
       "generic" => :submit_generic
     }.freeze
 
@@ -98,6 +99,7 @@ module Report
       return :submit_urlscan if name.include?("urlscan")
       return :submit_fishfish if name.include?("fishfish") || name.include?("yuri")
       return :submit_phish_report if name.include?("phish.report") || name.include?("phish report")
+      return :submit_otx if name.include?("otx") || name.include?("alienvault")
 
       # Default to generic
       :submit_generic
@@ -485,6 +487,47 @@ module Report
         body: e.response[:body].to_s
       )
       raise ServiceError, "Phish Report API error: #{e.response[:status]}"
+    end
+
+    # =========================================
+    # AlienVault OTX Submission
+    # https://otx.alienvault.com/api
+    # Adds indicators to our OTX pulse
+    # =========================================
+    def submit_otx
+      otx_service = Phish::OtxService.new(logger: logger)
+      raise ServiceError, "OTX not configured" unless otx_service.configured?
+
+      domain = payload[:domain]
+      url = payload[:url]
+
+      # Add URL if available, otherwise add domain
+      result = if url.present?
+        otx_service.add_url(url)
+      elsif domain.present?
+        otx_service.add_domain(domain)
+      else
+        raise ServiceError, "No domain or URL in payload"
+      end
+
+      unless result[:success]
+        raise ServiceError, "OTX submission failed: #{result[:error]}"
+      end
+
+      submission.record_response!(
+        status_code: 200,
+        body: result.to_json,
+        reference: nil
+      )
+
+      log_info("OTX indicator added: #{url || domain}")
+      true
+    rescue Phish::BaseService::ServiceError => e
+      submission.record_response!(
+        status_code: 500,
+        body: { error: e.message }.to_json
+      )
+      raise ServiceError, "OTX API error: #{e.message}"
     end
 
     # =========================================
