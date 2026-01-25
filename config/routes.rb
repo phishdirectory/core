@@ -294,9 +294,7 @@ Rails.application.routes.draw do
 
       # Admin API endpoints
       namespace :admin do
-        namespace :domain do
-          post "bulk_import", to: "domains#bulk_import"
-        end
+        post "domain/bulk_import", to: "domains#bulk_import"
       end
 
       # Identity API (service-to-service user management)
