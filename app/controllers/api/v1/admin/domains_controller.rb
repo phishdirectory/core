@@ -3,7 +3,7 @@
 module Api
   module V1
     module Admin
-      class DomainsController < BaseController
+      class DomainsController < Api::V1::BaseController
         before_action :require_admin!
 
         # POST /api/v1/admin/domain/bulk_import
