@@ -379,6 +379,7 @@ module Report
       url_to_report = "https://#{url_to_report}" unless url_to_report =~ %r{\Ahttps?://}
 
       body = {
+        thread: "Phish.Directory Automation",
         url: url_to_report,
         reason: build_fishfish_reason
       }
