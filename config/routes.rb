@@ -292,6 +292,13 @@ Rails.application.routes.draw do
       # Webhooks
       resources :webhooks, only: [:index, :create, :destroy]
 
+      # Admin API endpoints
+      namespace :admin do
+        namespace :domain do
+          post "bulk_import", to: "domains#bulk_import"
+        end
+      end
+
       # Identity API (service-to-service user management)
       namespace :identity do
         resources :users, only: [:show, :create, :update] do
