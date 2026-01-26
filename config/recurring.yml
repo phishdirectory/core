@@ -76,6 +76,12 @@ reddit_sync:
   queue: maintenance
   schedule: every 6 hours at minute 45
 
+# PhishDestroy - sync destroylist every 6 hours
+phishdestroy_sync:
+  class: PhishdestroySyncJob
+  queue: maintenance
+  schedule: every 6 hours at minute 30
+
 # Blazer checks - run scheduled query checks
 blazer_run_checks_5_minutes:
   command: "Blazer.run_checks(schedule: '5 minutes')"
