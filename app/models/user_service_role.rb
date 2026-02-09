@@ -2,7 +2,7 @@
 
 class UserServiceRole < ApplicationRecord
   include SoftDeletable
-  include PublicIdentifiable
+  include EncodedIds::HashidIdentifiable
 
   set_public_id_prefix "usr"
 

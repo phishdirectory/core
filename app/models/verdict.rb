@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Verdict < ApplicationRecord
-  include PublicIdentifiable
+  include EncodedIds::HashidIdentifiable
 
   set_public_id_prefix "vrd"
 

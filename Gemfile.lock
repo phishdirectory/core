@@ -150,6 +150,9 @@ GEM
       dotenv (= 3.2.0)
       railties (>= 6.1)
     drb (2.2.3)
+    encoded_ids (1.0.0)
+      hashid-rails (~> 1.0)
+      rails (>= 6.1)
     erb (6.0.1)
     erubi (1.13.1)
     et-orbi (1.4.0)
@@ -582,6 +585,7 @@ DEPENDENCIES
   discard
   doorkeeper
   dotenv-rails
+  encoded_ids
   faraday
   faraday-retry
   ferrum

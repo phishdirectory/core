@@ -46,7 +46,8 @@ gem "saml_idp", "~> 0.16"           # SAML IdP functionality
 # ============================================
 gem "paper_trail"                   # Audit trail / versioning
 gem "friendly_id"                   # Human-readable slugs
-gem "hashid-rails"                  # Obfuscated public IDs
+gem "hashid-rails"
+gem "encoded_ids"                  # Obfuscated public IDs
 gem "pg_search"                     # Full-text search
 gem "strong_migrations"             # Safe migrations
 gem "aasm"                          # State machines

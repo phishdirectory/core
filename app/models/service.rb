@@ -3,7 +3,7 @@
 class Service < ApplicationRecord
   include AASM
   include SoftDeletable
-  include PublicIdentifiable
+  include EncodedIds::HashidIdentifiable
 
   set_public_id_prefix "svc"
 
