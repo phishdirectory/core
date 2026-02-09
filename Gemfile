@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 
 # Core Rails
-gem "rails", "~> 8.1.1"
+gem "rails", "~> 8.1.2"
 gem "logger"                        # Required for Ruby 3.4+ (bundled gem)
 gem "ostruct"                       # Required for Ruby 3.5+ (bundled gem)
 gem "pg", "~> 1.1"
