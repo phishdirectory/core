@@ -2,8 +2,11 @@
 
 EncodedIds.configure do |config|
   # Hashid configuration (for integer IDs)
+  # SECURITY: Salt is stored in encrypted credentials (see config/credentials.yml.enc)
+  # To edit: rails credentials:edit
+  # Fallback to ENV["HASHID_SALT"] for containerized deployments
   config.hashid_salt = Rails.application.credentials.dig(:hashid, :salt) ||
-                       Rails.application.secret_key_base
+                       ENV["HASHID_SALT"]
   config.hashid_min_length = 8
   config.hashid_alphabet = "abcdefghijklmnopqrstuvwxyz0123456789"
 
