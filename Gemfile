@@ -39,7 +39,7 @@ gem "bcrypt"                        # Password hashing (has_secure_password)
 
 # SAML 2.0 Identity Provider
 gem "ruby-saml", "~> 1.17"          # SAML core library
-gem "saml_idp", "~> 0.16"           # SAML IdP functionality
+gem "saml_idp", "~> 1.0"            # SAML IdP functionality
 
 # ============================================
 # Database & Models
