@@ -4,7 +4,7 @@ source "https://rubygems.org"
 gem "rails", "~> 8.1.1"
 gem "logger"                        # Required for Ruby 3.4+ (bundled gem)
 gem "ostruct"                       # Required for Ruby 3.5+ (bundled gem)
-gem "pg", "~> 1.1"
+gem "pg", "~> 1.6"
 gem "puma", ">= 5.0"
 
 # Windows timezone data
