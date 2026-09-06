@@ -150,7 +150,7 @@ GEM
       dotenv (= 3.2.0)
       railties (>= 6.1)
     drb (2.2.3)
-    encoded_ids (1.0.0)
+    encoded_ids (1.1.0)
       hashid-rails (~> 1.0)
       rails (>= 6.1)
     erb (6.0.1)
@@ -585,7 +585,7 @@ DEPENDENCIES
   discard
   doorkeeper
   dotenv-rails
-  encoded_ids
+  encoded_ids (~> 1.1)
   faraday
   faraday-retry
   ferrum
@@ -594,7 +594,6 @@ DEPENDENCIES
   flipper-ui
   friendly_id
   geocoder
-  hashid-rails
   image_processing (~> 1.2)
   kaminari
   letter_opener
