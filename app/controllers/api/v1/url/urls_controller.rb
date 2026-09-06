@@ -20,13 +20,16 @@ module Api
             return render json: { error: "Invalid URL format" }, status: :bad_request
           end
 
-          # Find or create the URL record
-          phish_url = Phish::Url.find_or_create_by(url: normalized_url)
+          # Find or create the URL record (handles the concurrent-create race)
+          phish_url = Phish::Url.find_or_create_by_natural_key!(url: normalized_url)
 
-          # Check if we need to refresh the verdict
-          if phish_url.needs_recheck?
-            # Queue background check
-            # PhishUrlCheckJob.perform_later(phish_url.id)
+          # Track that this URL was queried
+          phish_url.touch_last_seen!
+
+          # Queue a background check when we have no verdict yet, or the one we
+          # have has gone stale.
+          if phish_url.needs_check?(Phish::Url::ACTIVE_QUERY_THRESHOLD)
+            PhishUrlCheckJob.enqueue_once(phish_url.id, key: phish_url.id)
           end
 
           render json: serialize_url(phish_url)
@@ -59,14 +62,24 @@ module Api
           # Find existing URLs
           existing = Phish::Url.where(url: normalized_urls).index_by(&:url)
 
-          # Create missing URLs
+          # Create missing URLs (handles the concurrent-create race)
           missing_urls = normalized_urls - existing.keys
           missing_urls.each do |url|
-            existing[url] = Phish::Url.create!(url: url)
+            existing[url] = Phish::Url.find_or_create_by_natural_key!(url: url)
           end
+
+          # Update last_seen_at for all URLs in bulk
+          Phish::Url.where(url: normalized_urls).update_all(last_seen_at: Time.current)
 
           # Reload all URLs with verdict eager loading to avoid N+1
           phish_urls = Phish::Url.includes(:verdict).where(url: normalized_urls).index_by(&:url)
+
+          # Queue background checks for anything missing or stale, same as #check
+          phish_urls.each_value do |phish_url|
+            next unless phish_url.needs_check?(Phish::Url::ACTIVE_QUERY_THRESHOLD)
+
+            PhishUrlCheckJob.enqueue_once(phish_url.id, key: phish_url.id)
+          end
 
           # Serialize in original order
           results = normalized_urls.map { |u| serialize_url(phish_urls[u]) }

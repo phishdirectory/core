@@ -17,8 +17,8 @@ module Api
             return render json: { error: "Invalid email format" }, status: :bad_request
           end
 
-          # Find or create the email record (create_or_find_by handles race conditions)
-          phish_email = Phish::Email.create_or_find_by!(email: email)
+          # Find or create the email record (handles the concurrent-create race)
+          phish_email = Phish::Email.find_or_create_by_natural_key!(email: email)
 
           # Track that this email was queried
           phish_email.touch_last_seen!
@@ -56,10 +56,10 @@ module Api
           # Find existing emails
           existing = Phish::Email.where(email: emails).index_by(&:email)
 
-          # Create missing emails (create_or_find_by! handles race conditions)
+          # Create missing emails (handles the concurrent-create race)
           missing_emails = emails - existing.keys
           missing_emails.each do |email|
-            existing[email] = Phish::Email.create_or_find_by!(email: email)
+            existing[email] = Phish::Email.find_or_create_by_natural_key!(email: email)
           end
 
           # Update last_seen_at for all emails in bulk

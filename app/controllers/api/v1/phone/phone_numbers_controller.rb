@@ -20,8 +20,8 @@ module Api
             return render json: { error: "Invalid phone number format. Expected E.164 format (e.g., +14155551234)" }, status: :bad_request
           end
 
-          # Find or create the phone number record (create_or_find_by handles race conditions)
-          phone_number = Phish::PhoneNumber.create_or_find_by!(phone_number: normalized_phone)
+          # Find or create the phone number record (handles the concurrent-create race)
+          phone_number = Phish::PhoneNumber.find_or_create_by_natural_key!(phone_number: normalized_phone)
 
           # Track that this phone number was queried
           phone_number.touch_last_seen!
@@ -62,10 +62,10 @@ module Api
           # Find existing phone numbers
           existing = Phish::PhoneNumber.where(phone_number: normalized_phones).index_by(&:phone_number)
 
-          # Create missing phone numbers (create_or_find_by! handles race conditions)
+          # Create missing phone numbers (handles the concurrent-create race)
           missing_phones = normalized_phones - existing.keys
           missing_phones.each do |phone|
-            existing[phone] = Phish::PhoneNumber.create_or_find_by!(phone_number: phone)
+            existing[phone] = Phish::PhoneNumber.find_or_create_by_natural_key!(phone_number: phone)
           end
 
           # Update last_seen_at for all phone numbers in bulk

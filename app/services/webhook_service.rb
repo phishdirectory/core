@@ -28,6 +28,16 @@ class WebhookService
       })
     end
 
+    def notify_url_verdict(url, verdict)
+      broadcast_event("url.verdict", {
+        url: url.url,
+        domain: url.domain,
+        classification: verdict.classification,
+        confidence: verdict.confidence_score,
+        checked_at: Time.current.iso8601
+      })
+    end
+
     private
 
     def broadcast_event(event, payload)

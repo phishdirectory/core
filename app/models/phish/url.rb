@@ -18,6 +18,11 @@ class Phish::Url < ApplicationRecord
     message: "must be a valid HTTP/HTTPS URL"
   }
 
+  # How stale a verdict may be before an API caller asking about this URL
+  # triggers a fresh check. Shorter than the 24 hour default used by the
+  # background sweep, because someone is actively asking right now.
+  ACTIVE_QUERY_THRESHOLD = 4.hours
+
   # Normalizations
   normalizes :url, with: ->(url) { url.strip }
 
@@ -51,12 +56,6 @@ class Phish::Url < ApplicationRecord
 
   def needs_check?(threshold = 24.hours)
     !checked? || stale?(threshold)
-  end
-
-  # Returns true if URL has been checked before but verdict may need refreshing.
-  # Uses a shorter threshold than needs_check? since this is for actively-queried URLs.
-  def needs_recheck?(threshold = 4.hours)
-    checked? && stale?(threshold)
   end
 
   # ===========================================

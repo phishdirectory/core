@@ -38,12 +38,17 @@ module Phish
         return build_protected_result(domain: normalized, protection: protection)
       end
 
-      results, rate_limited = collect_service_results(:check_domain, normalized)
+      results, rate_limited, failed = collect_service_results(:check_domain, normalized)
 
       # Schedule retry jobs for rate-limited services
       schedule_retries(rate_limited, record_type: "domain", record: record)
 
-      aggregate_results(results, domain: normalized, rate_limited_services: rate_limited)
+      aggregate_results(
+        results,
+        domain: normalized,
+        rate_limited_services: rate_limited,
+        failed_services: failed
+      )
     end
 
     # Check a URL against all configured services
@@ -60,12 +65,17 @@ module Phish
         return build_protected_result(url: normalized, protection: protection)
       end
 
-      results, rate_limited = collect_service_results(:check_url, normalized)
+      results, rate_limited, failed = collect_service_results(:check_url, normalized)
 
       # Schedule retry jobs for rate-limited services
       schedule_retries(rate_limited, record_type: "url", record: record)
 
-      aggregate_results(results, url: normalized, rate_limited_services: rate_limited)
+      aggregate_results(
+        results,
+        url: normalized,
+        rate_limited_services: rate_limited,
+        failed_services: failed
+      )
     end
 
     # Check rate limit status for all services
@@ -99,10 +109,19 @@ module Phish
       end
     end
 
-    # Collect results from all services, tracking rate-limited ones
+    # Collect results from all services, tracking rate-limited and failed ones.
+    #
+    # Every failure mode is contained to the one service that caused it. The
+    # bare StandardError rescue matters: response parsing happens outside
+    # BaseService#with_error_handling, so unexpected JSON from a single vendor
+    # raises NoMethodError or TypeError rather than ServiceError, and without
+    # this would abort the checks for every other service too.
+    #
+    # @return [Array(Array, Array, Array)] results, rate limited, failed
     def collect_service_results(method, *args)
       results = []
       rate_limited = []
+      failed = []
 
       services.each do |service|
         result = service.public_send(method, *args)
@@ -114,10 +133,14 @@ module Phish
         }
         log_info("Service #{service.service_name} rate limited, retry after #{e.retry_after}s")
       rescue ServiceError => e
+        failed << { service: service.service_name, error: e.class.name, message: e.message }
         log_error("Service #{service.service_name} failed", e)
+      rescue StandardError => e
+        failed << { service: service.service_name, error: e.class.name, message: e.message }
+        log_error("Service #{service.service_name} raised an unexpected error", e)
       end
 
-      [ results, rate_limited ]
+      [ results, rate_limited, failed ]
     end
 
     def instantiate_service(name)
@@ -160,11 +183,21 @@ module Phish
     #       virustotal: 1.2
     #       google_safe_browsing: 1.5
     #
-    def aggregate_results(results, rate_limited_services: [], **context)
+    def aggregate_results(results, rate_limited_services: [], failed_services: [], **context)
       # Include rate limited info in context
       context[:rate_limited_services] = rate_limited_services if rate_limited_services.any?
+      context[:failed_services] = failed_services if failed_services.any?
 
-      return build_unknown_result(context) if results.empty?
+      if results.empty?
+        # Distinguish "every source broke" from "every source had nothing to
+        # say". Callers treat the first as a failed check, not as a finding.
+        return build_unknown_result(
+          context.merge(all_services_failed: true),
+          reason: "All #{failed_services.size} service(s) failed"
+        ) if failed_services.any?
+
+        return build_unknown_result(context, reason: "No services returned results")
+      end
 
       # Phase 1: Check for authoritative sources first
       # These curated lists override weighted scoring when they detect phishing
@@ -216,7 +249,10 @@ module Phish
 
       # Determine final verdict based on normalized scores
       if total_weight.zero?
-        build_unknown_result(context.merge(service_results: service_results))
+        build_unknown_result(
+          context.merge(service_results: service_results),
+          reason: "No service met the #{min_confidence} confidence threshold"
+        )
       else
         # Normalize scores to 0-1 range by dividing by total weight
         normalized_phishing = phishing_score / total_weight
@@ -260,13 +296,13 @@ module Phish
       end
     end
 
-    def build_unknown_result(context)
+    def build_unknown_result(context, reason: "No services returned results")
       build_result(
         verdict: "unknown",
         confidence: 0.0,
         details: context.merge(
           services_checked: 0,
-          reason: "No services returned results"
+          reason: reason
         )
       )
     end

@@ -151,7 +151,7 @@ class Phish::PhoneNumber < ApplicationRecord
   class << self
     def find_or_create_for_check(phone_string)
       normalized = normalize_phone_number(phone_string)
-      create_or_find_by!(phone_number: normalized)
+      find_or_create_by_natural_key!(phone_number: normalized)
     end
 
     def normalize_phone_number(phone_string)

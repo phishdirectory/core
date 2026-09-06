@@ -38,6 +38,22 @@ class ApplicationJob < ActiveJob::Base
   # Log job execution with timing
   around_perform :log_job_execution
 
+  # Enqueue at most one job for a given key within the window.
+  #
+  # A popular domain can be queried thousands of times an hour. Without this
+  # guard every one of those requests enqueues its own identical check job.
+  #
+  # This is a de-duplication optimization, not a correctness guarantee: if the
+  # cache is unavailable it fails open and enqueues, which is the safe
+  # direction. Returns true when this call enqueued the job.
+  def self.enqueue_once(*args, key:, window: 10.minutes)
+    cache_key = "enqueue_once:#{name}:#{key}"
+    return false unless Rails.cache.write(cache_key, true, expires_in: window, unless_exist: true)
+
+    perform_later(*args)
+    true
+  end
+
   private
 
   def log_job_execution

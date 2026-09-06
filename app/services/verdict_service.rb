@@ -1,13 +1,32 @@
 # frozen_string_literal: true
 
 class VerdictService
+  # Classifications that represent real knowledge about a record. An "unknown"
+  # result must never replace one of these.
+  MEANINGFUL_CLASSIFICATIONS = %w[phishing suspicious clean protected].freeze
+
   class << self
     # Updates or creates a verdict for a domain/URL record atomically.
+    #
+    # An "unknown" result means we learned nothing this run, which is very
+    # different from learning that a record is clean. Every upstream failing at
+    # once produces "unknown", so writing it over an existing verdict would let
+    # a DNS blip or a batch of expired API keys quietly downgrade a confirmed
+    # phishing domain. When that happens we keep the verdict we already have.
     #
     # @param record [Phish::Domain, Phish::Url] The domain or URL record
     # @param result [Hash] The aggregator service result with :verdict, :confidence, :details
     # @return [Verdict] The created/updated verdict
     def update_verdict!(record, result)
+      if downgrade_to_unknown?(record, result)
+        Rails.logger.warn(
+          "[VerdictService] Keeping existing #{record.verdict.classification} verdict for " \
+          "#{record.class.name}##{record.id}: this check returned unknown " \
+          "(#{result.dig(:details, :reason) || "no reason given"})"
+        )
+        return record.verdict
+      end
+
       ActiveRecord::Base.transaction do
         verdict = record.verdict || record.build_verdict
         verdict.assign_attributes(
@@ -22,6 +41,12 @@ class VerdictService
 
         verdict
       end
+    end
+
+    # True when this result would replace real knowledge with "we don't know".
+    def downgrade_to_unknown?(record, result)
+      result[:verdict] == "unknown" &&
+        MEANINGFUL_CLASSIFICATIONS.include?(record.verdict&.classification)
     end
 
     # Runs a phishing check on a domain and updates its verdict.

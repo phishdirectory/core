@@ -19,12 +19,12 @@ class BulkDomainImportJob < ApplicationJob
         next
       end
 
-      phish_domain = Phish::Domain.create_or_find_by!(domain: normalized)
+      phish_domain = Phish::Domain.find_or_create_by_natural_key!(domain: normalized)
       phish_domain.touch_last_seen!
 
       # Queue individual check if needed
-      if phish_domain.needs_recheck?
-        PhishDomainCheckJob.perform_later(phish_domain.id)
+      if phish_domain.needs_check?(Phish::Domain::ACTIVE_QUERY_THRESHOLD) &&
+         PhishDomainCheckJob.enqueue_once(phish_domain.id, key: phish_domain.id)
         imported += 1
       else
         skipped += 1
