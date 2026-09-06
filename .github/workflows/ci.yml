@@ -79,6 +79,15 @@ jobs:
         with:
           bundler-cache: true
 
+      # app/assets/builds is gitignored, so a fresh checkout has no compiled
+      # stylesheet and every test that renders a layout fails on a missing
+      # asset. Build it before the suite runs.
+      - name: Build stylesheets
+        env:
+          RAILS_ENV: test
+          RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
+        run: bin/rails tailwindcss:build
+
       - name: Run tests
         env:
           RAILS_ENV: test
