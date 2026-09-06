@@ -37,7 +37,9 @@ class DomainAvailabilityCheckJobTest < ActiveJob::TestCase
       )
     end
 
-    assert_enqueued_jobs 5, only: DomainAvailabilityCheckJob do
+    # Five domains here, plus the one the setup block creates. Each is
+    # enqueued exactly once even though it matches both batch queries.
+    assert_enqueued_jobs 6, only: DomainAvailabilityCheckJob do
       DomainAvailabilityCheckJob.perform_now
     end
   end

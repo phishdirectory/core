@@ -5,13 +5,13 @@ require "test_helper"
 class WebhookTest < ActionDispatch::IntegrationTest
   setup do
     @service = create_test_service
-    @key = @service.keys.create!(status: :active)
+    @key = @service.service_keys.create!(status: :active)
     @headers = api_headers(api_key: @key.api_key)
   end
 
   test "service can list webhooks" do
-    @service.webhooks.create!(url: "https://example.com/webhook1")
-    @service.webhooks.create!(url: "https://example.com/webhook2")
+    @service.service_webhooks.create!(url: "https://example.com/webhook1")
+    @service.service_webhooks.create!(url: "https://example.com/webhook2")
 
     get api_v1_webhooks_path, headers: @headers
 
@@ -33,7 +33,7 @@ class WebhookTest < ActionDispatch::IntegrationTest
   end
 
   test "service can delete webhook" do
-    webhook = @service.webhooks.create!(url: "https://example.com/webhook")
+    webhook = @service.service_webhooks.create!(url: "https://example.com/webhook")
 
     delete api_v1_webhook_path(webhook), headers: @headers
 
@@ -43,7 +43,7 @@ class WebhookTest < ActionDispatch::IntegrationTest
 
   test "service cannot manage other service webhooks" do
     other_service = create_test_service
-    webhook = other_service.webhooks.create!(url: "https://other.com/webhook")
+    webhook = other_service.service_webhooks.create!(url: "https://other.com/webhook")
 
     delete api_v1_webhook_path(webhook), headers: @headers
 

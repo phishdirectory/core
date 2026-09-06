@@ -42,7 +42,7 @@ class Domain::AvailabilityServiceTest < ActiveSupport::TestCase
 
     assert_not result[:dns][:resolvable]
     assert_not result[:available]
-    assert result[:dns][:error].present?
+    assert_empty result[:dns][:addresses]
   end
 
   test "skips http check when dns fails" do

@@ -8,7 +8,7 @@ module Api
 
       # GET /api/v1/webhooks
       def index
-        webhooks = current_service.webhooks.order(created_at: :desc)
+        webhooks = current_service.service_webhooks.order(created_at: :desc)
 
         render json: {
           webhooks: webhooks.map { |w| serialize_webhook(w) },
@@ -18,7 +18,7 @@ module Api
 
       # POST /api/v1/webhooks
       def create
-        webhook = current_service.webhooks.new(webhook_params)
+        webhook = current_service.service_webhooks.new(webhook_params)
 
         if webhook.save
           render json: {
@@ -61,7 +61,9 @@ module Api
         {
           id: webhook.public_id,
           url: webhook.url,
-          active: webhook.active?,
+          # There is no active column. A webhook is active until it is
+          # soft deleted, which is what destroy does.
+          active: webhook.kept?,
           created_at: webhook.created_at.iso8601
         }
       end
