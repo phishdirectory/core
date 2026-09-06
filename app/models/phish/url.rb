@@ -2,7 +2,7 @@
 
 class Phish::Url < ApplicationRecord
   include SoftDeletable
-  include PublicIdentifiable
+  include EncodedIds::UuidIdentifiable
   include Classifiable
 
   self.table_name = "phish_urls"

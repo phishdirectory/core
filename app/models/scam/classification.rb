@@ -3,7 +3,7 @@
 # Records a user's scam category vote for a classifiable item (domain, URL, etc.)
 # Each user can only vote once per item, but multiple users can vote on the same item.
 class Scam::Classification < ApplicationRecord
-  include PublicIdentifiable
+  include EncodedIds::UuidIdentifiable
 
   self.table_name = "scam_classifications"
   set_public_id_prefix "scl"

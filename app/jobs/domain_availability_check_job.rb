@@ -51,29 +51,32 @@ class DomainAvailabilityCheckJob < ApplicationJob
 
   def check_batch_of_domains
     # Prioritize recently seen domains that need availability checks
-    domains = Phish::Domain
+    recently_seen = Phish::Domain
       .seen_recently(7.days)
       .needs_availability_check(CHECK_THRESHOLD)
       .order(last_seen_at: :desc)
       .limit(BATCH_SIZE)
-
-    Rails.logger.info("[DomainAvailability] Found #{domains.count} recently seen domains to check")
-
-    domains.find_each do |domain|
-      # Enqueue individual checks to spread the load
-      DomainAvailabilityCheckJob.perform_later(domain.id)
-    end
+      .pluck(:id)
 
     # Also check domains that were recently added but never checked
     unchecked = Phish::Domain
       .where(availability_checked_at: nil)
       .order(created_at: :desc)
       .limit(BATCH_SIZE)
+      .pluck(:id)
 
-    Rails.logger.info("[DomainAvailability] Found #{unchecked.count} unchecked domains to check")
+    # A domain that is both recently seen and never checked matches both
+    # queries. Deduplicate so it is only enqueued once.
+    domain_ids = (recently_seen + unchecked).uniq
 
-    unchecked.find_each do |domain|
-      DomainAvailabilityCheckJob.perform_later(domain.id)
+    Rails.logger.info(
+      "[DomainAvailability] Found #{recently_seen.size} recently seen and " \
+      "#{unchecked.size} unchecked domains, #{domain_ids.size} to check"
+    )
+
+    domain_ids.each do |domain_id|
+      # Enqueue individual checks to spread the load
+      DomainAvailabilityCheckJob.perform_later(domain_id)
     end
   end
 end

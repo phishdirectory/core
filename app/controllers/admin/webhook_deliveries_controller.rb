@@ -2,7 +2,7 @@
 
 module Admin
   class WebhookDeliveriesController < BaseController
-    before_action :set_delivery, only: [:show, :retry]
+    before_action :set_delivery, only: [ :show, :retry ]
 
     def index
       @deliveries = WebhookDelivery.order(created_at: :desc)

@@ -2,7 +2,7 @@
 
 module Dashboard
   class ApiKeysController < BaseController
-    before_action :set_api_key, only: [:destroy, :regenerate]
+    before_action :set_api_key, only: [ :destroy, :regenerate ]
 
     def index
       @api_keys = current_user.user_api_keys.order(created_at: :desc)

@@ -15,7 +15,7 @@ module Seeds
           status: :active,
           keys: [
             { notes: "Primary key", status: :active },
-            { notes: "Secondary key", status: :active },
+            { notes: "Secondary key", status: :active }
           ]
         },
         {
@@ -23,14 +23,14 @@ module Seeds
           status: :active,
           keys: [
             { notes: "Production key", status: :active },
-            { notes: "Old key (deprecated)", status: :deprecated },
+            { notes: "Old key (deprecated)", status: :deprecated }
           ]
         },
         {
           name: "Browser Extension",
           status: :active,
           keys: [
-            { notes: "Extension key", status: :active },
+            { notes: "Extension key", status: :active }
           ]
         },
 
@@ -39,7 +39,7 @@ module Seeds
           name: "Legacy System",
           status: :suspended,
           keys: [
-            { notes: "Legacy key", status: :active },
+            { notes: "Legacy key", status: :active }
           ]
         },
 
@@ -48,9 +48,9 @@ module Seeds
           name: "Deprecated API",
           status: :decommissioned,
           keys: [
-            { notes: "Revoked key", status: :revoked },
+            { notes: "Revoked key", status: :revoked }
           ]
-        },
+        }
       ].freeze
 
       def self.seed!

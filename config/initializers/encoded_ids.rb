@@ -16,6 +16,8 @@ EncodedIds.configure do |config|
   # Separator between prefix and hash
   config.separator = "_"
 
-  # Whether to include prefix in to_param URLs
-  config.use_prefix_in_routes = false
+  # Whether to include prefix in to_param URLs.
+  # Must stay true: controllers look records up with find_by_public_id!, which
+  # rejects an id that has no prefix.
+  config.use_prefix_in_routes = true
 end

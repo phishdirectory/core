@@ -19,7 +19,7 @@ class CreateFeatureAndOauthTables < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :flipper_gates, [:feature_key, :key, :value], unique: true
+    add_index :flipper_gates, [ :feature_key, :key, :value ], unique: true
 
     # Doorkeeper OAuth Applications
     create_table :oauth_applications, id: :uuid do |t|

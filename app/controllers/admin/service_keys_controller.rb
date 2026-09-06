@@ -3,7 +3,7 @@
 module Admin
   class ServiceKeysController < BaseController
     before_action :set_service
-    before_action :set_key, only: [:destroy, :deprecate, :revoke]
+    before_action :set_key, only: [ :destroy, :deprecate, :revoke ]
 
     def index
       @keys = @service.service_keys.order(created_at: :desc)

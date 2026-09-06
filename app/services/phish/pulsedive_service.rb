@@ -58,9 +58,9 @@ module Phish
         response = query_indicator(normalized)
         result = if response.nil?
                    build_not_found_result(normalized, :domain)
-                 else
+        else
                    parse_indicator_response(response, normalized, :domain)
-                 end
+        end
         write_cache(normalized, :domain, result)
         result
       end
@@ -80,9 +80,9 @@ module Phish
         response = query_indicator(normalized)
         result = if response.nil?
                    build_not_found_result(normalized, :url)
-                 else
+        else
                    parse_indicator_response(response, normalized, :url)
-                 end
+        end
         write_cache(normalized, :url, result)
         result
       end

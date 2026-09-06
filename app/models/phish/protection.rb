@@ -2,7 +2,7 @@
 
 class Phish::Protection < ApplicationRecord
   include SoftDeletable
-  include PublicIdentifiable
+  include EncodedIds::UuidIdentifiable
 
   self.table_name = "phish_protections"
   set_public_id_prefix "prt"

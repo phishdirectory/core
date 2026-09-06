@@ -120,6 +120,7 @@ group :development, :test do
   gem "rubocop-rails-omakase", require: false
   gem "dotenv-rails"                # Environment variables
   gem "webmock"                     # HTTP request stubbing
+  gem "minitest-mock"               # Object#stub, split out of minitest in 6.0
 end
 
 group :development do

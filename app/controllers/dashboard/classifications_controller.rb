@@ -3,7 +3,7 @@
 module Dashboard
   class ClassificationsController < BaseController
     before_action :require_trusted!
-    before_action :set_classifiable, only: [:show, :create, :mark_clean, :skip]
+    before_action :set_classifiable, only: [ :show, :create, :mark_clean, :skip ]
 
     # GET /dashboard/classifications
     # Shows the classification queue for the current user

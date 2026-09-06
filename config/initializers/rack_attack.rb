@@ -106,7 +106,7 @@ class Rack::Attack
       "X-RateLimit-Reset" => (now + (match_data[:period] - now % match_data[:period])).to_s
     }
 
-    [429, headers, [{ error: "Rate limit exceeded. Retry later." }.to_json]]
+    [ 429, headers, [ { error: "Rate limit exceeded. Retry later." }.to_json ] ]
   end
 end
 

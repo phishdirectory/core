@@ -5,6 +5,12 @@ module Api
     class BaseController < ActionController::API
       include ActionController::HttpAuthentication::Token::ControllerMethods
 
+      # Do not wrap the JSON body under a root key. Rails would infer the key
+      # from the controller name, so Domain::DomainsController would set
+      # params[:domain] to a Parameters hash and shadow the real scalar
+      # parameter the action reads.
+      wrap_parameters false
+
       before_action :authenticate_request!
       before_action :require_user_agent!
       around_action :log_api_request
@@ -119,12 +125,26 @@ module Api
         end
       end
 
-      # Log all API requests to unified api_requests table
+      # Log all API requests to unified api_requests table.
+      #
+      # The rescue below must stay inside write_api_request_log. If it also
+      # covered the yield, every exception an action raises would be swallowed
+      # here, the client would get an empty 200, and the rescue_from handlers
+      # above would never run.
       def log_api_request
         start_time = Time.current
 
-        yield
+        begin
+          yield
+        rescue StandardError
+          write_api_request_log(start_time, response_code: 500)
+          raise
+        end
 
+        write_api_request_log(start_time)
+      end
+
+      def write_api_request_log(start_time, response_code: nil)
         # Only log if we have an authenticated key
         return unless loggable_authenticatable
 
@@ -142,7 +162,7 @@ module Api
           user_agent: request.user_agent,
           request_headers: filtered_request_headers.to_json,
           request_body: truncated_request_body,
-          response_code: response.status,
+          response_code: response_code || response.status,
           response_body: truncated_response_body,
           duration_ms: duration_ms,
           requested_at: start_time

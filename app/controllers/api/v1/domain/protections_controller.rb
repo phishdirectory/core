@@ -5,7 +5,7 @@ module Api
     module Domain
       class ProtectionsController < BaseController
         before_action :require_admin!
-        before_action :set_protection, only: [:show, :destroy]
+        before_action :set_protection, only: [ :show, :destroy ]
 
         # GET /api/v1/domain/protections
         def index

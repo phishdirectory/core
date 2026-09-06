@@ -72,7 +72,7 @@ class Api::V1::Domain::WhoisControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "bulk requires authentication" do
-    post api_v1_domain_whois_bulk_path, params: { domains: ["example.com"] }
+    post api_v1_domain_whois_bulk_path, params: { domains: [ "example.com" ] }
     assert_response :unauthorized
   end
 
@@ -94,7 +94,7 @@ class Api::V1::Domain::WhoisControllerTest < ActionDispatch::IntegrationTest
 
   test "bulk validates domain formats" do
     post api_v1_domain_whois_bulk_path,
-         params: { domains: ["valid.com", "invalid..domain"] },
+         params: { domains: [ "valid.com", "invalid..domain" ] },
          headers: @auth_headers,
          as: :json
 
@@ -115,7 +115,7 @@ class Api::V1::Domain::WhoisControllerTest < ActionDispatch::IntegrationTest
     )
 
     post api_v1_domain_whois_bulk_path,
-         params: { domains: ["example1.com", "example2.com"] },
+         params: { domains: [ "example1.com", "example2.com" ] },
          headers: @auth_headers,
          as: :json
 

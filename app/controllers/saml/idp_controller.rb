@@ -4,10 +4,10 @@ module Saml
   class IdpController < ApplicationController
     include SamlIdp::Controller
 
-    skip_before_action :verify_authenticity_token, only: [:create, :logout]
+    skip_before_action :verify_authenticity_token, only: [ :create, :logout ]
     before_action :require_saml_enabled
-    before_action :validate_saml_request, only: [:new, :create]
-    before_action :find_service_provider, only: [:new, :create]
+    before_action :validate_saml_request, only: [ :new, :create ]
+    before_action :find_service_provider, only: [ :new, :create ]
 
     # GET /saml/metadata
     # Returns IdP metadata XML for service providers to configure

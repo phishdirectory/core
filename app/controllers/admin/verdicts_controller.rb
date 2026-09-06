@@ -2,7 +2,7 @@
 
 module Admin
   class VerdictsController < BaseController
-    before_action :set_verdict, only: [:show, :edit, :update]
+    before_action :set_verdict, only: [ :show, :edit, :update ]
 
     def index
       @verdicts = Verdict.includes(:phish_domains, :phish_urls)

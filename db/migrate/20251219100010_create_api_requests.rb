@@ -33,7 +33,7 @@ class CreateApiRequests < ActiveRecord::Migration[8.1]
     add_index :api_requests, :requested_at
     add_index :api_requests, :response_code
     add_index :api_requests, :duration_ms
-    add_index :api_requests, [:authenticatable_type, :authenticatable_id, :requested_at],
+    add_index :api_requests, [ :authenticatable_type, :authenticatable_id, :requested_at ],
               name: "idx_api_requests_auth_time"
 
     safety_assured { add_foreign_key :api_requests, :users, on_delete: :nullify }

@@ -73,7 +73,7 @@ class Phish::DomainExpiryServiceTest < ActiveSupport::TestCase
       queried_at: 1.hour.ago
     )
 
-    result = @service.bulk_lookup(["example1.com", "example2.com"])
+    result = @service.bulk_lookup([ "example1.com", "example2.com" ])
 
     assert_equal 2, result[:results].size
     assert_equal "Registrar 1", result[:results]["example1.com"][:registrar]

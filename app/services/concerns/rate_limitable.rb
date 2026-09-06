@@ -87,7 +87,7 @@ module RateLimitable
 
     key = cache_key(limit_name, action)
     current = Rails.cache.read(key).to_i
-    [config[:requests] - current, 0].max
+    [ config[:requests] - current, 0 ].max
   end
 
   # Get rate limit status for all configured limits
@@ -99,7 +99,7 @@ module RateLimitable
     _rate_limits.transform_values.with_index do |(name, config), _|
       key = cache_key(name, action)
       current = Rails.cache.read(key).to_i
-      remaining = [config[:requests] - current, 0].max
+      remaining = [ config[:requests] - current, 0 ].max
       # Estimate reset time based on period since cache TTL APIs are internal
       reset_at = Time.current + config[:period]
 

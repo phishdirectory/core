@@ -111,21 +111,21 @@ module Phish
 
     def determine_final_verdict(verdict_scores)
       if verdict_scores["phishing"] >= 0.5
-        ["phishing", verdict_scores["phishing"]]
+        [ "phishing", verdict_scores["phishing"] ]
       elsif verdict_scores["suspicious"] >= 0.4
-        ["suspicious", verdict_scores["suspicious"]]
+        [ "suspicious", verdict_scores["suspicious"] ]
       elsif verdict_scores["clean"] >= 0.5
-        ["clean", verdict_scores["clean"]]
+        [ "clean", verdict_scores["clean"] ]
       elsif verdict_scores["phishing"] > 0 || verdict_scores["suspicious"] > 0
         # Any phishing/suspicious signal with lower confidence
         if verdict_scores["phishing"] >= verdict_scores["suspicious"]
-          ["suspicious", [verdict_scores["phishing"], verdict_scores["suspicious"]].max]
+          [ "suspicious", [ verdict_scores["phishing"], verdict_scores["suspicious"] ].max ]
         else
-          ["suspicious", verdict_scores["suspicious"]]
+          [ "suspicious", verdict_scores["suspicious"] ]
         end
       else
         max_verdict = verdict_scores.max_by { |_, v| v }
-        [max_verdict&.first || "unknown", max_verdict&.last || 0.0]
+        [ max_verdict&.first || "unknown", max_verdict&.last || 0.0 ]
       end
     end
   end

@@ -17,7 +17,7 @@ module Seeds
         { url: "https://steamcommunity-trade.ru/tradeoffer/new", confidence: 0.89 },
         { url: "https://discord-nitro-gift.click/claim/free", confidence: 0.92 },
         { url: "https://appleid-verify.support/account/locked", confidence: 0.90 },
-        { url: "https://crypto-airdrop.xyz/claim/ethereum", confidence: 0.87 },
+        { url: "https://crypto-airdrop.xyz/claim/ethereum", confidence: 0.87 }
       ].freeze
 
       # Suspicious URLs - may be phishing
@@ -25,14 +25,14 @@ module Seeds
         { url: "https://free-robux-generator.click/get", confidence: 0.62 },
         { url: "https://amazon-deals-today.biz/offer/iphone", confidence: 0.58 },
         { url: "https://work-from-home-jobs.info/apply", confidence: 0.55 },
-        { url: "https://lottery-winner-claim.net/prize", confidence: 0.60 },
+        { url: "https://lottery-winner-claim.net/prize", confidence: 0.60 }
       ].freeze
 
       # Clean URLs - known safe
       CLEAN_URLS = [
         { url: "https://www.google.com/search?q=test", confidence: 0.99 },
         { url: "https://github.com/anthropics/claude", confidence: 0.99 },
-        { url: "https://stackoverflow.com/questions", confidence: 0.98 },
+        { url: "https://stackoverflow.com/questions", confidence: 0.98 }
       ].freeze
 
       def self.seed!

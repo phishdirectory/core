@@ -2,7 +2,7 @@
 
 class Phish::Email < ApplicationRecord
   include SoftDeletable
-  include PublicIdentifiable
+  include EncodedIds::UuidIdentifiable
   include Protectable
   include Classifiable
 
@@ -22,7 +22,7 @@ class Phish::Email < ApplicationRecord
   normalizes :email, with: ->(email) { email.to_s.strip.downcase }
 
   # Callbacks
-  before_validation :extract_domain, on: [:create, :update], if: :email_changed?
+  before_validation :extract_domain, on: [ :create, :update ], if: :email_changed?
 
   # Scopes
   scope :checked, -> { where.not(last_checked_at: nil) }

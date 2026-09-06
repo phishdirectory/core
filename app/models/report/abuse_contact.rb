@@ -4,7 +4,7 @@ class Report::AbuseContact < ApplicationRecord
   self.table_name = "report_abuse_contacts"
 
   include SoftDeletable
-  include PublicIdentifiable
+  include EncodedIds::UuidIdentifiable
 
   set_public_id_prefix "rac"
 

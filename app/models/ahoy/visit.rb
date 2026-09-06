@@ -41,7 +41,7 @@ class Ahoy::Visit < ApplicationRecord
   end
 
   def location_string
-    [city, region, country].compact.join(", ")
+    [ city, region, country ].compact.join(", ")
   end
 
   # ===========================================

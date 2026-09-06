@@ -2,9 +2,9 @@
 
 module Admin
   class UsersController < BaseController
-    before_action :set_user, except: [:index, :new, :create, :search]
-    before_action :authorize_view!, only: [:show]
-    before_action :authorize_manage!, only: [:edit, :update, :destroy, :impersonate, :suspend, :reactivate, :lock, :unlock, :make_admin, :remove_privileges, :add_service_role, :remove_service_role]
+    before_action :set_user, except: [ :index, :new, :create, :search ]
+    before_action :authorize_view!, only: [ :show ]
+    before_action :authorize_manage!, only: [ :edit, :update, :destroy, :impersonate, :suspend, :reactivate, :lock, :unlock, :make_admin, :remove_privileges, :add_service_role, :remove_service_role ]
 
     def index
       @users = User.includes(:user_sessions).order(created_at: :desc).page(params[:page])
@@ -164,9 +164,9 @@ module Admin
       id = params[:id]
       @user = if id.to_s.start_with?("PDU")
                 User.find_by!(pd_id: id.upcase)
-              else
+      else
                 User.find_by_public_id!(id)
-              end
+      end
     end
 
     def authorize_view!
@@ -182,8 +182,8 @@ module Admin
     end
 
     def user_params
-      permitted = [:first_name, :last_name, :email, :profile_photo]
-      permitted += [:access_level, :staff, :pd_dev] if current_user.superadmin?
+      permitted = [ :first_name, :last_name, :email, :profile_photo ]
+      permitted += [ :access_level, :staff, :pd_dev ] if current_user.superadmin?
       params.require(:user).permit(permitted)
     end
   end

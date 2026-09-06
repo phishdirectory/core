@@ -3,7 +3,7 @@
 module Admin
   module Saml
     class ServiceProvidersController < BaseController
-      before_action :set_service_provider, except: [:index, :new, :create]
+      before_action :set_service_provider, except: [ :index, :new, :create ]
 
       def index
         @service_providers = ::Saml::ServiceProvider.with_discarded.order(created_at: :desc).page(params[:page])

@@ -3,7 +3,7 @@
 module Saml
   class ServiceProvider < ApplicationRecord
     include SoftDeletable
-    include PublicIdentifiable
+    include EncodedIds::UuidIdentifiable
 
     self.table_name = "saml_service_providers"
 

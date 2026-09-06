@@ -17,7 +17,7 @@ class Phish::EmailTest < ActiveSupport::TestCase
   end
 
   test "validates email format" do
-    invalid_emails = ["notanemail", "missing@tld", "@nodomain.com", "spaces in@email.com"]
+    invalid_emails = [ "notanemail", "missing@tld", "@nodomain.com", "spaces in@email.com" ]
 
     invalid_emails.each do |addr|
       email = Phish::Email.new(email: addr)

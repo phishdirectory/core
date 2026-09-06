@@ -2,7 +2,7 @@
 
 module Auth
   class PasswordsController < ApplicationController
-    before_action :redirect_if_authenticated, only: [:new, :create, :edit, :update]
+    before_action :redirect_if_authenticated, only: [ :new, :create, :edit, :update ]
 
     # GET /auth/password/forgot
     def new

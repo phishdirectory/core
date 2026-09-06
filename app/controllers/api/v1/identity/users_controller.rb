@@ -6,7 +6,7 @@ module Api
       class UsersController < BaseController
         before_action :require_service!
         before_action :check_identity_api_enabled!
-        before_action :set_user, only: [:show, :update]
+        before_action :set_user, only: [ :show, :update ]
 
         # GET /api/v1/identity/users/:id
         def show

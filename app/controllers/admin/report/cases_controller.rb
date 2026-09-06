@@ -3,7 +3,7 @@
 module Admin
   module Report
     class CasesController < Admin::BaseController
-      before_action :set_case, only: [:show, :retry_submission, :escalate, :resolve]
+      before_action :set_case, only: [ :show, :retry_submission, :escalate, :resolve ]
 
       def index
         @cases = ::Report::Case

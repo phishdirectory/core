@@ -2,7 +2,7 @@
 
 class Phish::PhoneNumber < ApplicationRecord
   include SoftDeletable
-  include PublicIdentifiable
+  include EncodedIds::UuidIdentifiable
   include Protectable
   include Classifiable
 
@@ -31,7 +31,7 @@ class Phish::PhoneNumber < ApplicationRecord
   }
 
   # Callbacks
-  before_validation :extract_country_code, on: [:create, :update], if: :phone_number_changed?
+  before_validation :extract_country_code, on: [ :create, :update ], if: :phone_number_changed?
 
   # Scopes
   scope :checked, -> { where.not(last_checked_at: nil) }

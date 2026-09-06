@@ -11,7 +11,7 @@ class DomainAvailabilityCheckJobTest < ActiveJob::TestCase
     # Stub the service to return a known result
     mock_result = {
       domain: "example.com",
-      dns: { resolvable: true, addresses: ["93.184.216.34"], error: nil },
+      dns: { resolvable: true, addresses: [ "93.184.216.34" ], error: nil },
       http: { reachable: true, status: 200, error: nil },
       available: true,
       checked_at: Time.current
@@ -37,7 +37,9 @@ class DomainAvailabilityCheckJobTest < ActiveJob::TestCase
       )
     end
 
-    assert_enqueued_jobs 5, only: DomainAvailabilityCheckJob do
+    # Five domains here, plus the one the setup block creates. Each is
+    # enqueued exactly once even though it matches both batch queries.
+    assert_enqueued_jobs 6, only: DomainAvailabilityCheckJob do
       DomainAvailabilityCheckJob.perform_now
     end
   end

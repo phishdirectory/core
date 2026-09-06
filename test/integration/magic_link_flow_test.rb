@@ -31,9 +31,11 @@ class MagicLinkFlowTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_response :success
 
-    # Verify token was consumed
+    # Verify token was consumed. The token stays on the record and is marked
+    # used, so magic_link_valid? is what rejects a second use.
     user.reload
-    assert_nil user.magic_link_token
+    assert user.magic_link_used_at.present?
+    assert_not user.magic_link_valid?
   end
 
   test "expired magic link is rejected" do

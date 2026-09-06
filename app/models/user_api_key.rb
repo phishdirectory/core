@@ -2,7 +2,7 @@
 
 class UserApiKey < ApplicationRecord
   include SoftDeletable
-  include EncodedIds::HashidIdentifiable
+  include EncodedIds::UuidIdentifiable
 
   # API Key prefix for easy identification
   KEY_PREFIX = "pdat_"

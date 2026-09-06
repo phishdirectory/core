@@ -5,7 +5,7 @@ class Report::Submission < ApplicationRecord
 
   include AASM
   include SoftDeletable
-  include PublicIdentifiable
+  include EncodedIds::UuidIdentifiable
 
   set_public_id_prefix "rsb"
 
@@ -156,8 +156,8 @@ class Report::Submission < ApplicationRecord
 
   def retry_delay
     # Exponential backoff: 1m, 5m, 15m, 1h, 4h
-    delays = [1.minute, 5.minutes, 15.minutes, 1.hour, 4.hours]
-    delays[[attempts, delays.length - 1].min]
+    delays = [ 1.minute, 5.minutes, 15.minutes, 1.hour, 4.hours ]
+    delays[[ attempts, delays.length - 1 ].min]
   end
 
   def record_response!(status_code:, body:, headers: nil, reference: nil)

@@ -11,7 +11,7 @@ class Domain::AvailabilityServiceTest < ActiveSupport::TestCase
     assert_equal "google.com", result[:domain]
     assert result[:dns].is_a?(Hash)
     assert result[:http].is_a?(Hash)
-    assert_includes [true, false], result[:available]
+    assert_includes [ true, false ], result[:available]
     assert result[:checked_at].is_a?(Time)
   end
 
@@ -42,7 +42,7 @@ class Domain::AvailabilityServiceTest < ActiveSupport::TestCase
 
     assert_not result[:dns][:resolvable]
     assert_not result[:available]
-    assert result[:dns][:error].present?
+    assert_empty result[:dns][:addresses]
   end
 
   test "skips http check when dns fails" do

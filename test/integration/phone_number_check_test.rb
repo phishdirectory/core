@@ -60,7 +60,7 @@ class PhoneNumberCheckTest < ActionDispatch::IntegrationTest
 
   test "can bulk check phone numbers" do
     post api_v1_phone_bulk_path,
-         params: { phones: ["+14155551234", "+14155555678", "+14155559999"] }.to_json,
+         params: { phones: [ "+14155551234", "+14155555678", "+14155559999" ] }.to_json,
          headers: @headers
 
     assert_response :success
@@ -82,7 +82,7 @@ class PhoneNumberCheckTest < ActionDispatch::IntegrationTest
   end
 
   test "bulk check returns phone numbers in order" do
-    phones = ["+14155551111", "+14155552222", "+14155553333"]
+    phones = [ "+14155551111", "+14155552222", "+14155553333" ]
 
     post api_v1_phone_bulk_path,
          params: { phones: phones }.to_json,
@@ -97,7 +97,7 @@ class PhoneNumberCheckTest < ActionDispatch::IntegrationTest
   end
 
   test "bulk check deduplicates phone numbers" do
-    phones = ["+14155551234", "+14155551234", "+14155551234"]
+    phones = [ "+14155551234", "+14155551234", "+14155551234" ]
 
     post api_v1_phone_bulk_path,
          params: { phones: phones }.to_json,
@@ -110,7 +110,7 @@ class PhoneNumberCheckTest < ActionDispatch::IntegrationTest
   end
 
   test "bulk check reports invalid phone numbers" do
-    phones = ["+14155551234", "invalid", "+14155555678"]
+    phones = [ "+14155551234", "invalid", "+14155555678" ]
 
     post api_v1_phone_bulk_path,
          params: { phones: phones }.to_json,

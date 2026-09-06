@@ -40,7 +40,7 @@ class ApiAuthenticationTest < ActionDispatch::IntegrationTest
 
   test "service can authenticate with service key" do
     service = create_test_service
-    key = service.keys.create!(status: :active)
+    key = service.service_keys.create!(status: :active)
 
     post api_v1_auth_authenticate_path,
          headers: api_headers(api_key: key.api_key)
@@ -53,7 +53,7 @@ class ApiAuthenticationTest < ActionDispatch::IntegrationTest
 
   test "revoked service key is rejected" do
     service = create_test_service
-    key = service.keys.create!(status: :revoked)
+    key = service.service_keys.create!(status: :revoked)
 
     post api_v1_auth_authenticate_path,
          headers: api_headers(api_key: key.api_key)
@@ -66,7 +66,8 @@ class ApiAuthenticationTest < ActionDispatch::IntegrationTest
     api_key = user.user_api_keys.create!(name: "Test Key")
 
     get api_v1_user_me_path,
-        headers: { "X-API-Key" => api_key.plaintext_key, "Accept" => "application/json" }
+        headers: { "X-API-Key" => api_key.plaintext_key, "Accept" => "application/json",
+                   "User-Agent" => "TestClient/1.0.0" }
 
     assert_response :success
   end
