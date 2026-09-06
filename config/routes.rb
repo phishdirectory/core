@@ -91,7 +91,7 @@ Rails.application.routes.draw do
   get "signup", to: "users#new", as: :signup
   post "signup", to: "users#create"
 
-  resources :users, only: [:show, :edit, :update] do
+  resources :users, only: [ :show, :edit, :update ] do
     member do
       get :sessions
     end
@@ -123,14 +123,14 @@ Rails.application.routes.draw do
     get "check_email", to: "email_checks#new", as: :email_check
     post "check_email", to: "email_checks#create"
 
-    resources :api_keys, only: [:index, :create, :destroy] do
+    resources :api_keys, only: [ :index, :create, :destroy ] do
       member do
         post :regenerate
       end
     end
 
-    resource :profile, only: [:show, :edit, :update]
-    resources :sessions, only: [:index, :destroy]
+    resource :profile, only: [ :show, :edit, :update ]
+    resources :sessions, only: [ :index, :destroy ]
 
     # Scam classification (trusted+ users only)
     get "classifications", to: "classifications#index", as: :classifications
@@ -172,25 +172,25 @@ Rails.application.routes.draw do
         post :reactivate
         post :decommission
       end
-      resources :keys, controller: "service_keys", only: [:index, :create, :destroy] do
+      resources :keys, controller: "service_keys", only: [ :index, :create, :destroy ] do
         member do
           post :deprecate
           post :revoke
         end
       end
-      resources :webhooks, controller: "service_webhooks", only: [:index, :create, :destroy]
+      resources :webhooks, controller: "service_webhooks", only: [ :index, :create, :destroy ]
     end
 
-    resources :domains, controller: "phish_domains", only: [:index, :show]
-    resources :urls, controller: "phish_urls", only: [:index, :show]
-    resources :phone_numbers, controller: "phish_phone_numbers", only: [:index, :show]
-    resources :emails, controller: "phish_emails", only: [:index, :show]
-    resources :verdicts, only: [:index, :show, :edit, :update]
-    resources :protections, only: [:index, :show, :new, :create, :destroy]
+    resources :domains, controller: "phish_domains", only: [ :index, :show ]
+    resources :urls, controller: "phish_urls", only: [ :index, :show ]
+    resources :phone_numbers, controller: "phish_phone_numbers", only: [ :index, :show ]
+    resources :emails, controller: "phish_emails", only: [ :index, :show ]
+    resources :verdicts, only: [ :index, :show, :edit, :update ]
+    resources :protections, only: [ :index, :show, :new, :create, :destroy ]
 
     # Monitoring
-    resources :api_requests, only: [:index, :show]
-    resources :webhook_deliveries, only: [:index, :show] do
+    resources :api_requests, only: [ :index, :show ]
+    resources :webhook_deliveries, only: [ :index, :show ] do
       member do
         post :retry
       end
@@ -204,7 +204,7 @@ Rails.application.routes.draw do
           post :import, action: :perform_import
         end
       end
-      resources :cases, only: [:index, :show] do
+      resources :cases, only: [ :index, :show ] do
         member do
           post :retry_submission
           post :escalate
@@ -221,7 +221,7 @@ Rails.application.routes.draw do
           post :disable
         end
       end
-      resources :authentications, only: [:index, :show]
+      resources :authentications, only: [ :index, :show ]
     end
 
     # Stop impersonation
@@ -262,7 +262,7 @@ Rails.application.routes.draw do
         get "whois/bulk", to: "whois#bulk"
         post "whois/bulk", to: "whois#bulk"
 
-        resources :protections, only: [:index, :show, :create, :destroy]
+        resources :protections, only: [ :index, :show, :create, :destroy ]
       end
 
       # URL checking
@@ -290,7 +290,7 @@ Rails.application.routes.draw do
       end
 
       # Webhooks
-      resources :webhooks, only: [:index, :create, :destroy]
+      resources :webhooks, only: [ :index, :create, :destroy ]
 
       # Admin API endpoints
       namespace :admin do
@@ -299,7 +299,7 @@ Rails.application.routes.draw do
 
       # Identity API (service-to-service user management)
       namespace :identity do
-        resources :users, only: [:show, :create, :update] do
+        resources :users, only: [ :show, :create, :update ] do
           collection do
             get :by_email
           end

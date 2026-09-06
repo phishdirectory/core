@@ -21,7 +21,7 @@ module Seeds
         { email: "admin@example.com", first_name: "Admin", last_name: "User", access_level: :admin, staff: true },
 
         # Superadmin
-        { email: "superadmin@example.com", first_name: "Super", last_name: "Admin", access_level: :superadmin, staff: true },
+        { email: "superadmin@example.com", first_name: "Super", last_name: "Admin", access_level: :superadmin, staff: true }
       ].freeze
 
       def self.seed!

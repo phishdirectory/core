@@ -12,11 +12,11 @@ module Seeds
       USER_KEYS = {
         "trusted@example.com" => [
           { name: "Development Key" },
-          { name: "Testing Key" },
+          { name: "Testing Key" }
         ],
         "admin@example.com" => [
-          { name: "Admin Dev Key" },
-        ],
+          { name: "Admin Dev Key" }
+        ]
       }.freeze
 
       def self.seed!

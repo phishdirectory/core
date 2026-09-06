@@ -83,7 +83,7 @@ namespace :report do
   end
 
   desc "Run all report data backfills"
-  task backfill_all: [:backfill_verdicts, :backfill_payloads] do
+  task backfill_all: [ :backfill_verdicts, :backfill_payloads ] do
     puts "\nAll backfills complete!"
   end
 end

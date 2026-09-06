@@ -68,7 +68,7 @@ class Report::DomainLookup < ApplicationRecord
 
   # Get all matched contacts
   def matched_contacts
-    [matched_registrar_contact, matched_hosting_contact].compact.uniq
+    [ matched_registrar_contact, matched_hosting_contact ].compact.uniq
   end
 
   # Check if we found any abuse contacts

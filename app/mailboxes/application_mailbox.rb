@@ -11,5 +11,5 @@ class ApplicationMailbox < ActionMailbox::Base
   routing(/^case_[a-z0-9]+@cases\.phish\.directory$/i => "report/cases")
 
   # Default - bounce unmatched emails
-  routing :all => :bounces
+  routing all: :bounces
 end

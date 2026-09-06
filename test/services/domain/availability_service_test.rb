@@ -11,7 +11,7 @@ class Domain::AvailabilityServiceTest < ActiveSupport::TestCase
     assert_equal "google.com", result[:domain]
     assert result[:dns].is_a?(Hash)
     assert result[:http].is_a?(Hash)
-    assert_includes [true, false], result[:available]
+    assert_includes [ true, false ], result[:available]
     assert result[:checked_at].is_a?(Time)
   end
 

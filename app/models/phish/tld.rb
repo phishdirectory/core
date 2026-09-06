@@ -62,7 +62,7 @@ class Phish::Tld < ApplicationRecord
       result = upsert(
         { name: tld_name },
         unique_by: :name,
-        returning: [:id]
+        returning: [ :id ]
       )
 
       find(result.rows.first.first)

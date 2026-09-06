@@ -11,7 +11,7 @@ class DomainAvailabilityCheckJobTest < ActiveJob::TestCase
     # Stub the service to return a known result
     mock_result = {
       domain: "example.com",
-      dns: { resolvable: true, addresses: ["93.184.216.34"], error: nil },
+      dns: { resolvable: true, addresses: [ "93.184.216.34" ], error: nil },
       http: { reachable: true, status: 200, error: nil },
       available: true,
       checked_at: Time.current

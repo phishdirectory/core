@@ -61,7 +61,7 @@ class EmailCheckTest < ActionDispatch::IntegrationTest
 
   test "can bulk check emails" do
     post api_v1_email_bulk_path,
-         params: { emails: ["user1@example.com", "user2@example.com", "user3@example.com"] }.to_json,
+         params: { emails: [ "user1@example.com", "user2@example.com", "user3@example.com" ] }.to_json,
          headers: @headers
 
     assert_response :success
@@ -83,7 +83,7 @@ class EmailCheckTest < ActionDispatch::IntegrationTest
   end
 
   test "bulk check returns emails in order" do
-    emails = ["first@example.com", "second@example.com", "third@example.com"]
+    emails = [ "first@example.com", "second@example.com", "third@example.com" ]
 
     post api_v1_email_bulk_path,
          params: { emails: emails }.to_json,
@@ -98,7 +98,7 @@ class EmailCheckTest < ActionDispatch::IntegrationTest
   end
 
   test "bulk check deduplicates emails" do
-    emails = ["same@example.com", "same@example.com", "same@example.com"]
+    emails = [ "same@example.com", "same@example.com", "same@example.com" ]
 
     post api_v1_email_bulk_path,
          params: { emails: emails }.to_json,
@@ -110,7 +110,7 @@ class EmailCheckTest < ActionDispatch::IntegrationTest
   end
 
   test "bulk check reports invalid emails" do
-    emails = ["valid@example.com", "invalid", "another@example.com"]
+    emails = [ "valid@example.com", "invalid", "another@example.com" ]
 
     post api_v1_email_bulk_path,
          params: { emails: emails }.to_json,

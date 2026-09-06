@@ -84,7 +84,7 @@ class CreateReportTables < ActiveRecord::Migration[8.1]
     end
 
     add_index :report_cases, :case_number, unique: true
-    add_index :report_cases, [:reportable_type, :reportable_id]
+    add_index :report_cases, [ :reportable_type, :reportable_id ]
     add_index :report_cases, :status
     add_index :report_cases, :requires_manual_review
     add_index :report_cases, :discarded_at
@@ -134,7 +134,7 @@ class CreateReportTables < ActiveRecord::Migration[8.1]
     add_index :report_submissions, :abuse_contact_id
     add_index :report_submissions, :status
     add_index :report_submissions, :depends_on_submission_id
-    add_index :report_submissions, [:case_id, :abuse_contact_id], unique: true
+    add_index :report_submissions, [ :case_id, :abuse_contact_id ], unique: true
     add_index :report_submissions, :discarded_at
     safety_assured do
       add_foreign_key :report_submissions, :report_cases, column: :case_id

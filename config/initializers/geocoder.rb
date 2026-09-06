@@ -39,7 +39,7 @@ if Rails.env.test?
   Geocoder::Lookup::Test.set_default_stub(
     [
       {
-        "coordinates" => [40.7128, -74.0060],
+        "coordinates" => [ 40.7128, -74.0060 ],
         "address" => "New York, NY, USA",
         "city" => "New York",
         "state" => "New York",

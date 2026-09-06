@@ -75,7 +75,7 @@ SamlIdp.configure do |config|
         cert: sp.certificate,
         fingerprint: nil,
         metadata_url: sp.metadata_url,
-        response_hosts: [URI.parse(sp.assertion_consumer_service_url).host]
+        response_hosts: [ URI.parse(sp.assertion_consumer_service_url).host ]
       }
     end
   }

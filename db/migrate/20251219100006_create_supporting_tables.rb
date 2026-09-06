@@ -15,8 +15,8 @@ class CreateSupportingTables < ActiveRecord::Migration[8.1]
       t.datetime :created_at
     end
 
-    add_index :lockbox_audits, [:subject_type, :subject_id]
-    add_index :lockbox_audits, [:viewer_type, :viewer_id]
+    add_index :lockbox_audits, [ :subject_type, :subject_id ]
+    add_index :lockbox_audits, [ :viewer_type, :viewer_id ]
 
     # Paper Trail versions (audit log)
     create_table :versions, id: :uuid do |t|
@@ -29,7 +29,7 @@ class CreateSupportingTables < ActiveRecord::Migration[8.1]
       t.text :object_changes
     end
 
-    add_index :versions, [:item_type, :item_id]
+    add_index :versions, [ :item_type, :item_id ]
     add_index :versions, :created_at
 
     # Friendly ID slugs
@@ -42,8 +42,8 @@ class CreateSupportingTables < ActiveRecord::Migration[8.1]
       t.datetime :created_at
     end
 
-    add_index :friendly_id_slugs, [:slug, :sluggable_type, :scope], unique: true
-    add_index :friendly_id_slugs, [:sluggable_type, :sluggable_id]
+    add_index :friendly_id_slugs, [ :slug, :sluggable_type, :scope ], unique: true
+    add_index :friendly_id_slugs, [ :sluggable_type, :sluggable_id ]
 
     # PG Search documents
     create_table :pg_search_documents, id: :uuid do |t|
@@ -54,7 +54,7 @@ class CreateSupportingTables < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :pg_search_documents, [:searchable_type, :searchable_id]
+    add_index :pg_search_documents, [ :searchable_type, :searchable_id ]
 
     # Rollups (time-series metrics)
     create_table :rollups, id: :uuid do |t|
@@ -65,7 +65,7 @@ class CreateSupportingTables < ActiveRecord::Migration[8.1]
       t.float :value
     end
 
-    add_index :rollups, [:name, :interval, :time, :dimensions], unique: true
+    add_index :rollups, [ :name, :interval, :time, :dimensions ], unique: true
 
     # Console1984 users (console session users)
     create_table :console1984_users, id: :uuid do |t|
@@ -85,7 +85,7 @@ class CreateSupportingTables < ActiveRecord::Migration[8.1]
     end
 
     add_index :console1984_sessions, :created_at
-    add_index :console1984_sessions, [:user_id, :created_at]
+    add_index :console1984_sessions, [ :user_id, :created_at ]
 
     # Console1984 sensitive accesses
     create_table :console1984_sensitive_accesses, id: :uuid do |t|
@@ -107,7 +107,7 @@ class CreateSupportingTables < ActiveRecord::Migration[8.1]
     end
 
     add_index :console1984_commands, :sensitive_access_id
-    add_index :console1984_commands, [:session_id, :created_at, :sensitive_access_id],
+    add_index :console1984_commands, [ :session_id, :created_at, :sensitive_access_id ],
               name: "on_session_and_sensitive_chronologically"
 
     # Audits1984 audits

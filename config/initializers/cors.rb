@@ -33,10 +33,10 @@ Rails.application.config.middleware.insert_before 0, Rack::Cors do
 
     resource "/health",
       headers: :any,
-      methods: [:get]
+      methods: [ :get ]
 
     resource "/api/v1/health",
       headers: :any,
-      methods: [:get]
+      methods: [ :get ]
   end
 end

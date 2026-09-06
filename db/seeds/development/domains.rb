@@ -19,7 +19,7 @@ module Seeds
         { domain: "microsoft-365-verify.click", confidence: 0.87 },
         { domain: "bank0famerica-secure.com", confidence: 0.96 },
         { domain: "coinbase-airdrop.xyz", confidence: 0.90 },
-        { domain: "discord-nitro-free.gift", confidence: 0.93 },
+        { domain: "discord-nitro-free.gift", confidence: 0.93 }
       ].freeze
 
       # Suspicious domains - lower confidence, may be legitimate
@@ -28,14 +28,14 @@ module Seeds
         { domain: "free-iphone-winner.click", confidence: 0.55 },
         { domain: "job-offer-remote.biz", confidence: 0.60 },
         { domain: "crypto-trading-bot.net", confidence: 0.58 },
-        { domain: "prize-claim-now.info", confidence: 0.62 },
+        { domain: "prize-claim-now.info", confidence: 0.62 }
       ].freeze
 
       # Clean domains - known safe
       CLEAN_DOMAINS = [
         { domain: "google.com", confidence: 0.99 },
         { domain: "github.com", confidence: 0.99 },
-        { domain: "stackoverflow.com", confidence: 0.98 },
+        { domain: "stackoverflow.com", confidence: 0.98 }
       ].freeze
 
       def self.seed!

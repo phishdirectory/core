@@ -2,7 +2,7 @@
 
 module Admin
   class ServicesController < BaseController
-    before_action :set_service, except: [:index, :new, :create]
+    before_action :set_service, except: [ :index, :new, :create ]
 
     def index
       @services = Service.order(created_at: :desc).page(params[:page])

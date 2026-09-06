@@ -29,7 +29,7 @@ class Phish::PulsediveServiceTest < ActiveSupport::TestCase
       indicator: "malicious.com",
       risk: "critical",
       stamp_added: "2024-01-01 00:00:00",
-      threats: [{ "name" => "Phishing" }]
+      threats: [ { "name" => "Phishing" } ]
     })
 
     result = @service.check_domain("malicious.com")
@@ -182,9 +182,9 @@ class Phish::PulsediveServiceTest < ActiveSupport::TestCase
       type: "domain",
       indicator: "threatfeed.com",
       risk: "high",
-      threats: [{ "name" => "Phishing" }, { "name" => "Malware" }],
-      feeds: [{ "name" => "OpenPhish" }],
-      riskfactors: [{ "description" => "Known phishing domain" }]
+      threats: [ { "name" => "Phishing" }, { "name" => "Malware" } ],
+      feeds: [ { "name" => "OpenPhish" } ],
+      riskfactors: [ { "description" => "Known phishing domain" } ]
     })
 
     result = @service.check_domain("threatfeed.com")

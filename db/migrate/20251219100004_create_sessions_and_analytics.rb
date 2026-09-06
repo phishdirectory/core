@@ -54,7 +54,7 @@ class CreateSessionsAndAnalytics < ActiveRecord::Migration[8.1]
     end
 
     add_index :ahoy_visits, :visit_token, unique: true
-    add_index :ahoy_visits, [:visitor_token, :started_at]
+    add_index :ahoy_visits, [ :visitor_token, :started_at ]
     add_index :ahoy_visits, :user_id
 
     # Ahoy events
@@ -66,7 +66,7 @@ class CreateSessionsAndAnalytics < ActiveRecord::Migration[8.1]
       t.datetime :time
     end
 
-    add_index :ahoy_events, [:name, :time]
+    add_index :ahoy_events, [ :name, :time ]
     add_index :ahoy_events, :properties, using: :gin, opclass: :jsonb_path_ops
     add_index :ahoy_events, :user_id
     add_index :ahoy_events, :visit_id
@@ -83,7 +83,7 @@ class CreateSessionsAndAnalytics < ActiveRecord::Migration[8.1]
       t.string :campaign
     end
 
-    add_index :ahoy_messages, [:user_type, :user_id]
+    add_index :ahoy_messages, [ :user_type, :user_id ]
     add_index :ahoy_messages, :to_bidx
     add_index :ahoy_messages, :campaign
 

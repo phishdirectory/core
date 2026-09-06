@@ -327,7 +327,7 @@ module Report
       body = {
         url: url_to_report,
         visibility: "unlisted",
-        tags: ["phishing", "phish.directory", report_case.case_number]
+        tags: [ "phishing", "phish.directory", report_case.case_number ]
       }
 
       response = conn.post("/api/v1/scan/", body)
@@ -542,7 +542,7 @@ module Report
       # Parse URL parts
       uri = URI.parse(endpoint)
       base_url = "#{uri.scheme}://#{uri.host}"
-      base_url += ":#{uri.port}" unless [80, 443].include?(uri.port)
+      base_url += ":#{uri.port}" unless [ 80, 443 ].include?(uri.port)
       path = uri.path.presence || "/"
 
       # Build headers
@@ -687,13 +687,13 @@ module Report
         return nil if statuses.blank?
 
         # Check for resolved indicators
-        resolved_keywords = ["Resolved", "Taken Down", "Suspended", "Removed"]
+        resolved_keywords = [ "Resolved", "Taken Down", "Suspended", "Removed" ]
         if statuses.any? { |s| resolved_keywords.any? { |kw| s.to_s.include?(kw) } }
           return :resolved
         end
 
         # Check for acknowledged/in-progress indicators
-        acknowledged_keywords = ["With Target", "Escalated", "Processing", "Forwarded"]
+        acknowledged_keywords = [ "With Target", "Escalated", "Processing", "Forwarded" ]
         if statuses.any? { |s| acknowledged_keywords.any? { |kw| s.to_s.include?(kw) } }
           return :acknowledged
         end

@@ -334,11 +334,11 @@ class User < ApplicationRecord
 
     case variant
     when :thumb
-      profile_photo.variant(resize_to_limit: [100, 100])
+      profile_photo.variant(resize_to_limit: [ 100, 100 ])
     when :medium
-      profile_photo.variant(resize_to_limit: [200, 200])
+      profile_photo.variant(resize_to_limit: [ 200, 200 ])
     when :large
-      profile_photo.variant(resize_to_limit: [400, 400])
+      profile_photo.variant(resize_to_limit: [ 400, 400 ])
     else
       profile_photo
     end

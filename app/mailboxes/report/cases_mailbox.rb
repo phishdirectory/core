@@ -77,7 +77,7 @@ module Report
 
     def check_for_acknowledgment(case_email)
       # Look for common acknowledgment patterns in subject/body
-      text = [case_email.subject, case_email.body_text].compact.join(" ").downcase
+      text = [ case_email.subject, case_email.body_text ].compact.join(" ").downcase
 
       acknowledgment_patterns = [
         /received/i,
@@ -102,7 +102,7 @@ module Report
 
     def check_for_resolution(case_email)
       # Look for common resolution patterns
-      text = [case_email.subject, case_email.body_text].compact.join(" ").downcase
+      text = [ case_email.subject, case_email.body_text ].compact.join(" ").downcase
 
       resolution_patterns = [
         /suspended/i,

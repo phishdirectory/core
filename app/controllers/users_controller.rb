@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 class UsersController < ApplicationController
-  before_action :redirect_if_authenticated, only: [:new, :create]
-  before_action :authenticate_user!, only: [:show, :edit, :update, :sessions]
-  before_action :set_user, only: [:show, :edit, :update, :sessions]
-  before_action :authorize_user!, only: [:edit, :update]
+  before_action :redirect_if_authenticated, only: [ :new, :create ]
+  before_action :authenticate_user!, only: [ :show, :edit, :update, :sessions ]
+  before_action :set_user, only: [ :show, :edit, :update, :sessions ]
+  before_action :authorize_user!, only: [ :edit, :update ]
 
   # GET /signup
   def new

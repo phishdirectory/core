@@ -14,34 +14,34 @@ module Seeds
           domain: "fake-paypal-login.com",
           votes: [
             { user_email: "trusted@example.com", category: "credential_theft", subcategory: "phishing_email" },
-            { user_email: "trusted2@example.com", category: "credential_theft", subcategory: "fake_login_page" },
+            { user_email: "trusted2@example.com", category: "credential_theft", subcategory: "fake_login_page" }
           ]
         },
         {
           domain: "crypto-giveaway-eth.io",
           votes: [
             { user_email: "trusted@example.com", category: "financial_crypto", subcategory: "cryptocurrency_investment" },
-            { user_email: "admin@example.com", category: "financial_crypto", subcategory: "rug_pull" },
+            { user_email: "admin@example.com", category: "financial_crypto", subcategory: "rug_pull" }
           ]
         },
         {
           domain: "steam-trade-offer.ru",
           votes: [
-            { user_email: "trusted@example.com", category: "gaming", subcategory: "steam_trade" },
+            { user_email: "trusted@example.com", category: "gaming", subcategory: "steam_trade" }
           ]
         },
         {
           domain: "discord-nitro-free.gift",
           votes: [
-            { user_email: "trusted2@example.com", category: "gaming", subcategory: "account_theft" },
+            { user_email: "trusted2@example.com", category: "gaming", subcategory: "account_theft" }
           ]
         },
         {
           domain: "job-offer-remote.biz",
           votes: [
-            { user_email: "trusted@example.com", category: "job_employment", subcategory: "fake_job_offer" },
+            { user_email: "trusted@example.com", category: "job_employment", subcategory: "fake_job_offer" }
           ]
-        },
+        }
       ].freeze
 
       def self.seed!

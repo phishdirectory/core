@@ -66,7 +66,7 @@ class Report::CaseEmail < ApplicationRecord
 
   # Parse ticket/reference numbers from the email
   def extract_reference_numbers
-    text = [subject, body_text].compact.join(" ")
+    text = [ subject, body_text ].compact.join(" ")
 
     # Common patterns for ticket numbers
     patterns = [

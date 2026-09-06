@@ -2,7 +2,7 @@
 
 module Admin
   class ProtectionsController < BaseController
-    before_action :set_protection, only: [:show, :destroy]
+    before_action :set_protection, only: [ :show, :destroy ]
 
     def index
       @protections = Phish::Protection.kept

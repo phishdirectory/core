@@ -201,9 +201,9 @@ module Xarf
     def build_description(type, source_identifier, verdict)
       confidence_text = if verdict&.confidence_score
                           "#{(verdict.confidence_score * 100).round}% confidence"
-                        else
+      else
                           "unconfirmed"
-                        end
+      end
 
       sources_count = verdict&.sources_list&.count || 0
       sources_text = sources_count > 0 ? "detected by #{sources_count} source#{'s' if sources_count > 1}" : ""
@@ -234,13 +234,13 @@ module Xarf
       # medium: moderate threat
       # low: minor or informational
       base_severity = case type
-                      when "phishing", "malware", "fraud"
+      when "phishing", "malware", "fraud"
                         confidence && confidence >= 0.8 ? "high" : "medium"
-                      when "suspicious_registration"
+      when "suspicious_registration"
                         "medium"
-                      else
+      else
                         "low"
-                      end
+      end
 
       # Elevate to critical for high-confidence phishing/malware
       if %w[phishing malware].include?(type) && confidence && confidence >= 0.95
@@ -364,10 +364,10 @@ module Xarf
       # Add confidence level tag
       if verdict&.confidence_score
         confidence_level = case verdict.confidence_score
-                           when 0.8..1.0 then "high"
-                           when 0.5...0.8 then "medium"
-                           else "low"
-                           end
+        when 0.8..1.0 then "high"
+        when 0.5...0.8 then "medium"
+        else "low"
+        end
         tags << "phishdirectory:confidence:#{confidence_level}"
       end
 
@@ -396,10 +396,10 @@ module Xarf
       # Priority based on confidence
       if verdict&.confidence_score
         report[:priority] = case verdict.confidence_score
-                            when 0.9..1.0 then "high"
-                            when 0.7...0.9 then "medium"
-                            else "low"
-                            end
+        when 0.9..1.0 then "high"
+        when 0.7...0.9 then "medium"
+        else "low"
+        end
       end
 
       # Custom fields from options

@@ -96,7 +96,7 @@ class CreatePhishTables < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :phish_protections, [:protectable_type, :protectable_value], unique: true, name: "index_protections_on_type_and_value"
+    add_index :phish_protections, [ :protectable_type, :protectable_value ], unique: true, name: "index_protections_on_type_and_value"
     add_index :phish_protections, :protected_by_id
     add_index :phish_protections, :discarded_at
 

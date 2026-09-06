@@ -104,7 +104,7 @@ class CreateUsers < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :user_api_keys, [:user_id, :active]
+    add_index :user_api_keys, [ :user_id, :active ]
     add_index :user_api_keys, :key_digest, unique: true
     add_index :user_api_keys, :expires_at
     add_index :user_api_keys, :discarded_at

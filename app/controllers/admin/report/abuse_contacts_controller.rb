@@ -3,7 +3,7 @@
 module Admin
   module Report
     class AbuseContactsController < Admin::BaseController
-      before_action :set_abuse_contact, only: [:show, :edit, :update, :destroy]
+      before_action :set_abuse_contact, only: [ :show, :edit, :update, :destroy ]
 
       def index
         @abuse_contacts = ::Report::AbuseContact

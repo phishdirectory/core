@@ -3,7 +3,7 @@
 module Admin
   class ServiceWebhooksController < BaseController
     before_action :set_service
-    before_action :set_webhook, only: [:destroy]
+    before_action :set_webhook, only: [ :destroy ]
 
     def index
       @webhooks = @service.service_webhooks

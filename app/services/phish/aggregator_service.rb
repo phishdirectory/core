@@ -85,7 +85,7 @@ module Phish
       return if rate_limited.empty? || record.nil?
 
       rate_limited.each do |info|
-        wait_time = [(info[:retry_after] || 60).to_i, 5].max.seconds
+        wait_time = [ (info[:retry_after] || 60).to_i, 5 ].max.seconds
 
         PhishServiceRetryJob
           .set(wait: wait_time)
@@ -117,7 +117,7 @@ module Phish
         log_error("Service #{service.service_name} failed", e)
       end
 
-      [results, rate_limited]
+      [ results, rate_limited ]
     end
 
     def instantiate_service(name)
@@ -248,7 +248,7 @@ module Phish
           # Scores are close or below threshold - mark as suspicious
           build_result(
             verdict: "suspicious",
-            confidence: [normalized_phishing, normalized_clean].max.round(2),
+            confidence: [ normalized_phishing, normalized_clean ].max.round(2),
             details: context.merge(
               service_results: service_results,
               services_checked: results.size,

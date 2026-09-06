@@ -86,14 +86,14 @@ class QuickSearchController < ApplicationController
     user = User.find_by_public_id(query)
     return [] unless user
 
-    [format_user(user)]
+    [ format_user(user) ]
   end
 
   def search_users_by_pd_id(query)
     user = User.find_by(pd_id: query.upcase)
     return [] unless user
 
-    [format_user(user)]
+    [ format_user(user) ]
   end
 
   def search_users(query)
@@ -109,7 +109,7 @@ class QuickSearchController < ApplicationController
     service = Service.find_by_public_id(query)
     return [] unless service
 
-    [format_service(service)]
+    [ format_service(service) ]
   end
 
   def search_services(query)
@@ -121,7 +121,7 @@ class QuickSearchController < ApplicationController
     domain = Phish::Domain.find_by_public_id(query)
     return [] unless domain
 
-    [format_domain(domain)]
+    [ format_domain(domain) ]
   end
 
   def search_domains(query)
@@ -133,7 +133,7 @@ class QuickSearchController < ApplicationController
     url = Phish::Url.find_by_public_id(query)
     return [] unless url
 
-    [format_url(url)]
+    [ format_url(url) ]
   end
 
   def search_urls(query)
@@ -145,7 +145,7 @@ class QuickSearchController < ApplicationController
     phone = Phish::PhoneNumber.find_by_public_id(query)
     return [] unless phone
 
-    [format_phone_number(phone)]
+    [ format_phone_number(phone) ]
   end
 
   def search_phone_numbers(query)
@@ -157,7 +157,7 @@ class QuickSearchController < ApplicationController
     email = Phish::Email.find_by_public_id(query)
     return [] unless email
 
-    [format_email(email)]
+    [ format_email(email) ]
   end
 
   def search_emails(query)

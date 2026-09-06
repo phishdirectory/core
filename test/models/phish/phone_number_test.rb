@@ -17,7 +17,7 @@ class Phish::PhoneNumberTest < ActiveSupport::TestCase
   end
 
   test "validates E.164 format" do
-    invalid_numbers = ["1234567890", "415-555-1234", "(415) 555-1234", "+0123456789"]
+    invalid_numbers = [ "1234567890", "415-555-1234", "(415) 555-1234", "+0123456789" ]
 
     invalid_numbers.each do |num|
       phone = Phish::PhoneNumber.new(phone_number: num)

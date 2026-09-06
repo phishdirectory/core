@@ -40,7 +40,7 @@ class DomainCheckTest < ActionDispatch::IntegrationTest
 
   test "can bulk check domains" do
     post api_v1_domain_bulk_path,
-         params: { domains: ["example1.com", "example2.com", "example3.com"] }.to_json,
+         params: { domains: [ "example1.com", "example2.com", "example3.com" ] }.to_json,
          headers: @headers
 
     assert_response :success

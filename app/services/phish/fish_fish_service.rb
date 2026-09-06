@@ -203,6 +203,5 @@ module Phish
         false
       end
     end
-
   end
 end

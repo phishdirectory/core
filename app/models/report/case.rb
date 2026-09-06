@@ -163,7 +163,7 @@ class Report::Case < ApplicationRecord
   def mark_for_manual_review!(reason = nil)
     update!(
       requires_manual_review: true,
-      notes: [notes, "Manual review required: #{reason}"].compact.join("\n")
+      notes: [ notes, "Manual review required: #{reason}" ].compact.join("\n")
     )
   end
 end

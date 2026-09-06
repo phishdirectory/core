@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class AuthController < ApplicationController
-  before_action :redirect_if_authenticated, only: [:login, :send_magic_link, :magic_link_login, :password_login]
+  before_action :redirect_if_authenticated, only: [ :login, :send_magic_link, :magic_link_login, :password_login ]
 
   # GET /auth/login
   def login

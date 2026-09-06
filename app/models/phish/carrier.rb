@@ -41,7 +41,7 @@ class Phish::Carrier < ApplicationRecord
       result = upsert(
         { name: carrier_name.strip },
         unique_by: :name,
-        returning: [:id]
+        returning: [ :id ]
       )
 
       find(result.rows.first.first)

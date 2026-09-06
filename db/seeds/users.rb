@@ -7,10 +7,9 @@
 
 module Seeds
   class Users
-
     USERS = [
       { email: "system@phish.directory", first_name: "System", last_name: "User", access_level: :owner, pd_dev: true, staff: true },
-      { email: "jasper.mayone@phish.directory", first_name: "Jasper", last_name: "Mayone", access_level: :owner, pd_dev: true, staff: true},
+      { email: "jasper.mayone@phish.directory", first_name: "Jasper", last_name: "Mayone", access_level: :owner, pd_dev: true, staff: true }
     ].freeze
 
     def self.seed!
@@ -29,6 +28,5 @@ module Seeds
         )
         end
       end
-
   end
 end

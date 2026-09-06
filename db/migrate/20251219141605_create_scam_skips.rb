@@ -12,9 +12,9 @@ class CreateScamSkips < ActiveRecord::Migration[8.0]
 
       t.timestamps
 
-      t.index [:classifiable_type, :classifiable_id], name: "index_scam_skips_on_classifiable"
+      t.index [ :classifiable_type, :classifiable_id ], name: "index_scam_skips_on_classifiable"
       t.index :user_id
-      t.index [:user_id, :classifiable_type, :classifiable_id], name: "index_scam_skips_on_user_and_classifiable"
+      t.index [ :user_id, :classifiable_type, :classifiable_id ], name: "index_scam_skips_on_user_and_classifiable"
     end
   end
 end

@@ -12,7 +12,7 @@ class RemoveDuplicateIndexes < ActiveRecord::Migration[8.1]
   end
 
   def down
-    add_index :api_requests, [:authenticatable_type, :authenticatable_id], name: :index_api_requests_on_authenticatable, if_not_exists: true
+    add_index :api_requests, [ :authenticatable_type, :authenticatable_id ], name: :index_api_requests_on_authenticatable, if_not_exists: true
     add_index :report_submissions, :case_id, name: :index_report_submissions_on_case_id, if_not_exists: true
     add_index :scam_classifications, :user_id, name: :index_scam_classifications_on_user_id, if_not_exists: true
     add_index :scam_skips, :user_id, name: :index_scam_skips_on_user_id, if_not_exists: true

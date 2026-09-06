@@ -99,7 +99,7 @@ module Report
       browser = Ferrum::Browser.new(
         headless: true,
         timeout: 30,
-        window_size: [1280, 800]
+        window_size: [ 1280, 800 ]
       )
 
       begin
