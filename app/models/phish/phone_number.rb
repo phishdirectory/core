@@ -2,7 +2,7 @@
 
 class Phish::PhoneNumber < ApplicationRecord
   include SoftDeletable
-  include PublicIdentifiable
+  include EncodedIds::UuidIdentifiable
   include Protectable
   include Classifiable
 

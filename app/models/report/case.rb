@@ -5,7 +5,7 @@ class Report::Case < ApplicationRecord
 
   include AASM
   include SoftDeletable
-  include PublicIdentifiable
+  include EncodedIds::UuidIdentifiable
   include FlakeIdentifiable
 
   set_public_id_prefix "rpc"

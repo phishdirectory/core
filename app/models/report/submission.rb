@@ -5,7 +5,7 @@ class Report::Submission < ApplicationRecord
 
   include AASM
   include SoftDeletable
-  include PublicIdentifiable
+  include EncodedIds::UuidIdentifiable
 
   set_public_id_prefix "rsb"
 

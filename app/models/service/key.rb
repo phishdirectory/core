@@ -5,7 +5,7 @@ class Service::Key < ApplicationRecord
 
   include AASM
   include SoftDeletable
-  include PublicIdentifiable
+  include EncodedIds::UuidIdentifiable
 
   set_public_id_prefix "sak"
 

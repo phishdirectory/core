@@ -3,7 +3,7 @@
 class Report::CaseEmail < ApplicationRecord
   self.table_name = "report_case_emails"
 
-  include PublicIdentifiable
+  include EncodedIds::UuidIdentifiable
 
   set_public_id_prefix "rce"
 

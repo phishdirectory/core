@@ -4,7 +4,7 @@ class Service::Webhook < ApplicationRecord
   self.table_name = "service_webhooks"
 
   include SoftDeletable
-  include PublicIdentifiable
+  include EncodedIds::UuidIdentifiable
 
   set_public_id_prefix "swh"
 
