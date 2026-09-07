@@ -8,6 +8,7 @@
     <span>phish.directory</span>
   </a>
   <div class="flex items-center gap-1">
+    <%= link_to "Report abuse", xarf_path, class: "px-4 py-2 text-surface-600 text-sm font-medium hover:text-surface-800 transition-colors rounded-lg hover:bg-surface-100" %>
     <a href="/docs" class="px-4 py-2 text-surface-600 text-sm font-medium hover:text-surface-800 transition-colors rounded-lg hover:bg-surface-100">Docs</a>
     <% if user_signed_in? %>
       <%= link_to "Dashboard", dashboard_root_path, class: "ml-2 px-4 py-2 bg-surface-900 text-surface-0 text-sm font-medium rounded-lg hover:bg-surface-800 transition-colors" %>

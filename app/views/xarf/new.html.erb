@@ -1,0 +1,113 @@
+<% content_for :title, "XARF Report Generator" %>
+<% content_for :description, "Paste a phishing link and get a XARF v4 abuse report you can send to the registrar or hosting provider. No JSON required." %>
+
+<%# Navigation %>
+<nav class="fixed top-0 left-0 right-0 px-6 lg:px-12 py-4 flex items-center justify-between z-50 bg-surface-0/80 backdrop-blur-xl">
+  <a href="<%= root_path %>" class="flex items-center gap-2.5 text-surface-900 font-semibold text-base tracking-tight">
+    <%= image_tag "phish-logo.png", alt: "phish.directory", class: "w-8 h-8 rounded-lg shadow-[0_0_15px_rgba(34,211,238,0.25)]" %>
+    <span>phish.directory</span>
+  </a>
+  <div class="flex items-center gap-1">
+    <a href="/docs" class="px-4 py-2 text-surface-600 text-sm font-medium hover:text-surface-800 transition-colors rounded-lg hover:bg-surface-100">Docs</a>
+    <% if user_signed_in? %>
+      <%= link_to "Dashboard", dashboard_root_path, class: "ml-2 px-4 py-2 bg-surface-900 text-surface-0 text-sm font-medium rounded-lg hover:bg-surface-800 transition-colors" %>
+    <% else %>
+      <%= link_to "Sign in", login_path, class: "px-4 py-2 text-surface-600 text-sm font-medium hover:text-surface-800 transition-colors rounded-lg hover:bg-surface-100" %>
+    <% end %>
+  </div>
+</nav>
+
+<main class="pt-28 pb-20 px-6 max-w-3xl mx-auto">
+  <header class="mb-10">
+    <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-surface-900 mb-3">
+      Report abuse without writing JSON
+    </h1>
+    <p class="text-surface-600 leading-relaxed">
+      Some providers only accept abuse reports in
+      <a href="https://xarf.org" class="text-accent hover:underline" rel="noopener">XARF</a>
+      format. Paste the link you found. We check it against our threat intelligence
+      sources, and if it really is malicious we build the report for you.
+    </p>
+  </header>
+
+  <%# Input ------------------------------------------------------------- %>
+  <%= render "shared/card", title: "What did you find?" do %>
+    <div class="p-5">
+      <%# Turbo Drive discards a 200 HTML response to a form post ("Form
+          responses must redirect to another location") and the page silently
+          never updates. This action answers with the result rather than a
+          redirect, so it submits as an ordinary form. %>
+      <%= form_with url: xarf_path, method: :post, data: { turbo: false }, class: "space-y-4" do |f| %>
+        <fieldset>
+          <legend class="text-xs font-medium text-surface-500 uppercase tracking-wide mb-2">Kind of report</legend>
+          <div class="flex gap-2">
+            <% [ [ "url", "Full link" ], [ "domain", "Domain only" ] ].each do |value, label| %>
+              <% checked = (@result&.type || "url") == value %>
+              <label class="flex-1 cursor-pointer">
+                <%= f.radio_button :type, value, checked: checked, class: "sr-only peer" %>
+                <span class="block text-center px-4 py-2.5 rounded-md border text-sm font-medium transition-colors
+                             border-surface-300/50 bg-surface-200 text-surface-600
+                             peer-checked:border-accent peer-checked:bg-accent/10 peer-checked:text-accent
+                             hover:border-surface-400"><%= label %></span>
+              </label>
+            <% end %>
+          </div>
+        </fieldset>
+
+        <div>
+          <%# A placeholder is not a label: it disappears the moment someone
+              types, and is not reliably announced. %>
+          <%= f.label :value, "Link or domain", class: "block text-xs font-medium text-surface-500 uppercase tracking-wide mb-2" %>
+          <%= f.text_field :value,
+                value: @result&.value,
+                placeholder: "https://secure-login.example.com/verify",
+                class: "w-full px-3 py-2.5 bg-surface-200 border border-surface-300/50 rounded-md text-surface-900 placeholder-surface-500 text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 font-mono transition-colors",
+                autocomplete: "off",
+                autocapitalize: "off",
+                spellcheck: "false",
+                autofocus: true %>
+        </div>
+
+        <%= f.submit "Generate report",
+              class: "w-full sm:w-auto px-5 py-2.5 bg-surface-900 text-surface-0 font-medium text-sm rounded-md hover:bg-surface-800 transition-colors cursor-pointer disabled:opacity-60" %>
+      <% end %>
+    </div>
+  <% end %>
+
+  <%# Result ------------------------------------------------------------ %>
+  <div class="mt-6">
+    <% if @result.nil? %>
+      <%= render "shared/card", title: "Your report" do %>
+        <%= render "shared/empty_state",
+              title: "Nothing to report yet",
+              subtitle: "Paste a link above. We only build a report when our sources agree the link is malicious.",
+              icon: :search %>
+      <% end %>
+
+    <% elsif @result.reportable? %>
+      <%= render "xarf/report", result: @result, submitted_case: @submitted_case %>
+
+    <% else %>
+      <%= render "xarf/not_reportable", result: @result %>
+    <% end %>
+  </div>
+
+  <%# What to do with it ------------------------------------------------ %>
+  <section class="mt-10 text-sm text-surface-500 leading-relaxed">
+    <h2 class="text-xs font-medium text-surface-500 uppercase tracking-wide mb-3">What to do with the report</h2>
+    <p class="mb-2">
+      Email the JSON to the provider's abuse address, or paste it into their abuse form.
+      Digital Ocean, for one, asks for XARF at
+      <span class="font-mono text-surface-600">abuse@digitalocean.com</span>.
+    </p>
+    <p>
+      Building the same report from your own systems? The
+      <%= link_to "API", "/docs", class: "text-accent hover:underline" %>
+      returns the underlying verdict, and everything on this page is built from it.
+    </p>
+  </section>
+</main>
+
+<footer class="py-12 px-6 text-center">
+  <p class="text-surface-500 text-sm">&copy; <%= Date.current.year %> phish.directory</p>
+</footer>

@@ -1,0 +1,95 @@
+<%#
+  A generated XARF report, plus the two things a reporter does with it: send it
+  themselves, or ask us to send it.
+
+  Accepts:
+    result:         Xarf::PublicReportService::Result, already known reportable
+    submitted_case: Report::Case when we sent it for them, otherwise nil
+%>
+<% submitted_case = local_assigns[:submitted_case] %>
+
+<%= render "shared/card", title: "Your report", meta: result.value do %>
+  <div class="p-5">
+    <% if result.note.present? %>
+      <p class="text-xs text-surface-500 bg-surface-200/60 rounded-md px-3 py-2 mb-5"><%= result.note %></p>
+    <% end %>
+
+    <div class="flex flex-wrap items-center gap-4 mb-5">
+      <span class="text-xs font-medium text-surface-500 uppercase tracking-wide">Verdict</span>
+      <%= render "shared/badge",
+            label: result.classification.to_s.titleize,
+            tone: result.classification == "phishing" ? :danger : :warning %>
+      <% if result.confidence %>
+        <span class="text-xs text-surface-500 tabular-nums">
+          <%= (result.confidence * 100).round %>% confidence<%
+            %><% if result.sources.any? %>, <%= pluralize(result.sources.count, "source") %><% end %>
+        </span>
+      <% end %>
+    </div>
+
+    <%# The report itself. %>
+    <div data-controller="clipboard">
+      <div class="flex items-center justify-between gap-3 mb-2">
+        <h3 class="text-xs font-medium text-surface-500 uppercase tracking-wide">XARF v4 JSON</h3>
+        <div class="flex items-center gap-2">
+          <button type="button"
+                  data-clipboard-target="button"
+                  data-action="clipboard#copy"
+                  class="px-3 py-1.5 bg-surface-900 text-surface-0 text-xs font-medium rounded-md hover:bg-surface-800 transition-colors cursor-pointer">Copy</button>
+          <%= link_to "Download",
+                xarf_download_path(type: result.type, value: result.value),
+                class: "px-3 py-1.5 bg-surface-200 text-surface-700 text-xs font-medium rounded-md hover:bg-surface-300 transition-colors" %>
+        </div>
+      </div>
+      <pre class="bg-surface-200 rounded-md p-4 font-mono text-xs overflow-x-auto text-surface-700 max-h-96"
+           tabindex="0"><code data-clipboard-target="source"><%= result.json %></code></pre>
+    </div>
+
+    <%# Let us send it ------------------------------------------------- %>
+    <div class="border-t border-surface-200/50 pt-5 mt-5">
+      <h3 class="text-xs font-medium text-surface-500 uppercase tracking-wide mb-3">Or let us send it</h3>
+
+      <% if submitted_case %>
+        <div class="bg-success/10 border border-success/30 rounded-md p-4">
+          <p class="text-sm font-medium text-surface-800">
+            Case <span class="font-mono"><%= submitted_case.case_number %></span> is open.
+          </p>
+          <p class="text-xs text-surface-600 mt-1">
+            We look up the registrar and hosting provider for this domain and send the
+            report to each of them. Replies are threaded to
+            <span class="font-mono"><%= submitted_case.email_address %></span>.
+          </p>
+        </div>
+
+      <% elsif user_signed_in? %>
+        <p class="text-sm text-surface-600 mb-3">
+          We will look up the registrar and hosting provider and send this report to
+          both, then track their replies.
+        </p>
+        <%# Answers with the result rather than a redirect, which Turbo Drive
+            would discard. See the note on the form in xarf/new. %>
+        <%= form_with url: xarf_submit_path, method: :post, data: { turbo: false } do |f| %>
+          <%= f.hidden_field :type, value: result.type %>
+          <%= f.hidden_field :value, value: result.value %>
+          <%= f.submit "Send this report for me",
+                class: "px-5 py-2.5 bg-surface-900 text-surface-0 font-medium text-sm rounded-md hover:bg-surface-800 transition-colors cursor-pointer disabled:opacity-60" %>
+        <% end %>
+
+      <% else %>
+        <%# Sending puts mail in someone else's inbox under our name, so it
+            needs an account behind it. Say that plainly rather than showing a
+            button that bounces to a login page. %>
+        <p class="text-sm text-surface-600 mb-3">
+          We can send this to the registrar and hosting provider for you and track
+          the replies. That needs an account, so reports can be traced back.
+        </p>
+        <div class="flex flex-wrap gap-2">
+          <%= link_to "Sign in to send it", login_path,
+                class: "px-5 py-2.5 bg-surface-900 text-surface-0 font-medium text-sm rounded-md hover:bg-surface-800 transition-colors" %>
+          <%= link_to "Create an account", signup_path,
+                class: "px-5 py-2.5 text-surface-700 font-medium text-sm rounded-md hover:bg-surface-100 transition-colors" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>
