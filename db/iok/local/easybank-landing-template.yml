@@ -1,0 +1,40 @@
+title: Easybank Landing Page Template
+description: |
+  Identifies pages built from the Easybank landing page template, a Frontend
+  Mentor challenge that phishing kits targeting banks reuse as a starting
+  point.
+
+  This is an identification rule, not a verdict. The submission says so
+  itself: "Benign portfolio and demonstration sites can also match." Plenty of
+  developers publish their Easybank exercise, and every one of them matches.
+  The informational level keeps it out of the scoring entirely, so it annotates
+  a check with what the page was built from without ever accusing it.
+
+  Pair it with a rule that detects the phishing, and use this to explain how
+  the page was made.
+level: informational
+references:
+  - https://easybank-sage.vercel.app/
+  - https://easybank-landing-pi.vercel.app/
+  - https://easybank-landing-page-six-phi.vercel.app/
+  - https://www.frontendmentor.io/challenges/easybank-landing-page-WaUhkoDN
+
+detection:
+
+  pageTitle:
+    title|contains: "Easybank"
+
+  # The template's own copy. Requiring several of them separates a page built
+  # from the template from a page that merely mentions the word.
+  templateText:
+    html|contains|all:
+      - "Next generation digital banking"
+      - "Simple Budgeting"
+      - "Fast Onboarding"
+      - "Open Banking APIs"
+
+  condition: pageTitle and templateText
+
+tags:
+  - template_service.frontendmentor
+  - page_type.landing

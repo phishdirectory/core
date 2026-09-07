@@ -66,6 +66,35 @@ end
 - Individual services extend BaseService: `GoogleSafeBrowsingService`, `VirustotalService`, etc.
 - `AggregatorService`: Orchestrates all services, weighted scoring, authoritative source logic
 
+**IOK Detection** (`app/services/iok/`):
+Local phishing kit fingerprinting. Unlike the other services, `Phish::IokService`
+calls no vendor API: it fetches the page itself and evaluates the synced rule
+corpus against it.
+- `Iok::Indicator`: one synced rule, written by `IokSyncJob` (daily)
+- `Iok::SyncService`: pulls `indicators/*.yml` from `phish-report/IOK`
+- `Iok::Rule` / `Iok::Condition`: the Sigma matcher and its condition parser
+- `Iok::PageSnapshot`: fetches a URL into the fields a rule matches on
+- `Iok::RuleSet`: compiles the enabled indicators once per process
+- `Iok::Severity`: what a match means, derived from the rule's level and tags
+- Local rules we wrote live in `db/iok/local/*.yml`, with `source: "local"`
+- Admin: `/admin/iok_indicators` (browse, disable, change severity, sync now)
+
+Nothing matching reports `unknown` with zero confidence, never `clean`, because
+the corpus only covers kits somebody has written a rule for.
+
+Not every rule is a phishing verdict, so severity decides what a match reports:
+
+| Severity | Verdict | Confidence | Example |
+|---|---|---|---|
+| `malicious` | `phishing` | 0.9 | a kit fingerprint, the default |
+| `suspicious` | `suspicious` | 0.5 | `cloaking`, `anti-analysis`, `cloning` |
+| `informational` | none | 0.0 | `website_builder`, `template_service` |
+
+`webflow-website-creator` matches every Webflow site there is, so an
+identification rule must never produce a verdict on its own. Severity is
+recomputed on every sync; an admin correction lives in `severity_override` and
+survives.
+
 **Job Queue Priorities** (`config/solid_queue.yml`):
 1. `critical` - Security incidents, ops alerts
 2. `webhooks` - External notifications

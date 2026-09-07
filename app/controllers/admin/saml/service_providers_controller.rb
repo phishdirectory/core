@@ -80,6 +80,7 @@ module Admin
           :authn_context_class_ref,
           :sign_assertions,
           :encrypt_assertions,
+          :want_authn_requests_signed,
           :enabled,
           :service_id,
           attribute_statement: {}

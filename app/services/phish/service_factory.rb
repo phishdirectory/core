@@ -19,6 +19,7 @@ module Phish
       checkphish: "Phish::CheckphishService",
       urldna: "Phish::UrldnaService",
       hybrid_analysis: "Phish::HybridAnalysisService"
+      iok: "Phish::IokService"
     }.freeze
 
     class << self

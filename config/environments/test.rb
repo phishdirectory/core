@@ -26,6 +26,10 @@ Rails.application.configure do
   # must not depend on DNS; WebhookAddressPolicy is unit tested directly.
   config.x.webhooks.resolve_addresses = false
 
+  # Only development and production set this, so the SAML issuer and entity ID
+  # came out as a bare "/saml" under test.
+  config.x.app_host = "http://www.example.com"
+
   # Render exception templates for rescuable exceptions and raise for other exceptions.
   config.action_dispatch.show_exceptions = :rescuable
 

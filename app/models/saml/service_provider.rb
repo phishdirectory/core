@@ -35,6 +35,17 @@ module Saml
       unspecified: "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified"
     }.freeze
 
+    # saml_idp builds the NameID Format URN from the SAML version and the key,
+    # so the shape has to be { version => { key => getter } }. Giving it the
+    # URN string directly does not work. Keeping the version here is what makes
+    # emailAddress come out as 1.1 rather than 2.0.
+    NAME_ID_BUILDERS = {
+      NAME_ID_FORMATS[:email] => [ "1.1", :email_address, ->(user) { user.email } ],
+      NAME_ID_FORMATS[:persistent] => [ "2.0", :persistent, ->(user) { user.pd_id } ],
+      NAME_ID_FORMATS[:transient] => [ "2.0", :transient, ->(_user) { SecureRandom.uuid } ],
+      NAME_ID_FORMATS[:unspecified] => [ "1.1", :unspecified, ->(user) { user.email } ]
+    }.freeze
+
     # ===========================================
     # Configuration helpers
     # ===========================================
@@ -45,14 +56,35 @@ module Saml
 
     # Get the name ID for a user based on format
     def name_id_for(user)
-      case name_id_format
-      when NAME_ID_FORMATS[:email]
-        user.email
-      when NAME_ID_FORMATS[:persistent]
-        user.pd_id
-      else
-        user.email
+      _version, _key, getter = name_id_builder
+      getter.call(user)
+    end
+
+    # The name_id_formats option saml_idp expects for this provider.
+    def name_id_formats
+      version, key, getter = name_id_builder
+      { version => { key => getter } }
+    end
+
+    # saml_idp expects { friendly_name => { name:, name_format:, getter: } },
+    # not { friendly_name => value }. The values are already computed per user,
+    # so each one becomes a getter that ignores the principal and returns it.
+    def saml_attributes_for(user)
+      attributes_for(user).each_with_object({}) do |(name, value), attrs|
+        next if value.blank?
+
+        attrs[name] = { getter: ->(_principal) { value } }
       end
+    end
+
+    # SHA256 fingerprint of the provider certificate, which saml_idp needs
+    # alongside the certificate itself before it will check a request signature.
+    def certificate_fingerprint
+      return nil if certificate.blank?
+
+      SamlIdp::Fingerprint.certificate_digest(certificate, :sha256)
+    rescue OpenSSL::X509::CertificateError
+      nil
     end
 
     # Build attribute statement for SAML assertion
@@ -88,6 +120,12 @@ module Saml
         status: status,
         error_message: error_message
       )
+    end
+
+    private
+
+    def name_id_builder
+      NAME_ID_BUILDERS.fetch(name_id_format) { NAME_ID_BUILDERS.fetch(NAME_ID_FORMATS[:email]) }
     end
   end
 end
