@@ -95,6 +95,12 @@ phishdestroy_sync:
   queue: maintenance
   schedule: every 6 hours at minute 30
 
+# DigitalOcean IP ranges - decide which phishing domains DigitalOcean hosts
+digitalocean_range_sync:
+  class: DigitalOceanRangeSyncJob
+  queue: maintenance
+  schedule: every sunday at 5am
+
 # Blazer checks - run scheduled query checks
 blazer_run_checks_5_minutes:
   command: "Blazer.run_checks(schedule: '5 minutes')"

@@ -78,6 +78,40 @@ module ActiveSupport
         }.merge(attrs)
       )
     end
+
+    def create_test_abuse_contact(attrs = {})
+      Report::AbuseContact.create!(
+        {
+          name: "Test Host #{SecureRandom.hex(4)}",
+          contact_type: :hosting,
+          method: :email,
+          email: "abuse@example.com"
+        }.merge(attrs)
+      )
+    end
+
+    def create_test_report_case(confidence: 0.95, domain_info: {}, sources: [ { "service" => "TestSource" } ])
+      domain = Phish::Domain.create!(domain: "bad-#{SecureRandom.hex(4)}.com")
+      verdict = Verdict.create!(
+        classification: "phishing",
+        confidence_score: confidence,
+        sources: sources
+      )
+
+      Report::Case.create!(
+        reportable: domain,
+        verdict_snapshot: verdict,
+        confidence_at_creation: confidence,
+        domain_info: domain_info
+      )
+    end
+
+    def create_test_submission(report_case, contact)
+      report_case.submissions.create!(
+        abuse_contact: contact,
+        payload: report_case.submissions.build(abuse_contact: contact).build_payload
+      )
+    end
   end
 end
 

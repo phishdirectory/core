@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Xarf
-  # Turns something a person pasted into a browser into a XARF v4 report.
+  # Turns something a person pasted into a browser into an X-ARF report.
   #
   # The point raised against XARF is that it asks an ordinary reporter to
   # hand-write JSON, which gatekeeps who is able to report abuse at all. This

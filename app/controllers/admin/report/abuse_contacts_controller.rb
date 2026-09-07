@@ -105,6 +105,7 @@ module Admin
           :organization,
           :trusted_reporter,
           :accepts_bulk,
+          :accepts_xarf,
           :priority,
           :active,
           :notes,

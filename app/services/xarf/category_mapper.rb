@@ -1,16 +1,16 @@
 # frozen_string_literal: true
 
 module Xarf
-  # Maps between phish.directory classifications and XARF v4 categories/types
+  # Maps between phish.directory classifications and the X-ARF schema 3
+  # taxonomy published at https://github.com/abusix/xarf.
   #
-  # XARF v4 Categories (7):
-  #   - connection: Network-level attacks (login_attack, port_scan, ddos, etc.)
-  #   - content: Malicious/harmful content (phishing, malware, fraud, etc.)
-  #   - copyright: IP infringement (copyright, p2p, cyberlocker, etc.)
-  #   - infrastructure: Compromised systems (botnet, compromised_server)
-  #   - messaging: Spam and bulk messaging (spam, bulk_messaging)
-  #   - reputation: Threat intel and blocklists (blocklist, threat_intelligence)
-  #   - vulnerability: Security issues (cve, open, misconfiguration)
+  # Schema 3 splits a report into a ReportClass and a ReportType. There are
+  # three classes and one type per schema file:
+  #
+  #   Content        Phishing, Malware, Copyright, Trademark, ChildAbuse, Botnet
+  #   Activity       Spam, DOS, PortScan, LoginAttack, Exploit, WebCrawler,
+  #                  Harassment, PotentiallyCompromisedAccount, Malware (RPZ)
+  #   Vulnerability  OpenService
   #
   # phish.directory Classifications:
   #   - phishing: Confirmed phishing sites
@@ -20,182 +20,121 @@ module Xarf
   #   - protected: Protected domains (whitelisted)
   #
   class CategoryMapper
-    # XARF v4 categories
-    XARF_CATEGORIES = %w[
-      connection
-      content
-      copyright
-      infrastructure
-      messaging
-      reputation
-      vulnerability
-    ].freeze
+    REPORT_CLASSES = %w[Content Activity Vulnerability].freeze
 
-    # XARF v4 types organized by category
-    XARF_TYPES = {
-      connection: %w[
-        login_attack
-        port_scan
-        ddos
-        infected_host
-        reconnaissance
-        scraping
-        sql_injection
-        vuln_scanning
+    # Types by class, taken from the schema 3 files. Malware appears twice
+    # because the RPZ schema reports it as Activity with an RPZ-Rewrite
+    # subtype, while the malware schema reports it as Content.
+    REPORT_TYPES = {
+      "Content" => %w[Phishing Malware Copyright Trademark ChildAbuse Botnet].freeze,
+      "Activity" => %w[
+        Spam
+        DOS
+        PortScan
+        LoginAttack
+        Exploit
+        PotentiallyCompromisedAccount
+        WebCrawler
+        Harassment
+        Malware
       ].freeze,
-      content: %w[
-        phishing
-        malware
-        csam
-        csem
-        exposed_data
-        brand_infringement
-        fraud
-        remote_compromise
-        suspicious_registration
-      ].freeze,
-      copyright: %w[
-        copyright
-        p2p
-        cyberlocker
-        ugc_platform
-        link_site
-        usenet
-      ].freeze,
-      infrastructure: %w[
-        botnet
-        compromised_server
-      ].freeze,
-      messaging: %w[
-        spam
-        bulk_messaging
-      ].freeze,
-      reputation: %w[
-        blocklist
-        threat_intelligence
-      ].freeze,
-      vulnerability: %w[
-        cve
-        open
-        misconfiguration
-      ].freeze
+      "Vulnerability" => %w[OpenService].freeze
     }.freeze
 
-    # Mapping from phish.directory classification to XARF category/type
+    # Mapping from phish.directory classification to X-ARF class/type.
+    #
+    # Schema 3 has no type for an unconfirmed site, so "suspicious" is reported
+    # as Phishing too. ReporterSeverity and the notes carry the confidence, so
+    # the receiving desk still sees that the finding is not confirmed.
     CLASSIFICATION_TO_XARF = {
-      "phishing" => { category: "content", type: "phishing" },
-      "suspicious" => { category: "content", type: "suspicious_registration" },
-      "clean" => nil, # Clean domains don't need XARF reports
-      "unknown" => nil, # Unknown domains don't have enough info for XARF
+      "phishing" => { report_class: "Content", report_type: "Phishing" },
+      "suspicious" => { report_class: "Content", report_type: "Phishing" },
+      "clean" => nil, # Clean domains don't need X-ARF reports
+      "unknown" => nil, # Unknown domains don't have enough info for X-ARF
       "protected" => nil # Protected domains shouldn't be reported
     }.freeze
 
-    # Mapping from XARF type to phish.directory classification
+    # Mapping from X-ARF type to phish.directory classification.
+    # nil means the type is real but outside what this directory classifies.
     XARF_TYPE_TO_CLASSIFICATION = {
-      # Content types
-      "phishing" => "phishing",
-      "malware" => "phishing",
-      "fraud" => "phishing",
-      "brand_infringement" => "suspicious",
-      "suspicious_registration" => "suspicious",
-      "exposed_data" => "suspicious",
-      "remote_compromise" => "phishing",
-      "csam" => "phishing",
-      "csem" => "phishing",
-
-      # Connection types (usually infrastructure-level, map to suspicious)
-      "login_attack" => "suspicious",
-      "port_scan" => "suspicious",
-      "ddos" => "suspicious",
-      "infected_host" => "phishing",
-      "reconnaissance" => "suspicious",
-      "scraping" => "suspicious",
-      "sql_injection" => "phishing",
-      "vuln_scanning" => "suspicious",
-
-      # Infrastructure types
-      "botnet" => "phishing",
-      "compromised_server" => "phishing",
-
-      # Messaging types
-      "spam" => "suspicious",
-      "bulk_messaging" => "suspicious",
-
-      # Reputation types (informational)
-      "blocklist" => "suspicious",
-      "threat_intelligence" => "suspicious",
-
-      # Copyright types (not typically phishing)
-      "copyright" => nil,
-      "p2p" => nil,
-      "cyberlocker" => nil,
-      "ugc_platform" => nil,
-      "link_site" => nil,
-      "usenet" => nil,
-
-      # Vulnerability types
-      "cve" => "suspicious",
-      "open" => "suspicious",
-      "misconfiguration" => "suspicious"
+      "Phishing" => "phishing",
+      "Malware" => "phishing",
+      "Botnet" => "phishing",
+      "Exploit" => "phishing",
+      "Trademark" => "suspicious",
+      "Spam" => "suspicious",
+      "LoginAttack" => "suspicious",
+      "PortScan" => "suspicious",
+      "DOS" => "suspicious",
+      "WebCrawler" => "suspicious",
+      "PotentiallyCompromisedAccount" => "suspicious",
+      "OpenService" => "suspicious",
+      "Copyright" => nil,
+      "ChildAbuse" => nil,
+      "Harassment" => nil
     }.freeze
 
-    # Confidence score adjustments based on XARF type
-    # Higher values = more confidence the mapping is accurate
+    # Confidence score for an incoming type to classification mapping.
+    # Higher values = more confidence the mapping is accurate.
     XARF_TYPE_CONFIDENCE = {
-      "phishing" => 1.0,
-      "malware" => 0.95,
-      "fraud" => 0.9,
-      "infected_host" => 0.85,
-      "botnet" => 0.85,
-      "compromised_server" => 0.8,
-      "brand_infringement" => 0.7,
-      "suspicious_registration" => 0.6,
-      "spam" => 0.5,
-      "blocklist" => 0.6,
-      "threat_intelligence" => 0.7
+      "Phishing" => 1.0,
+      "Malware" => 0.95,
+      "Botnet" => 0.85,
+      "Exploit" => 0.8,
+      "Trademark" => 0.7,
+      "Spam" => 0.5,
+      "LoginAttack" => 0.5,
+      "PortScan" => 0.5,
+      "DOS" => 0.5,
+      "WebCrawler" => 0.4,
+      "PotentiallyCompromisedAccount" => 0.6,
+      "OpenService" => 0.5
     }.freeze
 
     DEFAULT_CONFIDENCE = 0.5
 
+    # Severity thresholds. ReporterSeverity is a closed low/medium/high enum.
+    HIGH_CONFIDENCE = 0.9
+    MEDIUM_CONFIDENCE = 0.7
+
     class << self
-      # Convert phish.directory classification to XARF category/type
+      # Convert phish.directory classification to X-ARF class/type
       #
       # @param classification [String] phish.directory classification
-      # @param subtype [String, nil] optional subtype for more specific mapping
-      # @return [Hash, nil] { category:, type: } or nil if not mappable
-      def to_xarf(classification, subtype: nil)
+      # @param report_type [String, nil] optional override for a more specific type
+      # @return [Hash, nil] { report_class:, report_type: } or nil if not mappable
+      def to_xarf(classification, report_type: nil)
         mapping = CLASSIFICATION_TO_XARF[classification.to_s]
         return nil if mapping.nil?
 
-        # Allow subtype override for more specific mappings
-        if subtype && valid_xarf_type?(subtype)
-          { category: category_for_type(subtype), type: subtype }
+        if report_type && valid_report_type?(report_type)
+          { report_class: classes_for_type(report_type).first, report_type: report_type.to_s }
         else
           mapping
         end
       end
 
-      # Convert XARF category/type to phish.directory classification
+      # Convert X-ARF class/type to phish.directory classification
       #
-      # @param category [String] XARF category
-      # @param type [String] XARF type
+      # @param report_class [String] X-ARF ReportClass
+      # @param report_type [String] X-ARF ReportType
       # @return [String, nil] phish.directory classification or nil
-      def from_xarf(category, type)
-        return nil unless valid_xarf_category?(category)
-        return nil unless valid_xarf_type?(type)
+      def from_xarf(report_class, report_type)
+        return nil unless valid_report_class?(report_class)
+        return nil unless valid_report_type?(report_type)
 
-        XARF_TYPE_TO_CLASSIFICATION[type.to_s]
+        XARF_TYPE_TO_CLASSIFICATION[report_type.to_s]
       end
 
-      # Get confidence score for XARF type to classification mapping
+      # Get confidence score for an X-ARF type to classification mapping
       #
-      # @param type [String] XARF type
+      # @param report_type [String] X-ARF ReportType
       # @return [Float] confidence score (0.0 - 1.0)
-      def confidence_for_type(type)
-        XARF_TYPE_CONFIDENCE.fetch(type.to_s, DEFAULT_CONFIDENCE)
+      def confidence_for_type(report_type)
+        XARF_TYPE_CONFIDENCE.fetch(report_type.to_s, DEFAULT_CONFIDENCE)
       end
 
-      # Check if a classification is reportable via XARF
+      # Check if a classification is reportable via X-ARF
       #
       # @param classification [String] phish.directory classification
       # @return [Boolean]
@@ -203,128 +142,110 @@ module Xarf
         CLASSIFICATION_TO_XARF[classification.to_s].present?
       end
 
-      # Get the XARF category for a given type
+      # Get every ReportClass a type may appear under
       #
-      # @param type [String] XARF type
-      # @return [String, nil] XARF category or nil
-      def category_for_type(type)
-        XARF_TYPES.each do |category, types|
-          return category.to_s if types.include?(type.to_s)
-        end
-        nil
+      # @param report_type [String] X-ARF ReportType
+      # @return [Array<String>] classes, most common first
+      def classes_for_type(report_type)
+        REPORT_TYPES.select { |_klass, types| types.include?(report_type.to_s) }.keys
       end
 
-      # Validate XARF category
+      # Validate a ReportClass
       #
-      # @param category [String] XARF category
+      # @param report_class [String]
       # @return [Boolean]
-      def valid_xarf_category?(category)
-        XARF_CATEGORIES.include?(category.to_s)
+      def valid_report_class?(report_class)
+        REPORT_CLASSES.include?(report_class.to_s)
       end
 
-      # Validate XARF type
+      # Validate a ReportType
       #
-      # @param type [String] XARF type
+      # @param report_type [String]
       # @return [Boolean]
-      def valid_xarf_type?(type)
-        XARF_TYPES.values.flatten.include?(type.to_s)
+      def valid_report_type?(report_type)
+        REPORT_TYPES.values.flatten.include?(report_type.to_s)
       end
 
-      # Get all XARF types for a category
+      # Check that a type is allowed under a class
       #
-      # @param category [String, Symbol] XARF category
+      # @param report_class [String]
+      # @param report_type [String]
+      # @return [Boolean]
+      def type_in_class?(report_class, report_type)
+        REPORT_TYPES.fetch(report_class.to_s, []).include?(report_type.to_s)
+      end
+
+      # Get all types for a class
+      #
+      # @param report_class [String]
       # @return [Array<String>] list of types
-      def types_for_category(category)
-        XARF_TYPES[category.to_sym] || []
+      def types_for_class(report_class)
+        REPORT_TYPES.fetch(report_class.to_s, [])
       end
 
-      # Map verdict object to XARF category/type with full context
+      # Map a verdict onto an X-ARF class/type with full context
       #
       # @param verdict [Verdict] verdict record
-      # @return [Hash] { category:, type:, confidence:, reportable: }
+      # @return [Hash] { report_class:, report_type:, confidence:, reportable: }
       def map_verdict(verdict)
         return { reportable: false } if verdict.nil?
 
-        xarf_mapping = to_xarf(verdict.classification)
+        mapping = to_xarf(verdict.classification)
+        return { reportable: false } unless mapping
 
-        if xarf_mapping
-          {
-            category: xarf_mapping[:category],
-            type: xarf_mapping[:type],
-            confidence: verdict.confidence_score || DEFAULT_CONFIDENCE,
-            reportable: true
-          }
-        else
-          { reportable: false }
+        mapping.merge(
+          confidence: verdict.confidence_score || DEFAULT_CONFIDENCE,
+          reportable: true
+        )
+      end
+
+      # Severity for a confidence score, as the ReporterSeverity enum
+      #
+      # @param confidence [Float, nil]
+      # @return [String] "low", "medium" or "high"
+      def severity_for_confidence(confidence)
+        case confidence.to_f
+        when HIGH_CONFIDENCE.. then "high"
+        when MEDIUM_CONFIDENCE...HIGH_CONFIDENCE then "medium"
+        else "low"
         end
       end
 
-      # Get descriptive info about a XARF type
+      # Describe an X-ARF type
       #
-      # @param type [String] XARF type
-      # @return [Hash] { category:, description:, severity: }
-      def type_info(type)
-        category = category_for_type(type)
-        return nil unless category
+      # @param report_type [String] X-ARF ReportType
+      # @return [Hash, nil] { report_class:, report_type:, description: }
+      def type_info(report_type)
+        classes = classes_for_type(report_type)
+        return nil if classes.empty?
 
         {
-          category: category,
-          type: type,
-          description: type_description(type),
-          severity: type_severity(type)
+          report_class: classes.first,
+          report_type: report_type.to_s,
+          description: type_description(report_type)
         }
       end
 
       private
 
-      def type_description(type)
+      def type_description(report_type)
         {
-          # Content types
-          "phishing" => "Fraudulent attempt to obtain sensitive information",
-          "malware" => "Malicious software distribution",
-          "fraud" => "Deceptive practices for financial gain",
-          "brand_infringement" => "Unauthorized use of brand identity",
-          "suspicious_registration" => "Domain registered with suspicious patterns",
-          "exposed_data" => "Sensitive data exposure",
-          "remote_compromise" => "Remote system compromise",
-          "csam" => "Child sexual abuse material",
-          "csem" => "Child sexual exploitation material",
-
-          # Connection types
-          "login_attack" => "Brute force or credential stuffing attack",
-          "port_scan" => "Network port scanning activity",
-          "ddos" => "Distributed denial of service attack",
-          "infected_host" => "Compromised host exhibiting malicious behavior",
-          "reconnaissance" => "Information gathering for potential attack",
-          "scraping" => "Unauthorized data scraping",
-          "sql_injection" => "SQL injection attack attempt",
-          "vuln_scanning" => "Vulnerability scanning activity",
-
-          # Infrastructure types
-          "botnet" => "Part of a botnet command and control",
-          "compromised_server" => "Server showing signs of compromise",
-
-          # Messaging types
-          "spam" => "Unsolicited bulk messaging",
-          "bulk_messaging" => "High-volume messaging campaign",
-
-          # Reputation types
-          "blocklist" => "Listed on security blocklist",
-          "threat_intelligence" => "Identified in threat intelligence feed"
-        }.fetch(type.to_s, "Unknown abuse type")
-      end
-
-      def type_severity(type)
-        case type.to_s
-        when "phishing", "malware", "csam", "csem", "remote_compromise", "botnet"
-          "critical"
-        when "fraud", "infected_host", "compromised_server", "sql_injection"
-          "high"
-        when "brand_infringement", "login_attack", "ddos", "spam"
-          "medium"
-        else
-          "low"
-        end
+          "Phishing" => "Fraudulent attempt to obtain sensitive information",
+          "Malware" => "Malicious software distribution",
+          "Copyright" => "Copyright infringing content",
+          "Trademark" => "Unauthorized use of brand identity",
+          "ChildAbuse" => "Child sexual abuse material",
+          "Botnet" => "Botnet command and control",
+          "Spam" => "Unsolicited bulk messaging",
+          "DOS" => "Denial of service attack",
+          "PortScan" => "Network port scanning activity",
+          "LoginAttack" => "Brute force or credential stuffing attack",
+          "Exploit" => "Attempt to exploit a vulnerability",
+          "PotentiallyCompromisedAccount" => "Account showing signs of compromise",
+          "WebCrawler" => "Unwanted automated crawling",
+          "Harassment" => "Harassment of an individual",
+          "OpenService" => "Service exposed that should not be reachable"
+        }.fetch(report_type.to_s, "Unknown abuse type")
       end
     end
   end

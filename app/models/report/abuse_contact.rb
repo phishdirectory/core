@@ -61,6 +61,7 @@ class Report::AbuseContact < ApplicationRecord
   scope :security_vendors, -> { where(contact_type: "security_vendor") }
   scope :trusted, -> { where(trusted_reporter: true) }
   scope :by_priority, -> { order(priority: :asc) }
+  scope :with_ip_ranges, -> { where("jsonb_array_length(ip_ranges) > 0") }
 
   # Class methods
   class << self
@@ -86,13 +87,49 @@ class Report::AbuseContact < ApplicationRecord
       end
     end
 
+    # Find contact whose published IP ranges cover any of the given addresses
+    #
+    # Nameserver patterns only identify a host when the site also uses that
+    # host's DNS, which phishing sites usually do not. Matching the addresses a
+    # domain actually resolves to is what finds the provider serving the page.
+    #
+    # @param addresses [Array<String>] IP addresses the domain resolves to
+    # @return [Report::AbuseContact, nil]
+    def find_for_ip(addresses)
+      ips = Array(addresses).filter_map { |address| parse_ip(address) }
+      return nil if ips.empty?
+
+      active.with_ip_ranges.by_priority.find { |contact| contact.covers_ip?(ips) }
+    end
+
     # Get all contacts that should always receive reports
     def always_report_to
       active.trusted.by_priority
     end
+
+    private
+
+    def parse_ip(address)
+      IPAddr.new(address.to_s)
+    rescue IPAddr::InvalidAddressError
+      nil
+    end
   end
 
   # Instance methods
+
+  # Check whether any of the given addresses falls inside this contact's ranges
+  #
+  # @param addresses [Array<IPAddr>] parsed addresses
+  # @return [Boolean]
+  def covers_ip?(addresses)
+    return false if cidr_ranges.empty?
+
+    Array(addresses).any? do |address|
+      cidr_ranges.any? { |range| range.include?(address) }
+    end
+  end
+
   def operational?
     active? && kept?
   end
@@ -112,6 +149,15 @@ class Report::AbuseContact < ApplicationRecord
   end
 
   private
+
+  # DigitalOcean publishes around 1200 ranges, so parse them once per record.
+  def cidr_ranges
+    @cidr_ranges ||= Array(ip_ranges).filter_map do |range|
+      IPAddr.new(range.to_s)
+    rescue IPAddr::InvalidAddressError
+      nil
+    end
+  end
 
   def update_response_stats!
     acknowledged = submissions.where.not(acknowledged_at: nil)

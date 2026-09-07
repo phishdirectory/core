@@ -103,10 +103,10 @@ class XarfToolTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :success
-    assert_match(/XARF v4 JSON/, response.body)
-    assert_match(/xarf_version/, response.body)
-    assert_match(/&quot;4\.0\.0&quot;/, response.body)
-    assert_match(/source_identifier/, response.body)
+    assert_match(/X-ARF JSON/, response.body)
+    assert_match(/ReporterInfo/, response.body)
+    assert_match(/&quot;Version&quot;: &quot;3&quot;/, response.body)
+    assert_match(/SourceUrl/, response.body)
   end
 
   test "a clean domain produces no report and says why" do
@@ -119,7 +119,7 @@ class XarfToolTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_match(/believe it is legitimate/, response.body)
-    assert_no_match(/xarf_version/, response.body)
+    assert_no_match(/ReporterInfo/, response.body)
   end
 
   test "an unrecognised domain says nothing is known rather than that it is fine" do
@@ -181,9 +181,9 @@ class XarfToolTest < ActionDispatch::IntegrationTest
     assert_match(/attachment/, response.headers["Content-Disposition"])
 
     payload = JSON.parse(response.body)
-    assert_equal "4.0.0", payload["xarf_version"]
-    assert_equal "phishing", payload["type"]
-    assert_equal "content", payload["category"]
+    assert_equal "3", payload["Version"]
+    assert_equal "Phishing", payload.dig("Report", "ReportType")
+    assert_equal "Content", payload.dig("Report", "ReportClass")
   end
 
   test "downloading something that is not reportable redirects instead of sending an empty file" do
@@ -298,7 +298,7 @@ class XarfToolTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_match(/below the threshold/, response.body)
     # The report itself is still there to download and send by hand.
-    assert_match(/xarf_version/, response.body)
+    assert_match(/ReporterInfo/, response.body)
   end
 
   test "the reporting kill switch is honoured" do

@@ -60,10 +60,24 @@ class Report::DomainLookup < ApplicationRecord
   end
 
   # Update matched contacts based on patterns
+  #
+  # Hosting falls back to the addresses the domain resolves to. A phishing site
+  # on a DigitalOcean droplet normally keeps its registrar's nameservers, so
+  # nameserver patterns alone never identify the provider serving the page.
   def match_contacts!
     self.matched_registrar_contact = Report::AbuseContact.find_for_registrar(registrar_name)
-    self.matched_hosting_contact = Report::AbuseContact.find_for_nameservers(nameservers)
+    self.matched_hosting_contact =
+      Report::AbuseContact.find_for_nameservers(nameservers) ||
+      Report::AbuseContact.find_for_ip(resolved_addresses)
+    self.hosting_provider = matched_hosting_contact.name if matched_hosting_contact
     save!
+  end
+
+  # Every address the domain resolves to, both families
+  #
+  # @return [Array<String>]
+  def resolved_addresses
+    Array(a_records) + Array(aaaa_records)
   end
 
   # Get all matched contacts
@@ -82,6 +96,8 @@ class Report::DomainLookup < ApplicationRecord
       registrar_name: registrar_name,
       registrar_abuse_email: registrar_abuse_email,
       nameservers: nameservers,
+      a_records: a_records,
+      aaaa_records: aaaa_records,
       hosting_provider: hosting_provider,
       domain_created_at: domain_created_at&.iso8601,
       domain_expires_at: domain_expires_at&.iso8601,

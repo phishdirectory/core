@@ -112,6 +112,18 @@
         </td>
       </tr>
       <% end %>
+      <% if @domain_info["aaaa_records"].present? %>
+      <tr>
+        <th>AAAA Records</th>
+        <td>
+          <ul>
+            <% @domain_info["aaaa_records"].each do |ip| %>
+              <li><%= ip %></li>
+            <% end %>
+          </ul>
+        </td>
+      </tr>
+      <% end %>
     </table>
   </section>
   <% end %>
