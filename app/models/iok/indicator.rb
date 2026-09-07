@@ -12,14 +12,21 @@ class Iok::Indicator < ApplicationRecord
   self.table_name = "iok_indicators"
   set_public_id_prefix "iok"
 
+  # Where the rule came from. Upstream rules are replaced wholesale by the sync
+  # job; local ones live in db/iok/local and are ours to maintain.
+  SOURCES = %w[upstream local].freeze
+
   validates :slug, presence: true, uniqueness: { conditions: -> { kept } }
   validates :title, presence: true
   validates :content_digest, presence: true
+  validates :source, inclusion: { in: SOURCES }
   validate :detection_compiles
 
   normalizes :slug, with: ->(slug) { slug.to_s.strip.downcase }
 
   scope :enabled, -> { where(enabled: true) }
+  scope :upstream, -> { where(source: "upstream") }
+  scope :local, -> { where(source: "local") }
   scope :tagged, ->(tag) { where("tags @> ?", [ tag ].to_json) }
   scope :recently_synced, -> { order(synced_at: :desc) }
 
@@ -48,6 +55,7 @@ class Iok::Indicator < ApplicationRecord
       slug: slug,
       title: title,
       tags: tags,
+      source: source,
       reference_urls: reference_urls
     }
   end

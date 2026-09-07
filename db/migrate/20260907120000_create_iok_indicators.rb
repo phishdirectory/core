@@ -18,6 +18,13 @@ class CreateIokIndicators < ActiveRecord::Migration[8.1]
       t.jsonb    :detection, default: {}, null: false
       t.string   :source_url
       t.string   :content_digest, null: false
+      # "upstream" for a rule from the archive, "local" for one checked into
+      # db/iok/local. The sync job's retire step is scoped to one source, so
+      # without this the upstream pass would discard every local rule.
+      #
+      # Deliberately unindexed: a few hundred rows over three values is a
+      # sequential scan whichever way it is written.
+      t.string   :source, default: "upstream", null: false
       t.boolean  :enabled, default: true, null: false
       t.datetime :synced_at
       t.datetime :discarded_at
