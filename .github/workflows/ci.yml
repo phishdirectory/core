@@ -81,8 +81,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
+      # libvips matches the Dockerfile. ruby-vips is a direct dependency since
+      # image_processing 2.0 made the backends soft dependencies, so Bundler
+      # loads it at boot and it needs the native library present.
       - name: Install packages
-        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libpq-dev
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libpq-dev libvips
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1

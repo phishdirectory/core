@@ -30,7 +30,12 @@ gem "turbo-rails"
 gem "stimulus-rails"
 
 # Active Storage
-gem "image_processing", "~> 1.2"
+gem "image_processing", "~> 2.1"
+# image_processing 2.0 made the processor backends soft dependencies, so the
+# one we actually use has to be declared here. Rails 8.1 defaults
+# variant_processor to :vips and the Dockerfile installs libvips, not
+# ImageMagick, so vips is the backend and mini_magick was never used.
+gem "ruby-vips"
 gem "active_storage_validations"
 
 # ============================================
