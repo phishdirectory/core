@@ -32,7 +32,13 @@ Rails.application.routes.draw do
   # ===========================================
   # Admin Engines (protected by AdminConstraint)
   # ===========================================
-  constraints AdminConstraint.new(minimum_level: :admin) do
+  # These five reach further than the admin CRUD screens do. Blazer runs
+  # arbitrary SQL against the primary database, which walks around every
+  # application-level check: an admin could read credentials straight out of
+  # the tables, and creating service keys is supposed to be superadmin-only.
+  # Flipper toggles security-relevant flags, Mission Control can manipulate
+  # queued work, and PgHero and the console audits expose production internals.
+  constraints AdminConstraint.new(minimum_level: :superadmin) do
     # Feature flags UI
     mount Flipper::UI.app(Flipper) => "/admin/flipper"
 
