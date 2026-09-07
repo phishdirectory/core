@@ -460,10 +460,11 @@ GEM
       ffi (~> 1.12)
       logger
     safely_block (1.0.0)
-    saml_idp (0.16.0)
+    saml_idp (1.0.0)
       activesupport (>= 5.2)
       builder (>= 3.0)
       nokogiri (>= 1.6.2)
+      ostruct
       rexml
       xmlenc (>= 0.7.1)
     sanitize (7.0.0)
@@ -636,7 +637,7 @@ DEPENDENCIES
   rswag-ui
   rubocop-rails-omakase
   ruby-saml (~> 1.17)
-  saml_idp (~> 0.16)
+  saml_idp (~> 1.0)
   sentry-rails
   sentry-ruby
   simplecov
