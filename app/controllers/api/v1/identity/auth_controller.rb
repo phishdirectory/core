@@ -18,41 +18,27 @@ module Api
             return
           end
 
-          user = User.find_by(email: email)
+          # ::User, not User. Constant lookup walks the lexical scope and
+          # finds the Api::V1::User module (the namespace of the /user
+          # endpoints) before it reaches the model. With eager loading that
+          # module is always defined, so the unqualified form raised
+          # NoMethodError on every call in production.
+          user = ::User.find_by(email: email)
 
-          if user.nil?
-            render json: { authenticated: false }, status: :unauthorized
-            return
+          # One answer for every way this can fail. Distinguishing "no such
+          # user" from "no password set" from "not active" let any service key
+          # enumerate the user base and read account state.
+          unless user&.has_password? && user.can_authenticate? && user.authenticate(password)
+            return render json: { authenticated: false }, status: :unauthorized
           end
 
-          unless user.has_password?
-            render json: {
-              authenticated: false,
-              error: "User does not have password authentication enabled"
-            }, status: :unauthorized
-            return
-          end
-
-          unless user.can_authenticate?
-            render json: {
-              authenticated: false,
-              error: "User account is not active",
-              status: user.status
-            }, status: :unauthorized
-            return
-          end
-
-          if user.authenticate(password)
-            render json: {
-              authenticated: true,
-              pd_id: user.pd_id,
-              public_id: user.public_id,
-              email: user.email,
-              access_level: user.access_level
-            }
-          else
-            render json: { authenticated: false }, status: :unauthorized
-          end
+          render json: {
+            authenticated: true,
+            pd_id: user.pd_id,
+            public_id: user.public_id,
+            email: user.email,
+            access_level: user.access_level
+          }
         end
 
         private

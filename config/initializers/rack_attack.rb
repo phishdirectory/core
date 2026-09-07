@@ -2,8 +2,12 @@
 
 class Rack::Attack
   ### Configure Cache ###
-  # Use Rails cache for rate limiting
-  Rack::Attack.cache.store = ActiveSupport::Cache::MemoryStore.new
+  #
+  # Must be the shared cache, not a per-process one. With an in-process
+  # MemoryStore every limit below was enforced per Puma worker, so the real
+  # ceiling was the configured limit multiplied by the worker count, and every
+  # counter reset on deploy.
+  Rack::Attack.cache.store = Rails.cache
 
   ### Throttle Spammy Clients ###
   # If any single client IP is making tons of requests, then they're
@@ -13,28 +17,52 @@ class Rack::Attack
   end
 
   ### Prevent Brute-Force Login Attacks ###
-  # Throttle POST requests to /auth/login by IP address
-  throttle("logins/ip", limit: 5, period: 20.seconds) do |req|
-    req.ip if req.path == "/auth/login" && req.post?
+  #
+  # These used to point at the wrong paths. POST /auth/login is the magic link
+  # request, not the password check, so the "logins" rules throttled magic
+  # links; and /auth/send_magic_link matches no route at all, so the
+  # "magic_links" rules never fired. The actual password endpoint,
+  # POST /auth/password_login, had nothing on it but the blanket per-IP rule.
+  PASSWORD_LOGIN_PATH = "/auth/password_login"
+  MAGIC_LINK_PATH = "/auth/login"
+
+  def self.normalized_email(req)
+    req.params["email"].to_s.downcase.gsub(/\s+/, "")
   end
 
-  # Throttle POST requests to /auth/login by email param
-  throttle("logins/email", limit: 5, period: 20.seconds) do |req|
-    if req.path == "/auth/login" && req.post?
-      # Normalize email to prevent bypassing
-      req.params["email"].to_s.downcase.gsub(/\s+/, "")
-    end
+  throttle("password_logins/ip", limit: 5, period: 20.seconds) do |req|
+    req.ip if req.path == PASSWORD_LOGIN_PATH && req.post?
+  end
+
+  # Per-account, so rotating source IPs does not buy an attacker unlimited
+  # attempts against one person's password.
+  throttle("password_logins/email", limit: 5, period: 20.seconds) do |req|
+    normalized_email(req).presence if req.path == PASSWORD_LOGIN_PATH && req.post?
+  end
+
+  # A slower sustained limit on top of the burst limit above.
+  throttle("password_logins/email/hourly", limit: 20, period: 1.hour) do |req|
+    normalized_email(req).presence if req.path == PASSWORD_LOGIN_PATH && req.post?
   end
 
   ### Magic Link Rate Limiting ###
   throttle("magic_links/ip", limit: 3, period: 1.minute) do |req|
-    req.ip if req.path == "/auth/send_magic_link" && req.post?
+    req.ip if req.path == MAGIC_LINK_PATH && req.post?
   end
 
   throttle("magic_links/email", limit: 3, period: 5.minutes) do |req|
-    if req.path == "/auth/send_magic_link" && req.post?
-      req.params["email"].to_s.downcase.gsub(/\s+/, "")
-    end
+    normalized_email(req).presence if req.path == MAGIC_LINK_PATH && req.post?
+  end
+
+  ### Password reset ###
+  # Also unthrottled until now, and it sends mail to an address the caller
+  # chooses.
+  throttle("password_resets/ip", limit: 5, period: 1.hour) do |req|
+    req.ip if req.path == "/auth/password/forgot" && req.post?
+  end
+
+  throttle("password_resets/email", limit: 3, period: 1.hour) do |req|
+    normalized_email(req).presence if req.path == "/auth/password/forgot" && req.post?
   end
 
   ### API Rate Limiting (Sliding Window with Burst Support) ###
@@ -75,6 +103,18 @@ class Rack::Attack
     if req.path.start_with?("/api/") && !req.path.start_with?("/api/v1/health")
       req.get_header("HTTP_X_API_KEY") || req.get_header("HTTP_AUTHORIZATION")&.gsub(/^Bearer\s+/, "")
     end
+  end
+
+  # The per-key limits above bucket on the credential itself, so probing with a
+  # different invalid key each time lands in a fresh bucket every request. This
+  # bounds unauthenticated API traffic by source instead.
+  throttle("api/unauthenticated/ip", limit: 30, period: 1.minute) do |req|
+    next unless req.path.start_with?("/api/")
+    next if req.path.start_with?("/api/v1/health")
+
+    credential = req.get_header("HTTP_X_API_KEY") ||
+                 req.get_header("HTTP_AUTHORIZATION")&.gsub(/^Bearer\s+/, "")
+    req.ip if credential.blank?
   end
 
   ### Signup Throttling ###
