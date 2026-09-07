@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_06_120004) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_06_120006) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "fuzzystrmatch"
   enable_extension "pg_catalog.plpgsql"
@@ -775,16 +775,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_06_120004) do
   end
 
   create_table "service_keys", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.string "api_key", null: false
     t.datetime "created_at", null: false
     t.datetime "discarded_at"
-    t.string "hash_key", null: false
+    t.string "key_digest", null: false
+    t.string "key_hint"
     t.text "notes"
     t.uuid "service_id", null: false
     t.enum "status", default: "active", null: false, enum_type: "service_key_status"
     t.datetime "updated_at", null: false
-    t.index ["api_key"], name: "index_service_keys_on_api_key", unique: true
     t.index ["discarded_at"], name: "index_service_keys_on_discarded_at"
+    t.index ["key_digest"], name: "index_service_keys_on_key_digest", unique: true
     t.index ["service_id"], name: "index_service_keys_on_service_id"
   end
 
@@ -880,7 +880,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_06_120004) do
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.enum "access_level", default: "user", null: false, enum_type: "access_level"
     t.datetime "confirmation_sent_at"
-    t.string "confirmation_token"
+    t.string "confirmation_token_digest"
     t.datetime "confirmed_at"
     t.datetime "created_at", null: false
     t.datetime "discarded_at"
@@ -892,13 +892,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_06_120004) do
     t.string "last_name", null: false
     t.datetime "locked_at"
     t.datetime "magic_link_expires_at"
-    t.string "magic_link_token"
+    t.string "magic_link_token_digest"
     t.datetime "magic_link_token_sent_at"
     t.datetime "magic_link_used_at"
     t.string "password_digest"
     t.datetime "password_reset_expires_at"
     t.datetime "password_reset_sent_at"
-    t.string "password_reset_token"
+    t.string "password_reset_token_digest"
     t.boolean "pd_dev", default: false, null: false
     t.string "pd_id", null: false
     t.boolean "pretend_is_not_admin", default: false, null: false
@@ -907,7 +907,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_06_120004) do
     t.enum "status", default: "active", null: false, enum_type: "status"
     t.datetime "updated_at", null: false
     t.string "username", null: false
-    t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
+    t.index ["confirmation_token_digest"], name: "index_users_on_confirmation_token_digest", unique: true
     t.index ["discarded_at"], name: "index_users_on_discarded_at"
     t.index ["email"], name: "index_users_on_email_kept", unique: true, where: "(discarded_at IS NULL)"
     t.index ["email"], name: "index_users_on_email_trgm", opclass: :gin_trgm_ops, using: :gin
@@ -915,8 +915,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_06_120004) do
     t.index ["last_api_activity_at"], name: "index_users_on_last_api_activity_at"
     t.index ["last_name"], name: "index_users_on_last_name_trgm", opclass: :gin_trgm_ops, using: :gin
     t.index ["locked_at"], name: "index_users_on_locked_at"
-    t.index ["magic_link_token"], name: "index_users_on_magic_link_token", unique: true
-    t.index ["password_reset_token"], name: "index_users_on_password_reset_token", unique: true
+    t.index ["magic_link_token_digest"], name: "index_users_on_magic_link_token_digest", unique: true
+    t.index ["password_reset_token_digest"], name: "index_users_on_password_reset_token_digest", unique: true
     t.index ["pd_id"], name: "index_users_on_pd_id", unique: true
     t.index ["pd_id"], name: "index_users_on_pd_id_trgm", opclass: :gin_trgm_ops, using: :gin
     t.index ["username"], name: "index_users_on_username_kept", unique: true, where: "(discarded_at IS NULL)"

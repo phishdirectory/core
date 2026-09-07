@@ -6,7 +6,7 @@ class WebhookTest < ActionDispatch::IntegrationTest
   setup do
     @service = create_test_service
     @key = @service.service_keys.create!(status: :active)
-    @headers = api_headers(api_key: @key.api_key)
+    @headers = api_headers(api_key: @key.plaintext_key)
   end
 
   test "service can list webhooks" do

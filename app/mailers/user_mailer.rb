@@ -15,7 +15,7 @@ class UserMailer < ApplicationMailer
 
   def magic_link
     @user = params[:user]
-    @magic_link_url = magic_link_login_url(token: @user.magic_link_token)
+    @magic_link_url = magic_link_login_url(token: params[:token])
     @expires_at = @user.magic_link_expires_at
 
     mail(
@@ -51,7 +51,7 @@ class UserMailer < ApplicationMailer
 
   def password_reset
     @user = params[:user]
-    @reset_url = reset_password_url(token: @user.password_reset_token)
+    @reset_url = reset_password_url(token: params[:token])
     @expires_at = @user.password_reset_expires_at
 
     mail(
@@ -63,7 +63,7 @@ class UserMailer < ApplicationMailer
 
   def email_confirmation
     @user = params[:user]
-    @confirmation_url = confirm_email_url(token: @user.confirmation_token)
+    @confirmation_url = confirm_email_url(token: params[:token])
 
     mail(
       to: email_address_with_name(@user.email, @user.full_name),

@@ -4,7 +4,7 @@ module Auth
   class ConfirmationsController < ApplicationController
     # GET /auth/confirm/:token
     def show
-      user = User.find_by(confirmation_token: params[:token])
+      user = User.find_by_confirmation_token(params[:token])
 
       if user.nil?
         redirect_to login_path, alert: "Invalid confirmation link."

@@ -38,7 +38,7 @@ class ApiRequestLoggingTest < ActionDispatch::IntegrationTest
 
     post api_v1_identity_authenticate_path,
          params: { email: @user.email, password: "hunter2-should-not-persist" }.to_json,
-         headers: api_headers(api_key: service_key.api_key)
+         headers: api_headers(api_key: service_key.plaintext_key)
 
     logged = ApiRequest.order(:created_at).last
     assert_not_nil logged
