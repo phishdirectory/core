@@ -18,7 +18,7 @@ module Phish
       pulsedive: "Phish::PulsediveService",
       checkphish: "Phish::CheckphishService",
       urldna: "Phish::UrldnaService",
-      hybrid_analysis: "Phish::HybridAnalysisService"
+      hybrid_analysis: "Phish::HybridAnalysisService",
       iok: "Phish::IokService"
     }.freeze
 
