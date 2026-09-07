@@ -194,6 +194,8 @@ Rails.application.routes.draw do
         member do
           post :deprecate
           post :revoke
+          post :trust
+          post :untrust
         end
       end
       resources :webhooks, controller: "service_webhooks", only: [ :index, :create, :destroy ]
@@ -305,6 +307,15 @@ Rails.application.routes.draw do
         post "check", to: "emails#check"
         get "bulk", to: "emails#bulk"
         post "bulk", to: "emails#bulk"
+      end
+
+      # Trusted source ingestion. Needs a service key marked trusted_source:
+      # these endpoints write verdicts rather than return them.
+      namespace :source do
+        post "domains", to: "entries#domains"
+        post "urls", to: "entries#urls"
+        post "emails", to: "entries#emails"
+        post "phone_numbers", to: "entries#phone_numbers"
       end
 
       # Webhooks

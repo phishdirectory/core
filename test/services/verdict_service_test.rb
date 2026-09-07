@@ -14,6 +14,36 @@ class VerdictServiceTest < ActiveSupport::TestCase
   end
 
   # ===========================================
+  # Trusted source submissions
+  # ===========================================
+
+  test "apply_trusted_source! records the classification the source supplied" do
+    verdict = VerdictService.apply_trusted_source!(
+      @domain, classification: "phishing", confidence: 0.8, source: "service:partner"
+    )
+
+    assert_equal "phishing", verdict.classification
+    assert_in_delta 0.8, verdict.confidence_score, 0.001
+    assert_equal "service:partner", verdict.metadata["trusted_source"]
+    assert_equal [ "service:partner" ], verdict.sources.map { |s| s["name"] }
+
+    @domain.reload
+    assert_equal verdict, @domain.verdict
+    assert @domain.last_checked_at.present?
+  end
+
+  test "apply_trusted_source! replaces an aggregator verdict rather than adding one" do
+    aggregated = VerdictService.update_verdict!(@domain, result_for("clean"))
+    trusted = VerdictService.apply_trusted_source!(
+      @domain.reload, classification: "phishing", confidence: 1.0, source: "service:partner"
+    )
+
+    assert_equal aggregated.id, trusted.id
+    assert_equal "phishing", trusted.classification
+    assert_not trusted.metadata.key?("service_results")
+  end
+
+  # ===========================================
   # Creating and updating
   # ===========================================
 

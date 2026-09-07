@@ -9,7 +9,47 @@
   <div class="space-y-8 not-prose">
     <div class="border-l-2 border-cyan-accent pl-6">
       <div class="flex items-center gap-3 mb-2">
-        <span class="px-2 py-1 bg-cyan-accent/15 text-cyan-accent rounded font-mono text-xs font-semibold">v1.1.0</span>
+        <span class="px-2 py-1 bg-cyan-accent/15 text-cyan-accent rounded font-mono text-xs font-semibold">v1.2.0</span>
+        <span class="text-slate-500 text-sm">September 2026</span>
+      </div>
+      <h3 class="text-lg font-semibold text-slate-100 mb-2">Trusted Source Ingestion</h3>
+      <ul class="text-slate-300 space-y-2">
+        <li class="flex items-start gap-2">
+          <span class="text-emerald-500 mt-1">+</span>
+          <span>Trusted source keys, which push your own verdicts to us instead of asking for ours</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="text-emerald-500 mt-1">+</span>
+          <span>
+            New endpoints:
+            <code class="text-cyan-accent">POST /v1/source/domains</code>,
+            <code class="text-cyan-accent">/v1/source/urls</code>,
+            <code class="text-cyan-accent">/v1/source/emails</code> and
+            <code class="text-cyan-accent">/v1/source/phone_numbers</code>
+          </span>
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="text-emerald-500 mt-1">+</span>
+          <span>Submissions upsert, so you can push the same feed as often as you like (max 1000 entries per request)</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="text-emerald-500 mt-1">+</span>
+          <span>Per-entry results, so one bad entry does not fail the batch</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="text-emerald-500 mt-1">+</span>
+          <span>Every verdict you write names your service, so records show who classified them</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="text-emerald-500 mt-1">+</span>
+          <span><%= link_to "Trusted Sources documentation", docs_page_path(page: "trusted-sources"), class: "text-cyan-accent hover:underline" %></span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="border-l-2 border-slate-600 pl-6">
+      <div class="flex items-center gap-3 mb-2">
+        <span class="px-2 py-1 bg-slate-600/30 text-slate-400 rounded font-mono text-xs font-semibold">v1.1.0</span>
         <span class="text-slate-500 text-sm">December 2024</span>
       </div>
       <h3 class="text-lg font-semibold text-slate-100 mb-2">Automated Reporting & New Detection Sources</h3>

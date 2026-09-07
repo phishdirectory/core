@@ -16,6 +16,9 @@ class Service::Key < ApplicationRecord
   has_many :usages, class_name: "Service::KeyUsage", foreign_key: :key_id, dependent: :destroy
   has_many :api_requests, as: :authenticatable, dependent: :destroy
 
+  # Scopes
+  scope :trusted_sources, -> { where(trusted_source: true) }
+
   # API key prefix-free by design: service keys are distinguished from user
   # keys (pdat_*) by the absence of a prefix.
   KEY_BYTES = 24
@@ -55,6 +58,21 @@ class Service::Key < ApplicationRecord
 
   def usable?
     active? && service.operational?
+  end
+
+  # True when this key may push its own verdicts into the database through
+  # Api::V1::Source::EntriesController. Trust alone is not enough: a revoked
+  # key, or one belonging to a suspended service, writes nothing.
+  def trusted_source_writer?
+    trusted_source? && usable?
+  end
+
+  def mark_trusted_source!
+    update!(trusted_source: true)
+  end
+
+  def unmark_trusted_source!
+    update!(trusted_source: false)
   end
 
   # ===========================================

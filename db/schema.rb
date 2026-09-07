@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_06_120006) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_07_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "fuzzystrmatch"
   enable_extension "pg_catalog.plpgsql"
@@ -782,6 +782,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_06_120006) do
     t.text "notes"
     t.uuid "service_id", null: false
     t.enum "status", default: "active", null: false, enum_type: "service_key_status"
+    t.boolean "trusted_source", default: false, null: false
     t.datetime "updated_at", null: false
     t.index ["discarded_at"], name: "index_service_keys_on_discarded_at"
     t.index ["key_digest"], name: "index_service_keys_on_key_digest", unique: true

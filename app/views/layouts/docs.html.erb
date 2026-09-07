@@ -70,6 +70,9 @@
           <%= link_to docs_page_path(page: 'reporting'), class: "flex items-center px-2.5 py-2 rounded-md text-sm font-medium transition-colors #{params[:page] == 'reporting' ? 'bg-accent/10 text-accent' : 'text-surface-600 hover:bg-surface-100 hover:text-surface-800'}" do %>
             <span>Automated Reporting</span>
           <% end %>
+          <%= link_to docs_page_path(page: 'trusted-sources'), class: "flex items-center px-2.5 py-2 rounded-md text-sm font-medium transition-colors #{params[:page] == 'trusted-sources' ? 'bg-accent/10 text-accent' : 'text-surface-600 hover:bg-surface-100 hover:text-surface-800'}" do %>
+            <span>Trusted Sources</span>
+          <% end %>
         </div>
 
         <div class="mb-6">

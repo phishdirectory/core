@@ -1,0 +1,233 @@
+<% content_for :title, "Trusted Sources" %>
+
+<div class="prose prose-invert max-w-none">
+  <h1 class="text-4xl font-bold text-slate-100 mb-4">Trusted Sources</h1>
+  <p class="text-xl text-slate-400 mb-8">
+    Push your own verdicts into phish.directory instead of asking us for ours.
+  </p>
+
+  <p class="text-slate-400 mb-6">
+    Every other endpoint answers the question "what do you know about this value?".
+    The trusted source endpoints answer the opposite one. You already know, and we
+    record what you tell us. A submission creates the record if we have never seen
+    the value, and replaces its verdict if we have. Our upstream checks do not run.
+  </p>
+
+  <div class="bg-pd-secondary border border-slate-700/20 rounded-xl p-4 not-prose mb-8">
+    <div class="font-semibold text-slate-100 mb-1">Base URL</div>
+    <code class="text-cyan-accent">https://phish.directory/api</code>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Access</h2>
+
+  <p class="text-slate-400 mb-4">
+    These endpoints need a service key marked as a trusted source. A user API key
+    (<code class="text-cyan-accent">pdat_*</code>) cannot call them, whatever the
+    user's access level. Ask us to mark one of your service keys as a trusted
+    source. We recommend a separate key from the one you read with, so you can
+    revoke ingestion without losing lookups.
+  </p>
+
+  <p class="text-slate-400 mb-8">
+    A request from any other key returns
+    <code class="text-cyan-accent">403 Forbidden</code>.
+  </p>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Endpoints</h2>
+
+  <div class="not-prose space-y-4 mb-8">
+    <div class="bg-pd-secondary border border-slate-700/20 rounded-xl p-5">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="px-2 py-1 bg-blue-500/15 text-blue-500 rounded font-mono text-xs font-semibold">POST</span>
+        <code class="text-slate-100 font-mono">/v1/source/domains</code>
+      </div>
+      <p class="text-slate-400 text-sm mb-4">Upsert domains and their verdicts.</p>
+
+      <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Parameters</div>
+      <table class="w-full text-sm mb-4">
+        <tr class="border-b border-slate-700/20">
+          <td class="py-2 pr-4"><code class="text-cyan-accent">domains</code></td>
+          <td class="py-2 pr-4 text-slate-500">array</td>
+          <td class="py-2 pr-4"><span class="text-red-400 text-xs">required</span></td>
+          <td class="py-2 text-slate-400">Strings, or objects. Max 1000 per request.</td>
+        </tr>
+        <tr class="border-b border-slate-700/20">
+          <td class="py-2 pr-4"><code class="text-cyan-accent">classification</code></td>
+          <td class="py-2 pr-4 text-slate-500">string</td>
+          <td class="py-2 pr-4"><span class="text-slate-500 text-xs">optional</span></td>
+          <td class="py-2 text-slate-400">Applies to every entry that states none of its own.</td>
+        </tr>
+        <tr class="border-b border-slate-700/20">
+          <td class="py-2 pr-4"><code class="text-cyan-accent">confidence</code></td>
+          <td class="py-2 pr-4 text-slate-500">number</td>
+          <td class="py-2 pr-4"><span class="text-slate-500 text-xs">optional</span></td>
+          <td class="py-2 text-slate-400">0 to 1. Defaults to 1.0.</td>
+        </tr>
+      </table>
+
+      <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Example Request</div>
+      <div class="bg-pd-tertiary rounded-lg p-4 font-mono text-sm mb-4">
+<pre class="text-slate-100">{
+  "domains": [
+    { "domain": "evil.example", "classification": "phishing", "confidence": 0.99 },
+    { "domain": "unsure.example", "classification": "suspicious" }
+  ]
+}</pre>
+      </div>
+
+      <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Example Response</div>
+      <div class="bg-pd-tertiary rounded-lg p-4 font-mono text-sm">
+<pre class="text-slate-100">{
+  "results": [
+    {
+      "value": "evil.example",
+      "status": "created",
+      "id": "dom_4k8xJm2pN9qW",
+      "classification": "phishing",
+      "confidence": 0.99,
+      "verdict_id": "vrd_7fQ2xR4tL1mZ"
+    },
+    {
+      "value": "unsure.example",
+      "status": "updated",
+      "id": "dom_9pW3kL6nT2vB",
+      "classification": "suspicious",
+      "confidence": 1.0,
+      "verdict_id": "vrd_2mN8jH5qC7xD"
+    }
+  ],
+  "counts": { "created": 1, "updated": 1 },
+  "count": 2
+}</pre>
+      </div>
+    </div>
+
+    <div class="bg-pd-secondary border border-slate-700/20 rounded-xl p-5">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="px-2 py-1 bg-blue-500/15 text-blue-500 rounded font-mono text-xs font-semibold">POST</span>
+        <code class="text-slate-100 font-mono">/v1/source/urls</code>
+      </div>
+      <p class="text-slate-400 text-sm mb-4">
+        Same shape. The array parameter is <code class="text-cyan-accent">urls</code>
+        and an object entry carries <code class="text-cyan-accent">url</code>.
+      </p>
+    </div>
+
+    <div class="bg-pd-secondary border border-slate-700/20 rounded-xl p-5">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="px-2 py-1 bg-blue-500/15 text-blue-500 rounded font-mono text-xs font-semibold">POST</span>
+        <code class="text-slate-100 font-mono">/v1/source/emails</code>
+      </div>
+      <p class="text-slate-400 text-sm mb-4">
+        Same shape. The array parameter is <code class="text-cyan-accent">emails</code>
+        and an object entry carries <code class="text-cyan-accent">email</code>.
+      </p>
+    </div>
+
+    <div class="bg-pd-secondary border border-slate-700/20 rounded-xl p-5">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="px-2 py-1 bg-blue-500/15 text-blue-500 rounded font-mono text-xs font-semibold">POST</span>
+        <code class="text-slate-100 font-mono">/v1/source/phone_numbers</code>
+      </div>
+      <p class="text-slate-400 text-sm mb-4">
+        Same shape. The array parameter is
+        <code class="text-cyan-accent">phone_numbers</code> and an object entry
+        carries <code class="text-cyan-accent">phone_number</code>. Numbers must be
+        in E.164 format, for example <code class="text-cyan-accent">+14155551234</code>.
+      </p>
+    </div>
+  </div>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Entry Shape</h2>
+
+  <p class="text-slate-400 mb-4">
+    An entry is either a bare string or an object. A bare string takes the
+    request-level <code class="text-cyan-accent">classification</code> and
+    <code class="text-cyan-accent">confidence</code>, so a feed with one
+    classification does not repeat itself:
+  </p>
+
+  <div class="bg-pd-tertiary rounded-lg p-4 font-mono text-sm mb-6 not-prose">
+<pre class="text-slate-100">{
+  "classification": "phishing",
+  "domains": ["evil.example", "worse.example"]
+}</pre>
+  </div>
+
+  <p class="text-slate-400 mb-4">An object entry accepts these fields:</p>
+
+  <table class="w-full text-sm mb-8 not-prose">
+    <tr class="border-b border-slate-700/20">
+      <td class="py-2 pr-4"><code class="text-cyan-accent">domain</code> / <code class="text-cyan-accent">url</code> / <code class="text-cyan-accent">email</code> / <code class="text-cyan-accent">phone_number</code></td>
+      <td class="py-2 text-slate-400">The value. <code class="text-cyan-accent">value</code> also works.</td>
+    </tr>
+    <tr class="border-b border-slate-700/20">
+      <td class="py-2 pr-4"><code class="text-cyan-accent">classification</code></td>
+      <td class="py-2 text-slate-400">Overrides the request-level one.</td>
+    </tr>
+    <tr class="border-b border-slate-700/20">
+      <td class="py-2 pr-4"><code class="text-cyan-accent">confidence</code></td>
+      <td class="py-2 text-slate-400">0 to 1.</td>
+    </tr>
+    <tr class="border-b border-slate-700/20">
+      <td class="py-2 pr-4"><code class="text-cyan-accent">metadata</code></td>
+      <td class="py-2 text-slate-400">Free-form object stored on the verdict. Max 4KB of JSON.</td>
+    </tr>
+  </table>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Classifications</h2>
+
+  <p class="text-slate-400 mb-4">
+    A trusted source may send <code class="text-cyan-accent">phishing</code>,
+    <code class="text-cyan-accent">suspicious</code> or
+    <code class="text-cyan-accent">clean</code>.
+  </p>
+
+  <p class="text-slate-400 mb-8">
+    <code class="text-cyan-accent">unknown</code> is refused, because it carries no
+    information and would only overwrite a verdict we already hold.
+    <code class="text-cyan-accent">protected</code> is refused too: the protected
+    list is our own operators' decision, and a source cannot hand it out.
+  </p>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Per-entry Results</h2>
+
+  <p class="text-slate-400 mb-4">
+    One bad entry does not fail the request. Every entry gets its own result, and
+    the response is <code class="text-cyan-accent">200 OK</code> as long as the
+    request itself was well formed. Each result carries a status:
+  </p>
+
+  <table class="w-full text-sm mb-8 not-prose">
+    <tr class="border-b border-slate-700/20">
+      <td class="py-2 pr-4"><code class="text-cyan-accent">created</code></td>
+      <td class="py-2 text-slate-400">We had never seen this value. The record and its verdict are new.</td>
+    </tr>
+    <tr class="border-b border-slate-700/20">
+      <td class="py-2 pr-4"><code class="text-cyan-accent">updated</code></td>
+      <td class="py-2 text-slate-400">We already held the value. Its verdict now says what you sent.</td>
+    </tr>
+    <tr class="border-b border-slate-700/20">
+      <td class="py-2 pr-4"><code class="text-cyan-accent">invalid</code></td>
+      <td class="py-2 text-slate-400">Malformed value, classification or confidence. See <code class="text-cyan-accent">reason</code>.</td>
+    </tr>
+    <tr class="border-b border-slate-700/20">
+      <td class="py-2 pr-4"><code class="text-cyan-accent">rejected</code></td>
+      <td class="py-2 text-slate-400">The value is on our protected list, so nothing was written.</td>
+    </tr>
+  </table>
+
+  <p class="text-slate-400 mb-8">
+    The request itself returns <code class="text-cyan-accent">400 Bad Request</code>
+    when the array is missing, empty, or holds more than 1000 entries.
+  </p>
+
+  <h2 class="text-2xl font-bold text-slate-100 mt-8 mb-4">Attribution</h2>
+
+  <p class="text-slate-400 mb-8">
+    Every verdict you write names your service as its source, so anyone reading the
+    record can see who classified it. Resubmitting the same value replaces the
+    verdict in place. Nothing is duplicated, so you can push the same feed as often
+    as you like.
+  </p>
+</div>
