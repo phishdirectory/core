@@ -15,6 +15,7 @@ module Phish
       openphish
       ipqualityscore
       checkphish
+      iok
     ].freeze
 
     # Upper bound on the whole aggregation, slightly above the per-request

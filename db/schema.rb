@@ -289,6 +289,30 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_150500) do
     t.index ["sluggable_type", "sluggable_id"], name: "index_friendly_id_slugs_on_sluggable_type_and_sluggable_id"
   end
 
+  create_table "iok_indicators", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "content_digest", null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.jsonb "detection", default: {}, null: false
+    t.datetime "discarded_at"
+    t.boolean "enabled", default: true, null: false
+    t.string "level"
+    t.jsonb "reference_urls", default: [], null: false
+    t.string "severity", default: "malicious", null: false
+    t.string "severity_override"
+    t.string "slug", null: false
+    t.string "source", default: "upstream", null: false
+    t.string "source_url"
+    t.datetime "synced_at"
+    t.jsonb "tags", default: [], null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["discarded_at"], name: "index_iok_indicators_on_discarded_at"
+    t.index ["enabled"], name: "index_iok_indicators_on_enabled"
+    t.index ["slug"], name: "index_iok_indicators_on_slug_kept", unique: true, where: "(discarded_at IS NULL)"
+    t.index ["tags"], name: "index_iok_indicators_on_tags", using: :gin
+  end
+
   create_table "lockbox_audits", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "context"
     t.datetime "created_at"
@@ -544,6 +568,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_150500) do
 
   create_table "report_abuse_contacts", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.boolean "accepts_bulk", default: false, null: false
+    t.boolean "accepts_xarf", default: false, null: false
     t.boolean "active", default: true, null: false
     t.text "api_endpoint_ciphertext"
     t.text "api_key_ciphertext"
@@ -603,6 +628,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_150500) do
     t.datetime "first_submitted_at"
     t.datetime "last_activity_at"
     t.text "notes"
+    t.string "public_token"
     t.uuid "reportable_id", null: false
     t.string "reportable_type", null: false
     t.boolean "requires_manual_review", default: false, null: false
@@ -614,6 +640,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_150500) do
     t.index ["case_number"], name: "index_report_cases_on_case_number", unique: true
     t.index ["case_number"], name: "index_report_cases_on_case_number_trgm", opclass: :gin_trgm_ops, using: :gin
     t.index ["discarded_at"], name: "index_report_cases_on_discarded_at"
+    t.index ["public_token"], name: "index_report_cases_on_public_token", unique: true
     t.index ["reportable_type", "reportable_id"], name: "index_report_cases_on_reportable_type_and_reportable_id"
     t.index ["requires_manual_review"], name: "index_report_cases_on_requires_manual_review"
     t.index ["status"], name: "index_report_cases_on_status"
@@ -622,6 +649,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_150500) do
 
   create_table "report_domain_lookups", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.jsonb "a_records", default: []
+    t.jsonb "aaaa_records", default: []
     t.datetime "created_at", null: false
     t.string "domain", null: false
     t.datetime "domain_created_at"
