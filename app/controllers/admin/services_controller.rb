@@ -5,7 +5,11 @@ module Admin
     before_action :set_service, except: [ :index, :new, :create ]
 
     def index
-      @services = Service.order(created_at: :desc).page(params[:page])
+      # The index prints a webhook count per row, so preload them: without
+      # this it is one query per service.
+      @services = Service.includes(:service_webhooks)
+                         .order(created_at: :desc)
+                         .page(params[:page])
     end
 
     def show

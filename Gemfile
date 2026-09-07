@@ -130,6 +130,7 @@ group :development, :test do
   gem "dotenv-rails"                # Environment variables
   gem "webmock"                     # HTTP request stubbing
   gem "minitest-mock"               # Object#stub, split out of minitest in 6.0
+  gem "simplecov", require: false    # Coverage reporting
 end
 
 group :development do

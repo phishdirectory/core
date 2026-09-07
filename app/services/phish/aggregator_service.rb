@@ -17,6 +17,11 @@ module Phish
       checkphish
     ].freeze
 
+    # Upper bound on the whole aggregation, slightly above the per-request
+    # timeout in BaseService so a single slow service still gets its full
+    # allowance without holding everything else hostage.
+    OVERALL_TIMEOUT = 35
+
     attr_reader :services
 
     def initialize(services: DEFAULT_SERVICES, logger: Rails.logger)
@@ -119,28 +124,55 @@ module Phish
     #
     # @return [Array(Array, Array, Array)] results, rate limited, failed
     def collect_service_results(method, *args)
-      results = []
-      rate_limited = []
-      failed = []
+      outcomes = call_services(method, *args)
 
-      services.each do |service|
-        result = service.public_send(method, *args)
-        results << result if result
-      rescue RateLimitError => e
-        rate_limited << {
-          service: service.service_name,
-          retry_after: e.retry_after
-        }
-        log_info("Service #{service.service_name} rate limited, retry after #{e.retry_after}s")
-      rescue ServiceError => e
-        failed << { service: service.service_name, error: e.class.name, message: e.message }
-        log_error("Service #{service.service_name} failed", e)
-      rescue StandardError => e
-        failed << { service: service.service_name, error: e.class.name, message: e.message }
-        log_error("Service #{service.service_name} raised an unexpected error", e)
-      end
+      results = outcomes.filter_map { |outcome| outcome[:result] }
+      rate_limited = outcomes.filter_map { |outcome| outcome[:rate_limited] }
+      failed = outcomes.filter_map { |outcome| outcome[:failed] }
 
       [ results, rate_limited, failed ]
+    end
+
+    # Calls every service concurrently.
+    #
+    # These are independent network calls with a 30 second timeout each. Run in
+    # sequence, one slow vendor delayed every vendor behind it and a bad
+    # afternoon could take minutes for a single lookup. Wall clock is now the
+    # slowest single service rather than the sum of all of them.
+    #
+    # Threads are the right tool here: this is IO bound, so the GVL is released
+    # for the duration of each request.
+    def call_services(method, *args)
+      threads = services.map do |service|
+        Thread.new do
+          # Each thread checks out its own connection, so it has to hand it
+          # back or the pool leaks under load.
+          ActiveRecord::Base.connection_pool.with_connection do
+            call_one_service(service, method, *args)
+          end
+        end
+      end
+
+      threads.filter_map do |thread|
+        thread.join(OVERALL_TIMEOUT)&.value || begin
+          thread.kill
+          nil
+        end
+      end
+    end
+
+    def call_one_service(service, method, *args)
+      result = service.public_send(method, *args)
+      result ? { result: result } : {}
+    rescue RateLimitError => e
+      log_info("Service #{service.service_name} rate limited, retry after #{e.retry_after}s")
+      { rate_limited: { service: service.service_name, retry_after: e.retry_after } }
+    rescue ServiceError => e
+      log_error("Service #{service.service_name} failed", e)
+      { failed: { service: service.service_name, error: e.class.name, message: e.message } }
+    rescue StandardError => e
+      log_error("Service #{service.service_name} raised an unexpected error", e)
+      { failed: { service: service.service_name, error: e.class.name, message: e.message } }
     end
 
     def instantiate_service(name)
@@ -324,14 +356,33 @@ module Phish
     # These are curated lists with high standards for inclusion
     AUTHORITATIVE_SOURCES = %w[fish_fish sinking_yachts].freeze
 
-    # Check if any authoritative source flagged as phishing
-    # Returns the result if found, nil otherwise
+    # An authoritative source short-circuits the weighted vote, so a single
+    # entry decides the verdict outright. Both of these always report a fixed
+    # high confidence and both answer from a local cache with a long TTL, which
+    # meant one stale or mistaken entry could override every other source with
+    # nothing to check it against.
+    #
+    # The override now needs either a second authoritative source, or no
+    # disagreement from anyone else. A lone authoritative hit that other
+    # services actively contradict falls through to the weighted vote, where it
+    # still carries its weight but does not get to decide alone.
     def check_authoritative_sources(results)
-      results.find do |result|
+      hits = results.select do |result|
         AUTHORITATIVE_SOURCES.include?(result[:service]) &&
           result[:verdict] == "phishing" &&
           result[:confidence] && result[:confidence] >= 0.9
       end
+
+      return nil if hits.empty?
+      return hits.first if hits.size > 1
+
+      contradicted = results.any? do |result|
+        result[:verdict] == "clean" &&
+          result[:confidence].to_f >= min_confidence &&
+          !AUTHORITATIVE_SOURCES.include?(result[:service])
+      end
+
+      contradicted ? nil : hits.first
     end
 
     # Scoring configuration from encrypted credentials

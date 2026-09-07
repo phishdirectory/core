@@ -390,8 +390,15 @@ class User < ApplicationRecord
   # Session and activity tracking
   # ===========================================
 
+  # Uses the loaded association when there is one. maximum() always issues a
+  # query, so on a list that eager loads sessions this was one SELECT MAX per
+  # row despite the includes.
   def last_seen_at
-    user_sessions.maximum(:last_seen_at)
+    if user_sessions.loaded?
+      user_sessions.filter_map(&:last_seen_at).max
+    else
+      user_sessions.maximum(:last_seen_at)
+    end
   end
 
   def last_login_at
