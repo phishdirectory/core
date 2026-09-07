@@ -22,7 +22,7 @@ module Api
             return
           end
 
-          user = User.find_by(email: email)
+          user = ::User.find_by(email: email)
 
           if user.nil?
             render json: { error: "User not found" }, status: :not_found
@@ -37,12 +37,12 @@ module Api
           user_data = user_params
 
           # Check if email already exists
-          if User.exists?(email: user_data[:email]&.downcase)
+          if ::User.exists?(email: user_data[:email]&.downcase)
             render json: { error: "Email already exists" }, status: :unprocessable_entity
             return
           end
 
-          user = User.new(user_data)
+          user = ::User.new(user_data)
           user.email_verified = true if params[:skip_confirmation]
 
           if user.save
@@ -77,11 +77,11 @@ module Api
 
         def find_user_by_identifier(id)
           if id.to_s.start_with?("PDU")
-            User.find_by!(pd_id: id)
+            ::User.find_by!(pd_id: id)
           elsif id.to_s.start_with?("usr_")
-            User.find_by_public_id!(id)
+            ::User.find_by_public_id!(id)
           else
-            User.find(id)
+            ::User.find(id)
           end
         end
 

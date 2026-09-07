@@ -110,6 +110,8 @@ gem "rollup"                        # Time-series rollups
 gem "pghero"                        # PostgreSQL monitoring
 gem "lograge"                       # Structured JSON logging
 gem "logstop"                       # PII filtering in logs
+gem "sentry-ruby"                   # Error tracking
+gem "sentry-rails"                  # Rails integration for Sentry
 
 # ============================================
 # Console Auditing (Production Security)

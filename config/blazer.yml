@@ -3,6 +3,9 @@
 
 data_sources:
   main:
+    # Prefer a dedicated read-only role. Falling back to DATABASE_URL gives
+    # the query runner write access to the primary database, which is more
+    # than a reporting tool needs.
     url: <%= Rails.application.credentials.dig(:blazer, :database_url) || ENV["BLAZER_DATABASE_URL"] || ENV["DATABASE_URL"] %>
 
     # Statement timeout, in seconds

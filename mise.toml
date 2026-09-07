@@ -1,0 +1,5 @@
+# .ruby-version is not honoured unless idiomatic version files are enabled,
+# which they are not by default in recent mise. Without this the repo picks up
+# whatever the global default happens to be and bundler fails to resolve.
+[tools]
+ruby = "3.4.7"
