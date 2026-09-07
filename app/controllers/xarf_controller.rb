@@ -2,7 +2,7 @@
 
 # The public XARF utility.
 #
-# Anyone can paste a link and get a XARF v4 report back. Sending that report to
+# Anyone can paste a link and get an X-ARF report back. Sending that report to
 # the registrar and hosting provider needs an account, because that path puts
 # mail in someone else's inbox under our name.
 class XarfController < ApplicationController
