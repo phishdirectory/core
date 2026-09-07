@@ -599,6 +599,7 @@ DEPENDENCIES
   friendly_id
   geocoder
   image_processing (~> 1.2)
+  importmap-rails
   kaminari
   letter_opener
   letter_opener_web
@@ -633,9 +634,11 @@ DEPENDENCIES
   solid_queue
   sprockets-rails
   statsd-instrument
+  stimulus-rails
   strong_migrations
   tailwindcss-rails (~> 4.4)
   thruster
+  turbo-rails
   tzinfo-data
   valid_email2
   validates_email_format_of

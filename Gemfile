@@ -22,6 +22,13 @@ gem "thruster", require: false
 # Asset Pipeline (required for admin UIs: mission_control, flipper-ui, blazer)
 gem "sprockets-rails"
 
+# JavaScript. The layouts already carry data-turbo-track, but nothing was ever
+# loading Turbo, so every navigation was a cold full page reload and every
+# data-turbo-confirm was inert.
+gem "importmap-rails"
+gem "turbo-rails"
+gem "stimulus-rails"
+
 # Active Storage
 gem "image_processing", "~> 1.2"
 gem "active_storage_validations"

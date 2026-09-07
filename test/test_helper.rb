@@ -19,8 +19,7 @@ module ActiveSupport
       session = User::Session.create_for_user(
         user,
         ip: "127.0.0.1",
-        device_info: "Test Browser",
-        user_agent: "Rails Test"
+        device_info: "Test Browser"
       )
       @session_token = session.session_token
       session
@@ -62,13 +61,13 @@ end
 
 module ActionDispatch
   class IntegrationTest
+    # Signs in through the real magic link flow, which is the only way a
+    # session cookie actually gets set.
     def sign_in(user)
-      session = sign_in_as(user)
-      # Set session cookie for integration tests
-      post login_path, params: { email: user.email }
       token = user.generate_magic_link_token
       get magic_link_login_path(token: token)
-      session
+      follow_redirect! if response.redirect?
+      user
     end
   end
 end

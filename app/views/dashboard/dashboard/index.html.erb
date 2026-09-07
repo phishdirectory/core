@@ -21,13 +21,13 @@
     <div class="bg-surface-100 rounded-lg p-5">
       <div class="text-xs font-medium text-surface-500 uppercase tracking-wide mb-1">Account Status</div>
       <div class="mt-1.5">
-        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-success/10 text-success"><%= current_user.status.titleize %></span>
+        <%= render "shared/badge", label: current_user.status.titleize, tone: account_status_tone(current_user.status) %>
       </div>
     </div>
     <div class="bg-surface-100 rounded-lg p-5">
       <div class="text-xs font-medium text-surface-500 uppercase tracking-wide mb-1">Access Level</div>
       <div class="mt-1.5">
-        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-info/10 text-info"><%= current_user.access_level.titleize %></span>
+        <%= render "shared/badge", label: current_user.access_level.titleize, tone: :info %>
       </div>
     </div>
   </div>
