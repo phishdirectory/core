@@ -85,6 +85,11 @@ class ApiRequestTest < ActiveSupport::TestCase
   end
 
   test "scopes filter correctly" do
+    # Pin the clock to midday. The offsets below reach back three hours, which
+    # crosses midnight (and drops out of the `today` scope) whenever the suite
+    # runs in the first two hours of a UTC day.
+    travel_to Time.current.beginning_of_day + 12.hours
+
     # Create some test requests
     3.times do |i|
       ApiRequest.create!(
