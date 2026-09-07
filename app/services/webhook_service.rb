@@ -40,8 +40,15 @@ class WebhookService
 
     private
 
+    # Only endpoints that asked for this event receive it. Previously every
+    # webhook received every event, so user.created delivered a new user's
+    # email address to every registered endpoint of every service.
     def broadcast_event(event, payload)
-      Service::Webhook.includes(:service).find_each do |webhook|
+      unless Service::Webhook::EVENTS.include?(event)
+        raise ArgumentError, "Unknown webhook event: #{event}"
+      end
+
+      Service::Webhook.subscribed_to(event).includes(:service).find_each do |webhook|
         webhook.deliver(event: event, payload: payload)
       rescue StandardError => e
         Rails.logger.error "[WebhookService] Failed to queue webhook delivery: #{e.message}"
