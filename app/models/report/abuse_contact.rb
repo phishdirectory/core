@@ -75,17 +75,22 @@ class Report::AbuseContact < ApplicationRecord
       end
     end
 
-    # Find contact matching nameservers
-    def find_for_nameservers(nameservers)
-      return nil if nameservers.blank?
+    # Find contact matching any hostname the domain's zone points at
+    #
+    # Nameservers, CNAME targets, reverse lookups and MX exchanges all name a
+    # provider the same way, so one list of globs per contact matches all of
+    # them. A CNAME is often the only record that names the platform serving a
+    # phishing page, because its addresses are shared anycast ones.
+    #
+    # @param hostnames [Array<String>] hostnames from the zone
+    # @return [Report::AbuseContact, nil]
+    def find_for_hostnames(hostnames)
+      hostnames = Array(hostnames).compact_blank
+      return nil if hostnames.empty?
 
-      active.find do |contact|
-        patterns = contact.nameserver_patterns || []
-        patterns.any? do |pattern|
-          nameservers.any? { |ns| File.fnmatch?(pattern, ns, File::FNM_CASEFOLD) }
-        end
-      end
+      active.by_priority.find { |contact| contact.matches_hostname?(hostnames) }
     end
+    alias_method :find_for_nameservers, :find_for_hostnames
 
     # Find contact whose published IP ranges cover any of the given addresses
     #
@@ -117,6 +122,30 @@ class Report::AbuseContact < ApplicationRecord
   end
 
   # Instance methods
+
+  # Check whether any of the given hostnames matches this contact's patterns
+  #
+  # A bare pattern also matches its own subdomains, so "digitalocean.com"
+  # covers "ns1.digitalocean.com" without every entry needing a glob.
+  #
+  # @param hostnames [Array<String>] hostnames from the zone
+  # @return [Boolean]
+  def matches_hostname?(hostnames)
+    patterns = Array(hostname_patterns).compact_blank
+    return false if patterns.empty?
+
+    names = Array(hostnames).map { |name| name.to_s.downcase.chomp(".") }
+
+    patterns.any? do |pattern|
+      pattern = pattern.to_s.downcase.chomp(".")
+
+      names.any? do |name|
+        File.fnmatch?(pattern, name, File::FNM_CASEFOLD) ||
+          name == pattern ||
+          name.end_with?(".#{pattern}")
+      end
+    end
+  end
 
   # Check whether any of the given addresses falls inside this contact's ranges
   #

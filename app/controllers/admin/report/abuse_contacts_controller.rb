@@ -111,7 +111,7 @@ module Admin
           :notes,
           web_form_fields: {},
           registrar_patterns: [],
-          nameserver_patterns: [],
+          hostname_patterns: [],
           ip_ranges: []
         )
       end

@@ -122,7 +122,7 @@ module Report
       when :notes
         # Append notes rather than replace
         false
-      when :registrar_patterns, :nameserver_patterns, :ip_ranges
+      when :registrar_patterns, :hostname_patterns, :ip_ranges
         # Merge arrays
         false
       else
