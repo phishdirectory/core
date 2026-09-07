@@ -1,7 +1,12 @@
 # frozen_string_literal: true
 
 module Xarf
-  # Generates XARF v4 compliant reports from phish.directory data
+  # Generates X-ARF reports from phish.directory data.
+  #
+  # Output follows schema 3 of https://github.com/abusix/xarf, which is the
+  # newest published schema. It is PascalCase and nests everything under
+  # ReporterInfo and Report. Abuse desks with automated tooling validate
+  # against it, so the same document serves the admin UI and the wire.
   #
   # Usage:
   #   generator = Xarf::ReportGenerator.new
@@ -15,16 +20,20 @@ module Xarf
   #   # Generate from a verdict
   #   report = generator.generate_for_verdict(verdict, source_type: :domain, source: domain)
   #
+  #   # Generate the document that goes out as an email's xarf.json attachment
+  #   report = generator.generate_for_submission(submission)
+  #
   #   # Get JSON
   #   report.to_json
   #
   class ReportGenerator
-    XARF_VERSION = "4.0.0"
+    SCHEMA_VERSION = "3"
 
     DEFAULT_REPORTER = {
       org: "phish.directory",
-      contact: "abuse@phish.directory",
-      domain: "phish.directory"
+      domain: "phish.directory",
+      email: "reports@phish.directory",
+      contact_name: "phish.directory Automated Reporting"
     }.freeze
 
     attr_reader :reporter
@@ -33,11 +42,11 @@ module Xarf
       @reporter = reporter || DEFAULT_REPORTER
     end
 
-    # Generate a XARF report for a Phish::Domain record
+    # Generate an X-ARF report for a Phish::Domain record
     #
     # @param domain [Phish::Domain] domain record
     # @param options [Hash] additional options
-    # @return [Hash] XARF v4 compliant report
+    # @return [Hash] X-ARF schema 3 report
     def generate_for_domain(domain, **options)
       raise ArgumentError, "Domain required" if domain.nil?
 
@@ -49,22 +58,18 @@ module Xarf
       end
 
       build_report(
-        source_identifier: domain.domain,
-        source_type: :domain,
-        category: mapping[:category],
-        type: mapping[:type],
-        confidence: mapping[:confidence],
+        source_url: "https://#{domain.domain}",
+        mapping: mapping,
         verdict: verdict,
-        record: domain,
         **options
       )
     end
 
-    # Generate a XARF report for a Phish::Url record
+    # Generate an X-ARF report for a Phish::Url record
     #
     # @param url [Phish::Url] URL record
     # @param options [Hash] additional options
-    # @return [Hash] XARF v4 compliant report
+    # @return [Hash] X-ARF schema 3 report
     def generate_for_url(url, **options)
       raise ArgumentError, "URL required" if url.nil?
 
@@ -76,25 +81,20 @@ module Xarf
       end
 
       build_report(
-        source_identifier: url.domain || url.url,
-        source_type: :url,
-        category: mapping[:category],
-        type: mapping[:type],
-        confidence: mapping[:confidence],
+        source_url: url.url,
+        mapping: mapping,
         verdict: verdict,
-        record: url,
-        url: url.url,
         **options
       )
     end
 
-    # Generate a XARF report for a Verdict with a specified source
+    # Generate an X-ARF report for a Verdict with a specified source
     #
     # @param verdict [Verdict] verdict record
     # @param source_type [Symbol] :domain or :url
     # @param source [String] the source identifier
     # @param options [Hash] additional options
-    # @return [Hash] XARF v4 compliant report
+    # @return [Hash] X-ARF schema 3 report
     def generate_for_verdict(verdict, source_type:, source:, **options)
       raise ArgumentError, "Verdict required" if verdict.nil?
       raise ArgumentError, "Source required" if source.blank?
@@ -105,22 +105,44 @@ module Xarf
         return { error: "Verdict classification not reportable via XARF" }
       end
 
+      source_url = source_type.to_sym == :url ? source : "https://#{source}"
+
+      build_report(source_url: source_url, mapping: mapping, verdict: verdict, **options)
+    end
+
+    # Generate the document that goes out as an abuse report's xarf.json.
+    #
+    # A submission carries case context the other entry points do not have: the
+    # case number, the address replies thread back to, and the addresses the
+    # domain resolved to when the case was opened.
+    #
+    # @param submission [Report::Submission] submission record
+    # @param options [Hash] additional options
+    # @return [Hash] X-ARF schema 3 report
+    def generate_for_submission(submission, **options)
+      raise ArgumentError, "Submission required" if submission.nil?
+
+      report_case = submission.case
+      payload = (submission.payload.presence || submission.build_payload).with_indifferent_access
+
       build_report(
-        source_identifier: source,
-        source_type: source_type,
-        category: mapping[:category],
-        type: mapping[:type],
-        confidence: mapping[:confidence],
-        verdict: verdict,
+        source_url: payload[:url].presence || "https://#{payload[:domain] || report_case.domain_name}",
+        mapping: submission_mapping(payload),
+        source_ip: case_source_ip(report_case),
+        detected_at: payload[:detected_at],
+        sources: payload[:sources],
+        case_reference: payload[:case_reference] || report_case.case_number,
+        # Replies to this address thread back onto the case.
+        contact_email: report_case.email_address,
         **options
       )
     end
 
-    # Generate bulk XARF reports for multiple domains
+    # Generate bulk X-ARF reports for multiple domains
     #
     # @param domains [Array<Phish::Domain>] array of domain records
     # @param options [Hash] additional options
-    # @return [Array<Hash>] array of XARF reports
+    # @return [Array<Hash>] array of X-ARF reports
     def generate_bulk_for_domains(domains, **options)
       domains.filter_map do |domain|
         report = generate_for_domain(domain, **options)
@@ -128,11 +150,11 @@ module Xarf
       end
     end
 
-    # Generate bulk XARF reports for multiple URLs
+    # Generate bulk X-ARF reports for multiple URLs
     #
     # @param urls [Array<Phish::Url>] array of URL records
     # @param options [Hash] additional options
-    # @return [Array<Hash>] array of XARF reports
+    # @return [Array<Hash>] array of X-ARF reports
     def generate_bulk_for_urls(urls, **options)
       urls.filter_map do |url|
         report = generate_for_url(url, **options)
@@ -142,270 +164,112 @@ module Xarf
 
     # Export reports to NDJSON format (one JSON per line)
     #
-    # @param reports [Array<Hash>] array of XARF reports
+    # @param reports [Array<Hash>] array of X-ARF reports
     # @return [String] NDJSON formatted string
     def to_ndjson(reports)
-      reports.map { |r| r.to_json }.join("\n")
+      reports.map(&:to_json).join("\n")
     end
 
     private
 
-    def build_report(source_identifier:, source_type:, category:, type:, confidence:, verdict:, record: nil, **options)
-      report = {
-        xarf_version: XARF_VERSION,
-        report_id: generate_uuid,
-        timestamp: Time.current.iso8601,
-        reporter: format_contact(reporter, include_type: true),
-        sender: format_contact(reporter),
-        source_identifier: source_identifier,
-        category: category,
-        type: type,
-        severity: determine_severity(type, confidence),
-        description: build_description(type, source_identifier, verdict)
-      }
+    def build_report(source_url:, mapping:, verdict: nil, source_ip: nil, detected_at: nil,
+                     sources: nil, case_reference: nil, contact_email: nil, **options)
+      confidence = mapping[:confidence]
+      source_names = format_sources(sources || verdict&.sources_list)
 
-      # Add confidence if available
-      report[:confidence] = confidence.round(2) if confidence
-
-      # Add URL if provided
-      report[:url] = options[:url] if options[:url].present?
-
-      # Add type-specific fields
-      add_phishing_fields(report, verdict, record, options) if type == "phishing"
-      add_fraud_fields(report, verdict, record, options) if type == "fraud"
-
-      # Add evidence (always include, even if empty array for spec compliance)
-      evidence = build_evidence(verdict, record, options)
-      report[:evidence] = evidence
-
-      # Add tags
-      tags = build_tags(verdict, record, source_type)
-      report[:tags] = tags if tags.any?
-
-      # Add optional fields
-      add_optional_fields(report, verdict, record, options)
-
-      report
-    end
-
-    def format_contact(contact, include_type: false)
-      result = {
-        org: contact[:org],
-        contact: contact[:contact],
-        domain: contact[:domain]
-      }
-      result[:type] = "automated" if include_type
-      result
-    end
-
-    def build_description(type, source_identifier, verdict)
-      confidence_text = if verdict&.confidence_score
-                          "#{(verdict.confidence_score * 100).round}% confidence"
-      else
-                          "unconfirmed"
-      end
-
-      sources_count = verdict&.sources_list&.count || 0
-      sources_text = sources_count > 0 ? "detected by #{sources_count} source#{'s' if sources_count > 1}" : ""
-
-      case type
-      when "phishing"
-        base = "Phishing site identified at #{source_identifier}"
-        [ base, confidence_text, sources_text ].reject(&:blank?).join(" - ")
-      when "suspicious_registration"
-        "Suspicious domain registration: #{source_identifier} - #{confidence_text}"
-      when "malware"
-        "Malware distribution identified at #{source_identifier} - #{confidence_text}"
-      when "fraud"
-        "Fraudulent activity identified at #{source_identifier} - #{confidence_text}"
-      else
-        "Abuse report for #{source_identifier} - #{confidence_text}"
-      end
-    end
-
-    def generate_uuid
-      SecureRandom.uuid
-    end
-
-    def determine_severity(type, confidence)
-      # Severity based on type and confidence
-      # critical: immediate threat requiring urgent action
-      # high: significant threat
-      # medium: moderate threat
-      # low: minor or informational
-      base_severity = case type
-      when "phishing", "malware", "fraud"
-                        confidence && confidence >= 0.8 ? "high" : "medium"
-      when "suspicious_registration"
-                        "medium"
-      else
-                        "low"
-      end
-
-      # Elevate to critical for high-confidence phishing/malware
-      if %w[phishing malware].include?(type) && confidence && confidence >= 0.95
-        "critical"
-      else
-        base_severity
-      end
-    end
-
-    def add_phishing_fields(report, verdict, record, options)
-      # Target brand from metadata or options
-      target_brand = options[:target_brand] ||
-                     verdict&.metadata_hash&.dig("target_brand")
-      report[:target_brand] = target_brand if target_brand.present?
-
-      # Cloned site
-      cloned_site = options[:cloned_site] ||
-                    verdict&.metadata_hash&.dig("cloned_site")
-      report[:cloned_site] = cloned_site if cloned_site.present?
-
-      # Credential fields if known
-      credential_fields = options[:credential_fields] ||
-                          verdict&.metadata_hash&.dig("credential_fields")
-      report[:credential_fields] = credential_fields if credential_fields.present?
-
-      # Phishing kit identification
-      phishing_kit = options[:phishing_kit] ||
-                     verdict&.metadata_hash&.dig("phishing_kit")
-      report[:phishing_kit] = phishing_kit if phishing_kit.present?
-
-      # Lure type
-      lure_type = options[:lure_type] ||
-                  verdict&.metadata_hash&.dig("lure_type")
-      report[:lure_type] = lure_type if lure_type.present?
-    end
-
-    def add_fraud_fields(report, verdict, record, options)
-      # Similar to phishing but with fraud-specific context
-      target_brand = options[:target_brand] ||
-                     verdict&.metadata_hash&.dig("target_brand")
-      report[:target_brand] = target_brand if target_brand.present?
-    end
-
-    # Build evidence array for XARF report
-    #
-    # XARF Evidence can include (per spec):
-    #   - Screenshots of phishing pages (image/png, image/jpeg)
-    #   - Email headers and content (message/rfc822, text/plain)
-    #   - HTTP response data (application/json, text/html)
-    #   - DNS records (application/json)
-    #   - WHOIS data (text/plain)
-    #   - Malware samples (application/octet-stream) - with caution
-    #   - Log files (text/plain, application/json)
-    #   - API responses from detection services
-    #
-    # Each evidence item should have:
-    #   - content_type: MIME type
-    #   - payload: Base64-encoded content
-    #   - description: Human-readable description
-    #   - hashes: Array of integrity hashes (sha256:xxx, sha512:xxx, md5:xxx)
-    #
-    # TODO: Momento (screenshot capturing service) will provide:
-    #   - Screenshots of phishing pages at time of detection
-    #   - Visual evidence for XARF reports
-    #
-    def build_evidence(verdict, record, options)
-      evidence = []
-
-      # Add detection service responses as evidence
-      # These are the raw results from services like VirusTotal, Google Safe Browsing, etc.
-      if verdict&.sources_list&.any?
-        sources_json = verdict.sources_list.to_json
-        evidence << {
-          type: "detection_results",
-          description: "Detection service responses from #{verdict.sources_list.map { |s| s['name'] || s[:name] }.compact.join(', ')}",
-          hash: Digest::SHA256.hexdigest(sources_json),
-          hash_algorithm: "sha256"
-        }
-      end
-
-      # Add verdict metadata as evidence if present
-      if verdict&.metadata_hash&.any?
-        metadata_json = verdict.metadata_hash.to_json
-        evidence << {
-          type: "metadata",
-          description: "Additional detection metadata",
-          hash: Digest::SHA256.hexdigest(metadata_json),
-          hash_algorithm: "sha256"
-        }
-      end
-
-      # Add screenshot if provided (from Momento or manual upload)
-      if options[:screenshot].present?
-        evidence << {
-          type: "screenshot",
-          description: "Screenshot of malicious content",
-          hash: options[:screenshot_hash],
-          hash_algorithm: "sha256"
+      {
+        "Version" => SCHEMA_VERSION,
+        "ReporterInfo" => reporter_info(contact_email),
+        "Disclosure" => true,
+        "Report" => {
+          "ReportClass" => mapping[:report_class],
+          "ReportType" => mapping[:report_type],
+          "Date" => format_date(detected_at || verdict&.created_at),
+          "SourceUrl" => source_url,
+          "SourceIp" => normalize_ip(source_ip),
+          "Ongoing" => true,
+          "ReporterCaseID" => case_reference,
+          "ReporterSeverity" => CategoryMapper.severity_for_confidence(confidence),
+          "ReporterNotes" => notes(confidence, source_names, case_reference, contact_email),
+          "Custom" => custom_fields(confidence, source_names, case_reference),
+          "Samples" => options[:samples].presence
         }.compact
-      end
-
-      # Add custom evidence items
-      if options[:evidence].is_a?(Array)
-        evidence.concat(options[:evidence])
-      end
-
-      evidence
+      }
     end
 
-    def build_tags(verdict, record, source_type)
-      tags = []
-
-      # Add source type tag
-      tags << "phishdirectory:source:#{source_type}"
-
-      # Add classification tag
-      if verdict&.classification
-        tags << "phishdirectory:classification:#{verdict.classification}"
-      end
-
-      # Add confidence level tag
-      if verdict&.confidence_score
-        confidence_level = case verdict.confidence_score
-        when 0.8..1.0 then "high"
-        when 0.5...0.8 then "medium"
-        else "low"
-        end
-        tags << "phishdirectory:confidence:#{confidence_level}"
-      end
-
-      # Add TLD tag for domains
-      if record.respond_to?(:tld) && record.tld.present?
-        tags << "phishdirectory:tld:#{record.tld.name}"
-      end
-
-      # Add source service tags
-      verdict&.sources_list&.each do |source|
-        source_name = source["name"] || source[:name]
-        tags << "phishdirectory:detected_by:#{source_name}" if source_name
-      end
-
-      tags.uniq
+    # ReporterInfo forbids properties outside this set, so nothing else goes in.
+    def reporter_info(contact_email)
+      {
+        "ReporterType" => "Org",
+        "ReporterOrg" => reporter[:org],
+        "ReporterOrgDomain" => reporter[:domain],
+        "ReporterOrgEmail" => reporter[:email],
+        "ReporterContactName" => reporter[:contact_name],
+        "ReporterContactEmail" => contact_email || reporter[:email]
+      }.compact
     end
 
-    def add_optional_fields(report, verdict, record, options)
-      # Reporter reference ID (our internal ID)
-      if record&.respond_to?(:public_id)
-        report[:reporter_reference_id] = record.public_id
-      elsif verdict&.respond_to?(:public_id)
-        report[:reporter_reference_id] = verdict.public_id
-      end
+    def submission_mapping(payload)
+      mapping = CategoryMapper.to_xarf(payload[:classification]) ||
+                CategoryMapper::CLASSIFICATION_TO_XARF["phishing"]
 
-      # Priority based on confidence
-      if verdict&.confidence_score
-        report[:priority] = case verdict.confidence_score
-        when 0.9..1.0 then "high"
-        when 0.7...0.9 then "medium"
-        else "low"
+      mapping.merge(confidence: payload[:confidence].to_f)
+    end
+
+    # SourceIp only accepts an IP literal. Prefer IPv4: a report is more useful
+    # to a host when it names the address most of the traffic reached.
+    def case_source_ip(report_case)
+      info = report_case.domain_info || {}
+
+      Array(info["a_records"]).first || Array(info["aaaa_records"]).first
+    end
+
+    def normalize_ip(address)
+      return nil if address.blank?
+
+      IPAddr.new(address.to_s).to_s
+    rescue IPAddr::InvalidAddressError
+      nil
+    end
+
+    def format_date(timestamp)
+      Time.parse(timestamp.to_s).utc.iso8601
+    rescue ArgumentError, TypeError
+      Time.current.utc.iso8601
+    end
+
+    def format_sources(sources)
+      names = Array(sources).filter_map do |source|
+        if source.is_a?(Hash)
+          source["service"] || source[:service] || source["name"] || source[:name]
+        else
+          source.to_s.presence
         end
       end
 
-      # Custom fields from options
-      if options[:reporter_custom_fields].is_a?(Hash)
-        report[:reporter_custom_fields] = options[:reporter_custom_fields]
-      end
+      names.any? ? names.join(", ") : "phish.directory aggregated threat intelligence"
+    end
+
+    def notes(confidence, source_names, case_reference, contact_email)
+      notes = "Phishing site detected by phish.directory with " \
+              "#{confidence_percent(confidence)}% confidence. " \
+              "Detection sources: #{source_names}."
+      notes += " Case reference: #{case_reference}." if case_reference.present?
+      notes += " Reply to #{contact_email} with any update on your investigation." if contact_email.present?
+      notes
+    end
+
+    # Custom only accepts string and integer values.
+    def custom_fields(confidence, source_names, case_reference)
+      {
+        "CaseReference" => case_reference,
+        "Confidence" => confidence_percent(confidence),
+        "DetectionSources" => source_names
+      }.compact
+    end
+
+    def confidence_percent(confidence)
+      (confidence.to_f * 100).round
     end
   end
 end

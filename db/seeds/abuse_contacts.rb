@@ -39,6 +39,7 @@ module Seeds
       # Hosting Providers (priority: 30)
       { name: "Amazon AWS", contact_type: :hosting, method: :email, email: "abuse@amazonaws.com", priority: 30 },
       { name: "Deno Deploy", contact_type: :hosting, method: :email, email: "deploy@deno.com", priority: 30, notes: "Handles deno.dev domains." },
+      { name: "DigitalOcean", contact_type: :hosting, method: :email, email: "abuse@digitalocean.com", priority: 30, accepts_xarf: true, nameserver_patterns: [ "ns1.digitalocean.com", "ns2.digitalocean.com", "ns3.digitalocean.com" ], notes: "The mailbox is processed by automated tooling that only accepts X-ARF reports, so accepts_xarf must stay on. DigitalOceanRangeSyncJob keeps ip_ranges current from https://digitalocean.com/geo/google.csv - do not edit them by hand." },
       { name: "ESITED", contact_type: :hosting, method: :email, email: "net-abuse@esited.com", priority: 30 },
       { name: "Google Cloud", contact_type: :hosting, method: :email, email: "google-cloud-compliance@google.com", priority: 30 },
       { name: "IQWeb FZ-LLC", contact_type: :hosting, method: :email, email: "abuse@iqweb.io", priority: 30 },

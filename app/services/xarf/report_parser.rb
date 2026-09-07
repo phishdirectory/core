@@ -1,7 +1,10 @@
 # frozen_string_literal: true
 
 module Xarf
-  # Parses incoming XARF v4 reports and extracts relevant data
+  # Parses incoming X-ARF reports and extracts relevant data.
+  #
+  # Accepts schema 3 of https://github.com/abusix/xarf, the same schema
+  # Xarf::ReportGenerator emits.
   #
   # Usage:
   #   parser = Xarf::ReportParser.new(json_string_or_hash)
@@ -9,25 +12,17 @@ module Xarf
   #     result = parser.parse
   #     # result contains normalized data for creating/updating records
   #   else
-  #     parser.errors # => ["Missing required field: report_id", ...]
+  #     parser.errors # => ["Missing required field: Version", ...]
   #   end
   #
   class ReportParser
-    XARF_VERSION_PATTERN = /\A4\.\d+\.\d+\z/
-    UUID_PATTERN = /\A[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\z/i
+    SUPPORTED_VERSIONS = %w[3].freeze
 
-    REQUIRED_FIELDS = %w[
-      xarf_version
-      report_id
-      timestamp
-      reporter
-      sender
-      source_identifier
-      category
-      type
-    ].freeze
+    REQUIRED_FIELDS = %w[Version ReporterInfo Disclosure Report].freeze
+    REQUIRED_REPORT_FIELDS = %w[ReportClass ReportType Date].freeze
 
-    REQUIRED_CONTACT_FIELDS = %w[org contact domain].freeze
+    # ReporterInfo requires these unless the reporter is a natural person.
+    REQUIRED_REPORTER_FIELDS = %w[ReporterOrg ReporterOrgDomain ReporterOrgEmail].freeze
 
     attr_reader :raw_data, :errors
 
@@ -37,7 +32,7 @@ module Xarf
       @raw_data = normalize_input(data)
     end
 
-    # Validate the XARF report structure
+    # Validate the X-ARF report structure
     #
     # @return [Boolean] true if valid
     def valid?
@@ -52,7 +47,7 @@ module Xarf
       @parsed
     end
 
-    # Parse the XARF report and extract relevant data
+    # Parse the X-ARF report and extract relevant data
     #
     # @return [Hash] normalized data for record creation
     # @raise [InvalidReportError] if report is invalid
@@ -62,45 +57,42 @@ module Xarf
       @parsed = true
 
       {
-        report_id: raw_data["report_id"],
-        xarf_version: raw_data["xarf_version"],
-        timestamp: parse_timestamp(raw_data["timestamp"]),
-        category: raw_data["category"],
-        type: raw_data["type"],
-        source_identifier: raw_data["source_identifier"],
-        reporter: parse_contact(raw_data["reporter"]),
-        sender: parse_contact(raw_data["sender"]),
+        version: raw_data["Version"],
+        timestamp: parse_timestamp(report["Date"]),
+        report_class: report_class,
+        report_type: report_type,
+        report_subtype: report["ReportSubType"],
+        case_id: report["ReporterCaseID"],
+        severity: report["ReporterSeverity"],
+        notes: report["ReporterNotes"],
+        reporter: parse_reporter(raw_data["ReporterInfo"]),
+        disclosure: raw_data["Disclosure"],
         classification: derive_classification,
         confidence: derive_confidence,
         urls: extract_urls,
         domains: extract_domains,
         ip_addresses: extract_ip_addresses,
-        evidence: extract_evidence,
+        samples: extract_samples,
         metadata: extract_metadata,
-        tags: raw_data["tags"] || [],
         raw: raw_data
       }
     end
 
-    # Get the XARF category
+    # The Report object, which holds everything about the event itself
     #
-    # @return [String, nil]
-    def category
-      raw_data["category"]
+    # @return [Hash]
+    def report
+      raw_data["Report"].is_a?(Hash) ? raw_data["Report"] : {}
     end
 
-    # Get the XARF type
-    #
     # @return [String, nil]
-    def type
-      raw_data["type"]
+    def report_class
+      report["ReportClass"]
     end
 
-    # Get the source identifier (IP, domain, etc.)
-    #
     # @return [String, nil]
-    def source_identifier
-      raw_data["source_identifier"]
+    def report_type
+      report["ReportType"]
     end
 
     # Get URLs from the report
@@ -141,243 +133,169 @@ module Xarf
       @validated = true
 
       validate_required_fields
-      validate_xarf_version
-      validate_report_id
+      validate_version
+      validate_report
       validate_timestamp
-      validate_category_and_type
-      validate_contacts
+      validate_class_and_type
+      validate_reporter
     end
 
     def validate_required_fields
       REQUIRED_FIELDS.each do |field|
-        if raw_data[field].blank?
-          errors << "Missing required field: #{field}"
-        end
+        # Disclosure is a boolean, so false is present but blank.
+        next if field == "Disclosure" && [ true, false ].include?(raw_data[field])
+
+        errors << "Missing required field: #{field}" if raw_data[field].blank?
       end
     end
 
-    def validate_xarf_version
-      version = raw_data["xarf_version"]
-      return if version.blank? # Already caught by required fields
+    def validate_version
+      version = raw_data["Version"]
+      return if version.blank?
 
-      unless version.match?(XARF_VERSION_PATTERN)
-        errors << "Invalid xarf_version format: expected 4.x.x"
+      unless SUPPORTED_VERSIONS.include?(version.to_s)
+        errors << "Unsupported Version: expected one of #{SUPPORTED_VERSIONS.join(', ')}"
       end
     end
 
-    def validate_report_id
-      report_id = raw_data["report_id"]
-      return if report_id.blank?
+    def validate_report
+      return errors << "Report must be an object" unless raw_data["Report"].is_a?(Hash)
 
-      unless report_id.match?(UUID_PATTERN)
-        errors << "Invalid report_id format: expected UUID v4"
+      REQUIRED_REPORT_FIELDS.each do |field|
+        errors << "Missing required field: Report.#{field}" if report[field].blank?
+      end
+
+      # A report is anchored to an origin by either an address or a URL.
+      if report["SourceIp"].blank? && report["SourceUrl"].blank?
+        errors << "Report requires either SourceIp or SourceUrl"
       end
     end
 
     def validate_timestamp
-      timestamp = raw_data["timestamp"]
+      timestamp = report["Date"]
       return if timestamp.blank?
 
       Time.iso8601(timestamp)
     rescue ArgumentError
-      errors << "Invalid timestamp format: expected ISO 8601"
+      errors << "Invalid Report.Date format: expected ISO 8601"
     end
 
-    def validate_category_and_type
-      category = raw_data["category"]
-      type = raw_data["type"]
+    def validate_class_and_type
+      return if report_class.blank? || report_type.blank?
 
-      return if category.blank? || type.blank?
-
-      unless CategoryMapper.valid_xarf_category?(category)
-        errors << "Invalid category: #{category}"
+      unless CategoryMapper.valid_report_class?(report_class)
+        errors << "Invalid ReportClass: #{report_class}"
       end
 
-      unless CategoryMapper.valid_xarf_type?(type)
-        errors << "Invalid type: #{type}"
+      unless CategoryMapper.valid_report_type?(report_type)
+        errors << "Invalid ReportType: #{report_type}"
+        return
       end
 
-      expected_category = CategoryMapper.category_for_type(type)
-      if expected_category && expected_category != category
-        errors << "Type '#{type}' does not belong to category '#{category}'"
+      unless CategoryMapper.type_in_class?(report_class, report_type)
+        errors << "ReportType '#{report_type}' does not belong to ReportClass '#{report_class}'"
       end
     end
 
-    def validate_contacts
-      %w[reporter sender].each do |contact_type|
-        contact = raw_data[contact_type]
-        next if contact.blank?
+    def validate_reporter
+      reporter = raw_data["ReporterInfo"]
+      return if reporter.blank?
 
-        unless contact.is_a?(Hash)
-          errors << "#{contact_type} must be an object"
-          next
-        end
+      return errors << "ReporterInfo must be an object" unless reporter.is_a?(Hash)
 
-        REQUIRED_CONTACT_FIELDS.each do |field|
-          if contact[field].blank?
-            errors << "Missing #{contact_type}.#{field}"
-          end
-        end
+      # Contact details are optional when the reporter is a natural person.
+      return if reporter["ReporterType"] == "Person"
+
+      REQUIRED_REPORTER_FIELDS.each do |field|
+        errors << "Missing ReporterInfo.#{field}" if reporter[field].blank?
       end
     end
 
     def parse_timestamp(timestamp_str)
       return nil if timestamp_str.blank?
+
       Time.iso8601(timestamp_str)
     rescue ArgumentError
       nil
     end
 
-    def parse_contact(contact)
-      return nil if contact.blank?
+    def parse_reporter(reporter)
+      return nil if reporter.blank?
 
       {
-        organization: contact["org"],
-        email: contact["contact"],
-        domain: contact["domain"]
-      }
+        type: reporter["ReporterType"],
+        organization: reporter["ReporterOrg"],
+        domain: reporter["ReporterOrgDomain"],
+        email: reporter["ReporterOrgEmail"],
+        contact_name: reporter["ReporterContactName"],
+        contact_email: reporter["ReporterContactEmail"],
+        contact_phone: reporter["ReporterContactPhone"]
+      }.compact
     end
 
     def derive_classification
-      CategoryMapper.from_xarf(raw_data["category"], raw_data["type"])
+      CategoryMapper.from_xarf(report_class, report_type)
     end
 
     def derive_confidence
-      base_confidence = CategoryMapper.confidence_for_type(raw_data["type"])
-
-      # Adjust based on report confidence if provided
-      if raw_data["confidence"].present?
-        report_confidence = raw_data["confidence"].to_f.clamp(0.0, 1.0)
-        # Weighted average: 70% type confidence, 30% report confidence
-        (base_confidence * 0.7) + (report_confidence * 0.3)
-      else
-        base_confidence
-      end
+      CategoryMapper.confidence_for_type(report_type)
     end
 
     def extract_urls
       urls = []
-
-      # Direct URL field
-      urls << raw_data["url"] if raw_data["url"].present?
-
-      # Redirect chain
-      if raw_data["redirect_chain"].is_a?(Array)
-        urls.concat(raw_data["redirect_chain"])
-      end
-
-      # Submission URL (for phishing)
-      urls << raw_data["submission_url"] if raw_data["submission_url"].present?
-
-      # From evidence items
-      evidence_items = raw_data["evidence"] || []
-      evidence_items.each do |item|
-        if item["content_type"]&.include?("url") && item["payload"].present?
-          decoded = decode_payload(item["payload"])
-          urls << decoded if decoded.present? && decoded.match?(%r{\Ahttps?://})
-        end
-      end
-
+      urls << report["SourceUrl"] if report["SourceUrl"].present?
       urls.compact.uniq
     end
 
     def extract_domains
-      domains = []
-
-      # From source_identifier if it's a domain
-      source = raw_data["source_identifier"]
-      if source.present? && !ip_address?(source)
-        domains << normalize_domain(source)
-      end
-
-      # From cloned_site field (target of phishing)
-      domains << raw_data["cloned_site"] if raw_data["cloned_site"].present?
-
-      # From target_brand (might be a domain)
-      target = raw_data["target_brand"]
-      if target.present? && target.include?(".")
-        domains << normalize_domain(target)
-      end
-
-      # Extract domains from URLs
-      urls.each do |url|
-        domain = extract_domain_from_url(url)
-        domains << domain if domain.present?
-      end
-
-      domains.compact.uniq
+      extract_urls.filter_map { |url| extract_domain_from_url(url) }.uniq
     end
 
     def extract_ip_addresses
-      ips = []
-
-      source = raw_data["source_identifier"]
-      ips << source if source.present? && ip_address?(source)
-
-      # From evidence or additional fields
-      if raw_data["additional_ip_addresses"].is_a?(Array)
-        raw_data["additional_ip_addresses"].each do |ip|
-          ips << ip if ip_address?(ip)
-        end
-      end
-
-      ips.compact.uniq
+      [ report["SourceIp"], report["DestinationIp"], report["AttackerIp"] ]
+        .compact_blank
+        .select { |address| ip_address?(address) }
+        .uniq
     end
 
-    def extract_evidence
-      evidence_items = raw_data["evidence"] || []
+    def extract_samples
+      Array(report["Samples"]).filter_map do |sample|
+        next unless sample.is_a?(Hash)
 
-      evidence_items.map do |item|
         {
-          content_type: item["content_type"],
-          description: item["description"],
-          hashes: item["hashes"] || [],
-          payload_size: item["payload"]&.length
-        }
+          content_type: sample["ContentType"],
+          description: sample["Description"],
+          base64_encoded: sample["Base64Encoded"],
+          file_name: sample["FileName"],
+          payload_size: sample["Payload"]&.length
+        }.compact
       end
     end
 
     def extract_metadata
       {
-        target_brand: raw_data["target_brand"],
-        cloned_site: raw_data["cloned_site"],
-        phishing_kit: raw_data["phishing_kit"],
-        credential_fields: raw_data["credential_fields"],
-        lure_type: raw_data["lure_type"],
-        detection_evasion: raw_data["detection_evasion"],
-        reporter_reference_id: raw_data["reporter_reference_id"],
-        priority: raw_data["priority"],
-        legacy_xarf_version: raw_data["legacy_xarf_version"]
+        report_subtype: report["ReportSubType"],
+        case_id: report["ReporterCaseID"],
+        severity: report["ReporterSeverity"],
+        ongoing: report["Ongoing"],
+        threat_actor: report["ThreatActor"],
+        source_port: report["SourcePort"],
+        asn: report["ASN"],
+        custom: report["Custom"]
       }.compact
-    end
-
-    def decode_payload(payload)
-      Base64.decode64(payload)
-    rescue StandardError
-      nil
     end
 
     def ip_address?(str)
       return false if str.blank?
 
-      # IPv4
-      return true if str.match?(/\A\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\z/)
-
-      # IPv6 (simplified check)
-      str.include?(":") && str.match?(/\A[0-9a-f:]+\z/i)
-    end
-
-    def normalize_domain(domain)
-      domain = domain.to_s.strip.downcase
-      domain = domain.sub(%r{\Ahttps?://}, "")
-      domain = domain.split("/").first
-      domain = domain.split(":").first
-      domain
+      IPAddr.new(str.to_s)
+      true
+    rescue IPAddr::InvalidAddressError
+      false
     end
 
     def extract_domain_from_url(url)
-      uri = URI.parse(url)
-      uri.host&.downcase
+      URI.parse(url).host&.downcase
     rescue URI::InvalidURIError
       nil
     end
