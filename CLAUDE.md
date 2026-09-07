@@ -178,6 +178,8 @@ urlscan:
   api_key: <key>
 urldna:
   api_key: <key>
+hybrid_analysis:
+  api_key: <key>
 
 # Optional - scoring weights (see credentials for values)
 scoring:

@@ -69,6 +69,9 @@ urlscan:
 urldna:
   api_key: <your-api-key>
 
+hybrid_analysis:
+  api_key: <your-api-key>
+
 # Scoring configuration (optional - stored encrypted for security)
 scoring:
   min_confidence: <threshold>
