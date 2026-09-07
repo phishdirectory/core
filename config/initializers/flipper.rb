@@ -40,8 +40,20 @@ end
 
 # Initialize default feature flags
 Rails.application.config.after_initialize do
-  # Skip if Flipper tables don't exist (e.g., during db:migrate or db:rollback)
-  next unless ActiveRecord::Base.connection.table_exists?(:flipper_features)
+  # Skip unless the Flipper table is really there. Booting must not depend on
+  # the database, or db:create, db:test:prepare, db:migrate and asset builds
+  # all fail before they can create it. table_exists? only answers the "table"
+  # half of that question. It raises when the database itself is absent or
+  # unreachable, so catch that too.
+  flipper_table_ready =
+    begin
+      ActiveRecord::Base.connection.table_exists?(:flipper_features)
+    rescue ActiveRecord::ActiveRecordError => e
+      Rails.logger.info("[Flipper] Skipping default flags: #{e.class}: #{e.message}")
+      false
+    end
+
+  next unless flipper_table_ready
 
   # Auto-reporting: Enable automated abuse reporting when phishing is detected
   # Start disabled - enable via admin UI when ready
