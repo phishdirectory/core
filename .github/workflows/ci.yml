@@ -53,6 +53,16 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    # Dependabot pull requests cannot read Actions secrets, so RAILS_MASTER_KEY
+    # is empty on them and the app cannot boot: the Lockbox and BlindIndex
+    # initializers raise when they find no key. Both fall back to these env vars,
+    # which lets the suite run. Real credentials take precedence wherever the
+    # master key is present, so nothing changes on normal pull requests or main.
+    # These are throwaway values for the test database only.
+    env:
+      LOCKBOX_MASTER_KEY: "0000000000000000000000000000000000000000000000000000000000000000"
+      BLIND_INDEX_MASTER_KEY: "1111111111111111111111111111111111111111111111111111111111111111"
+
     services:
       postgres:
         image: postgres:17
