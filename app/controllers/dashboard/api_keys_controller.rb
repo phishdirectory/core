@@ -5,7 +5,9 @@ module Dashboard
     before_action :set_api_key, only: [ :destroy, :regenerate ]
 
     def index
-      @api_keys = current_user.user_api_keys.order(created_at: :desc)
+      @api_keys = current_user.user_api_keys
+                                .order(created_at: :desc)
+                                .page(params[:page]).per(20)
     end
 
     def create

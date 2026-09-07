@@ -19,9 +19,31 @@
     <div class="absolute inset-0 bg-surface-0/60"></div>
   </div>
 
-  <div class="relative z-10 flex min-h-screen">
+  <div class="relative z-10 flex min-h-screen" data-controller="sidebar">
     <%# Sidebar %>
-    <aside class="w-56 bg-surface-50/70 backdrop-blur-xl flex flex-col fixed top-0 left-0 bottom-0 z-50">
+    <%# Narrow screens get a top bar with the only way to reach the nav. %>
+    <div class="md:hidden fixed top-0 inset-x-0 z-40 h-14 flex items-center gap-3 px-4 bg-surface-50/90 backdrop-blur-xl border-b border-surface-200/50">
+      <button type="button"
+              data-sidebar-target="toggle"
+              data-action="sidebar#toggle"
+              class="p-2 -ml-2 rounded-md text-surface-600 hover:bg-surface-100 focus:outline-none focus:ring-2 focus:ring-accent"
+              aria-label="Open navigation"
+              aria-expanded="false">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+      <span class="text-sm font-semibold text-surface-900">phish.directory</span>
+    </div>
+
+    <%# Backdrop, only ever visible while the off-canvas panel is open. %>
+    <div data-sidebar-target="backdrop"
+         data-action="click->sidebar#close"
+         class="hidden md:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"></div>
+
+    <aside data-sidebar-target="panel"
+           class="w-56 bg-surface-50/70 backdrop-blur-xl flex flex-col fixed top-0 left-0 bottom-0 z-50 -translate-x-full md:translate-x-0 transition-transform duration-200"
+           aria-label="Main navigation">
       <%# Logo %>
       <div class="h-14 px-4 flex items-center border-b border-surface-200/50">
         <a href="<%= root_path %>" class="flex items-center gap-2.5 text-surface-900 font-semibold text-sm">
@@ -132,7 +154,7 @@
     </aside>
 
     <%# Main Content %>
-    <main class="flex-1 ml-56 min-h-screen">
+    <main class="flex-1 md:ml-56 min-h-screen pt-14 md:pt-0">
       <% if impersonating? %>
         <div class="bg-warning/10 px-6 py-2 flex items-center justify-between text-sm text-warning">
           <span>Impersonating <%= current_user.full_name %></span>
