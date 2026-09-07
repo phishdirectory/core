@@ -28,6 +28,9 @@ module Phish
     DEFAULT_TIMEOUT = 30
     DEFAULT_OPEN_TIMEOUT = 10
 
+    # Request body encodings #connection knows how to install
+    REQUEST_ENCODINGS = %i[json url_encoded].freeze
+
     # Built once. OpenSSL 3 turns on CRL checking by default and the
     # distribution points are frequently unreachable, which turns a working
     # certificate into a connection failure. Peer verification stays on.
@@ -59,7 +62,16 @@ module Phish
     protected
 
     # Create a Faraday connection with standard configuration
-    def connection(base_url:, timeout: DEFAULT_TIMEOUT, headers: {})
+    #
+    # @param request_encoding [Symbol] How request bodies are encoded, :json or
+    #   :url_encoded. Most vendors take JSON, but some (Hybrid Analysis) only
+    #   accept application/x-www-form-urlencoded and answer a JSON body with a
+    #   400 error.
+    def connection(base_url:, timeout: DEFAULT_TIMEOUT, headers: {}, request_encoding: :json)
+      unless REQUEST_ENCODINGS.include?(request_encoding)
+        raise ArgumentError, "Unsupported request encoding: #{request_encoding}"
+      end
+
       Faraday.new(url: base_url) do |conn|
         conn.options.timeout = timeout
         conn.options.open_timeout = DEFAULT_OPEN_TIMEOUT
@@ -70,7 +82,7 @@ module Phish
         headers.each { |key, value| conn.headers[key] = value }
 
         # Request middleware
-        conn.request :json
+        conn.request request_encoding
 
         # Response middleware
         conn.response :json, content_type: /\bjson$/
