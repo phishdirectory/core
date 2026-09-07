@@ -201,6 +201,7 @@ Rails.application.routes.draw do
       member do
         post :enable
         post :disable
+        post :severity
       end
       collection do
         post :sync

@@ -25,6 +25,37 @@
     </div>
   <% end %>
 
+  <div class="bg-surface-100 rounded-lg p-5">
+    <h2 class="text-xs font-medium text-surface-500 mb-1">What a match means</h2>
+    <p class="text-xs text-surface-500 mb-3">
+      <% if @indicator.severity_overridden? %>
+        Set by an admin to <strong><%= @indicator.severity_override %></strong>, overriding
+        <strong><%= @indicator.severity %></strong> from the rule's own level and tags.
+      <% else %>
+        Derived from the rule's level and tags. A sync recomputes it; an override here does not.
+      <% end %>
+    </p>
+    <div class="flex flex-wrap items-center gap-2">
+      <% Iok::Severity::ALL.each do |value| %>
+        <% current = @indicator.effective_severity == value %>
+        <%= button_to value.titleize,
+                      severity_admin_iok_indicator_path(@indicator, severity: value),
+                      method: :post,
+                      class: "px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer #{current ? 'bg-surface-900 text-surface-0' : 'text-surface-600 bg-surface-200 hover:bg-surface-300'}" %>
+      <% end %>
+      <% if @indicator.severity_overridden? %>
+        <%= button_to "Reset to rule default",
+                      severity_admin_iok_indicator_path(@indicator),
+                      method: :post,
+                      class: "px-3 py-1.5 text-xs font-medium text-surface-600 hover:text-surface-900 transition-colors cursor-pointer" %>
+      <% end %>
+    </div>
+    <p class="text-xs text-surface-500 mt-3">
+      Malicious reports phishing. Suspicious reports suspicious. Informational records the
+      match and contributes nothing to the verdict.
+    </p>
+  </div>
+
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <div class="bg-surface-100 rounded-lg p-5">
       <h2 class="text-xs font-medium text-surface-500 mb-3">Tags</h2>

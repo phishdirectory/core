@@ -1,0 +1,49 @@
+title: Steam Community Fake Browser Kit
+description: |
+  Detects a Steam Community phishing kit spread through Discord. The page
+  clones a Steam profile and an "Invitation to connect" prompt, and renders a
+  fake browser window around it so the victim sees what looks like a second
+  browser showing steamcommunity.com.
+
+  Two things give it away, and neither appears on the real site:
+
+  1. The fake window's title bar is page content, so the HTML contains the
+     string "Steam Community - Google Chrome".
+  2. The kit ships Steam's capsule image under the misspelled filename
+     capsulee_184x69.jpg. Steam itself serves capsule_184x69.jpg.
+
+  DRAFT. Written from the notes in the Fish Discord thread, which was still
+  marked Developing and had no finished rule. It has not been checked against
+  the scans below, so it stays at potentially_malicious until somebody
+  confirms it. Observed on s.team-gucci.com and steanmcommvnity.ru.
+level: potentially_malicious
+references:
+  - https://urlscan.io/result/019616f5-b386-7050-aabc-269c9f6eeeb4/
+  - https://urlscan.io/result/0195f579-e269-761f-936f-41b55c0492cf/
+  - https://urlscan.io/search/#filename%3A%22capsulee_184x69.jpg%22
+
+detection:
+
+  # steamcommunity.com and steampowered.com carry the same title and the same
+  # logo, so the rule has to be able to rule them out.
+  officialDomain:
+    hostname|endswith:
+      - "steamcommunity.com"
+      - "steampowered.com"
+      - "steamstatic.com"
+
+  fakeBrowserChrome:
+    html|contains: "Steam Community - Google Chrome"
+
+  misspelledCapsule:
+    requests|contains: "capsulee_184x69.jpg"
+
+  pageTitle:
+    title: "Steam Community"
+
+  condition: not officialDomain and pageTitle and (fakeBrowserChrome or misspelledCapsule)
+
+tags:
+  - kit
+  - target.steam
+  - target.discord

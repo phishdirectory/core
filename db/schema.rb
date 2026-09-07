@@ -298,6 +298,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_150500) do
     t.boolean "enabled", default: true, null: false
     t.string "level"
     t.jsonb "reference_urls", default: [], null: false
+    t.string "severity", default: "malicious", null: false
+    t.string "severity_override"
     t.string "slug", null: false
     t.string "source", default: "upstream", null: false
     t.string "source_url"

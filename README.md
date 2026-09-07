@@ -219,6 +219,7 @@ Access admin features at `/admin` (requires admin role):
 
 - **Users**: View, edit, suspend, impersonate users
 - **Services**: Manage external service integrations
+- **IOK Indicators**: `/admin/iok_indicators`
 - **Feature Flags**: `/admin/flipper`
 - **Background Jobs**: `/admin/jobs`
 - **Analytics**: `/admin/blazer`
