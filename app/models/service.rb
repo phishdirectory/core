@@ -57,12 +57,22 @@ class Service < ApplicationRecord
   # Key management
   # ===========================================
 
-  def generate_key!(notes: nil)
-    service_keys.create!(notes: notes)
+  def generate_key!(notes: nil, trusted_source: false)
+    service_keys.create!(notes: notes, trusted_source: trusted_source)
   end
 
   def active_keys
     service_keys.active
+  end
+
+  # Keys this service may use to push its own verdicts to us. Only usable keys
+  # count, so a suspended service has none even while its keys stay flagged.
+  def trusted_source_keys
+    service_keys.trusted_sources.active
+  end
+
+  def trusted_source?
+    operational? && trusted_source_keys.exists?
   end
 
   def primary_key

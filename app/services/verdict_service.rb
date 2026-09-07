@@ -43,6 +43,45 @@ class VerdictService
       end
     end
 
+    # Records a verdict a trusted source supplied for a record.
+    #
+    # Nothing here came from Phish::AggregatorService, so there are no per-source
+    # results to weigh against each other: the source is the only source, and its
+    # classification stands. That is the whole point of marking a key trusted.
+    #
+    # The downgrade_to_unknown? guard does not apply. A trusted source may not
+    # send "unknown" at all, so it can never overwrite real knowledge with the
+    # absence of it.
+    #
+    # @param record [Phish::Domain, Phish::Url, Phish::Email, Phish::PhoneNumber]
+    # @param classification [String] One of TrustedSourceUpsertService::CLASSIFICATIONS
+    # @param confidence [Float] 0.0 to 1.0
+    # @param source [String] Name of the submitting service
+    # @param metadata [Hash] Extra context to store on the verdict
+    # @return [Verdict] The created/updated verdict
+    def apply_trusted_source!(record, classification:, confidence:, source:, metadata: {})
+      submitted_at = Time.current
+
+      ActiveRecord::Base.transaction do
+        verdict = record.verdict || record.build_verdict
+        verdict.assign_attributes(
+          classification: classification,
+          confidence_score: confidence,
+          sources: [ { "name" => source, "result" => classification, "checked_at" => submitted_at.iso8601 } ],
+          metadata: metadata.merge(
+            "trusted_source" => source,
+            "submitted_at" => submitted_at.iso8601,
+            "reason" => "Trusted source submission"
+          )
+        )
+        verdict.save!
+
+        record.update!(verdict: verdict, last_checked_at: submitted_at)
+
+        verdict
+      end
+    end
+
     # True when this result would replace real knowledge with "we don't know".
     def downgrade_to_unknown?(record, result)
       result[:verdict] == "unknown" &&

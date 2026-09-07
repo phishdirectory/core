@@ -54,6 +54,9 @@
                   <% when 'revoked' %>
                     <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-danger/10 text-danger">Revoked</span>
                   <% end %>
+                  <% if key.trusted_source? %>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-info/10 text-info ml-1" title="May push verdicts into the database">Trusted source</span>
+                  <% end %>
                 </td>
                 <td class="px-5 py-3 text-surface-600 text-sm">
                   <%= key.created_at.strftime("%b %d, %Y %I:%M %p") %>
@@ -62,6 +65,11 @@
                   <div class="flex items-center justify-end gap-2">
                     <% if key.may_deprecate? %>
                       <%= button_to "Deprecate", deprecate_admin_service_key_path(@service, key), method: :post, class: "px-2.5 py-1.5 text-xs font-medium text-warning bg-warning/10 rounded-md hover:bg-warning/20 transition-colors cursor-pointer" %>
+                    <% end %>
+                    <% if key.trusted_source? %>
+                      <%= button_to "Untrust", untrust_admin_service_key_path(@service, key), method: :post, class: "px-2.5 py-1.5 text-xs font-medium text-surface-700 bg-surface-200 rounded-md hover:bg-surface-300 transition-colors cursor-pointer" %>
+                    <% elsif current_user.superadmin? %>
+                      <%= button_to "Trust as source", trust_admin_service_key_path(@service, key), method: :post, class: "px-2.5 py-1.5 text-xs font-medium text-info bg-info/10 rounded-md hover:bg-info/20 transition-colors cursor-pointer", data: { turbo_confirm: "This key will be able to write verdicts straight into the database. Continue?" } %>
                     <% end %>
                     <% if key.may_revoke? %>
                       <%= button_to "Revoke", revoke_admin_service_key_path(@service, key), method: :post, class: "px-2.5 py-1.5 text-xs font-medium text-danger bg-danger/10 rounded-md hover:bg-danger/20 transition-colors cursor-pointer", data: { turbo_confirm: "Are you sure? This will permanently disable this key." } %>

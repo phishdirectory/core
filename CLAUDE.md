@@ -123,6 +123,14 @@ app/
 - `POST /api/v1/auth/authenticate` - Verify service key
 - `CRUD /api/v1/webhooks` - Webhook management
 
+### Trusted Source Key Required
+Service keys flagged `trusted_source` push their own verdicts in, skipping
+`AggregatorService`. See `TrustedSourceUpsertService` and `/docs/trusted-sources`.
+- `POST /api/v1/source/domains` - Upsert domains + verdicts (max 1000)
+- `POST /api/v1/source/urls`
+- `POST /api/v1/source/emails`
+- `POST /api/v1/source/phone_numbers`
+
 ## Configuration
 
 ### Required Credentials (`bin/rails credentials:edit`)
