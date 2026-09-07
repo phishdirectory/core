@@ -6,17 +6,29 @@ info:
 
     ## Authentication
 
-    All API requests require authentication via API key. Include your key in the request headers:
+    Every endpoint except `/health` and `/auth/*` needs an API key. Send it in a header:
 
     ```
-    Authorization: Bearer pdat_your_api_key
+    Authorization: Bearer YOUR_API_KEY
     ```
 
     Or alternatively:
 
     ```
-    X-API-Key: pdat_your_api_key
+    X-API-Key: YOUR_API_KEY
     ```
+
+    There are two kinds of key, and each opens a different part of the API:
+
+    | Kind | Format | Opens |
+    |------|--------|-------|
+    | User key | `pdat_...` | The check endpoints and `/user/me` |
+    | Service key | no prefix | `/webhooks`, `/identity/*` and `/auth/authenticate` |
+
+    A service key can also be flagged as a **trusted source**. Those keys open the
+    `/source/*` endpoints, which write your own verdicts into our database instead
+    of reading ours. Some endpoints additionally need the calling user to be an
+    admin, which is noted on each one.
 
     ## Rate Limits
 
@@ -63,12 +75,25 @@ tags:
     description: Email verification endpoints
   - name: User
     description: User account management
+  - name: Auth
+    description: Service-to-service authentication
+  - name: WHOIS
+    description: Domain registration lookups
+  - name: Protections
+    description: The protected list (admin only)
+  - name: Trusted Sources
+    description: Verdict ingestion (trusted source service keys only)
   - name: Webhooks
-    description: Webhook management (Service API keys only)
+    description: Webhook management (service keys only)
+  - name: Identity
+    description: User management for federated services (service keys only)
+  - name: Admin
+    description: Operator endpoints (admin only)
 
 paths:
   /health:
     get:
+      operationId: getHealth
       tags:
         - Health
       summary: Health check
@@ -89,8 +114,77 @@ paths:
                     type: string
                     format: date-time
 
+  /auth/authenticate:
+    post:
+      operationId: postAuthAuthenticate
+      tags:
+        - Auth
+      summary: Verify a service key
+      description: |
+        Confirm that a service key is valid and usable, and find out which service
+        it belongs to. Send the service key itself as the credential. A user key
+        (`pdat_*`) is never accepted here.
+      responses:
+        '200':
+          description: The key is valid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  authenticated:
+                    type: boolean
+                    example: true
+                  service:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      name:
+                        type: string
+                        example: partner-feed
+                  key_id:
+                    type: string
+                    format: uuid
+        '401':
+          description: The key is missing, unknown, revoked, or its service is not active
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Invalid API key"
+
+  /auth/token:
+    post:
+      operationId: postAuthToken
+      tags:
+        - Auth
+      summary: Exchange credentials for an access token
+      description: |
+        Not implemented. Use `/oauth/token` for OAuth 2.0 token exchange.
+      security: []
+      responses:
+        '501':
+          $ref: '#/components/responses/NotImplemented'
+
+  /auth/refresh:
+    post:
+      operationId: postAuthRefresh
+      tags:
+        - Auth
+      summary: Refresh an access token
+      description: |
+        Not implemented. Use `/oauth/token` with `grant_type=refresh_token`.
+      security: []
+      responses:
+        '501':
+          $ref: '#/components/responses/NotImplemented'
+
   /domain/check:
     get:
+      operationId: getDomainCheck
       tags:
         - Domain
       summary: Check a domain
@@ -115,6 +209,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
     post:
+      operationId: postDomainCheck
       tags:
         - Domain
       summary: Check a domain
@@ -145,7 +240,47 @@ paths:
           $ref: '#/components/responses/Unauthorized'
 
   /domain/bulk:
+    get:
+      operationId: getDomainBulk
+      tags:
+        - Domain
+      summary: Check multiple domains (query string form)
+      description: |
+        The same as the POST form, with the values in the query string as
+        `?domains[]=...&domains[]=...`. Prefer POST for anything but a
+        handful of values: a long query string is easy to truncate.
+      parameters:
+        - name: domains[]
+          in: query
+          required: true
+          explode: true
+          schema:
+            type: array
+            maxItems: 100
+            items:
+              type: string
+          example: ["example.com", "suspicious-site.com"]
+      responses:
+        '200':
+          description: Bulk check results, in the order sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DomainResult'
+                  count:
+                    type: integer
+                    example: 2
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
     post:
+      operationId: postDomainBulk
       tags:
         - Domain
       summary: Check multiple domains
@@ -187,8 +322,306 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
+  /domain/whois:
+    get:
+      operationId: getDomainWhois
+      tags:
+        - WHOIS
+      summary: Look up domain registration
+      description: |
+        Registration details for a domain, from WHOIS or RDAP. Results are cached,
+        so repeated lookups of the same domain do not hit the registry again.
+      parameters:
+        - name: domain
+          in: query
+          required: true
+          schema:
+            type: string
+          example: suspicious-site.com
+      responses:
+        '200':
+          description: Registration information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WhoisResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: No registration information found for this domain
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  domain:
+                    type: string
+                  error:
+                    type: string
+                    example: Domain registration information not found
+                  queried_at:
+                    type: string
+                    format: date-time
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+    post:
+      operationId: postDomainWhois
+      tags:
+        - WHOIS
+      summary: Look up domain registration
+      description: Same as the GET form, with the domain in the request body.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [domain]
+              properties:
+                domain:
+                  type: string
+                  example: suspicious-site.com
+      responses:
+        '200':
+          description: Registration information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WhoisResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: No registration information found for this domain
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+
+  /domain/whois/bulk:
+    get:
+      operationId: getDomainWhoisBulk
+      tags:
+        - WHOIS
+      summary: Look up registration for several domains (query string form)
+      description: |
+        The same as the POST form, with the domains in the query string as
+        `?domains[]=...&domains[]=...`.
+      parameters:
+        - name: domains[]
+          in: query
+          required: true
+          explode: true
+          schema:
+            type: array
+            maxItems: 100
+            items:
+              type: string
+          example: ["suspicious-site.com", "example.com"]
+      responses:
+        '200':
+          description: Registration information, in the order sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/WhoisResult'
+                  count:
+                    type: integer
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        domain:
+                          type: string
+                        error:
+                          type: string
+                        retry_after:
+                          type: integer
+                          nullable: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+    post:
+      operationId: postDomainWhoisBulk
+      tags:
+        - WHOIS
+      summary: Look up registration for several domains
+      description: |
+        Up to 100 domains per request. A lookup that fails does not fail the batch:
+        it appears in `errors` instead. A rate limit from the registry stops the
+        batch early, so `results` can be shorter than what you sent.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [domains]
+              properties:
+                domains:
+                  type: array
+                  maxItems: 100
+                  items:
+                    type: string
+                  example: ["suspicious-site.com", "example.com"]
+      responses:
+        '200':
+          description: Registration information, in the order sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/WhoisResult'
+                  count:
+                    type: integer
+                    example: 2
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        domain:
+                          type: string
+                        error:
+                          type: string
+                        retry_after:
+                          type: integer
+                          nullable: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+
+  /domain/protections:
+    get:
+      operationId: getDomainProtections
+      tags:
+        - Protections
+      summary: List protected domains
+      description: |
+        The protected list holds domains that must never be flagged, whatever any
+        source reports. Needs an admin user key.
+      responses:
+        '200':
+          description: The protected domains
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  protections:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Protection'
+                  count:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      operationId: postDomainProtections
+      tags:
+        - Protections
+      summary: Protect a domain
+      description: Add a domain to the protected list. Needs an admin user key.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [protectable_value]
+              properties:
+                protectable_value:
+                  type: string
+                  description: The domain to protect
+                  example: example.com
+                reason:
+                  type: string
+                  nullable: true
+                  example: Customer owned domain
+      responses:
+        '201':
+          description: The domain is now protected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Protection'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /domain/protections/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Public identifier (prt_...) or UUID
+        example: prt_4k8xJm2pN9qW
+    get:
+      operationId: getDomainProtectionsById
+      tags:
+        - Protections
+      summary: Get one protection
+      description: Needs an admin user key.
+      responses:
+        '200':
+          description: The protection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Protection'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      operationId: deleteDomainProtectionsById
+      tags:
+        - Protections
+      summary: Remove a protection
+      description: Needs an admin user key.
+      responses:
+        '204':
+          description: The domain is no longer protected
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
   /url/check:
     get:
+      operationId: getUrlCheck
       tags:
         - URL
       summary: Check a URL
@@ -213,6 +646,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
     post:
+      operationId: postUrlCheck
       tags:
         - URL
       summary: Check a URL
@@ -243,7 +677,47 @@ paths:
           $ref: '#/components/responses/Unauthorized'
 
   /url/bulk:
+    get:
+      operationId: getUrlBulk
+      tags:
+        - URL
+      summary: Check multiple URLs (query string form)
+      description: |
+        The same as the POST form, with the values in the query string as
+        `?urls[]=...&urls[]=...`. Prefer POST for anything but a
+        handful of values: a long query string is easy to truncate.
+      parameters:
+        - name: urls[]
+          in: query
+          required: true
+          explode: true
+          schema:
+            type: array
+            maxItems: 100
+            items:
+              type: string
+          example: ["https://example.com", "https://suspicious-site.com/login"]
+      responses:
+        '200':
+          description: Bulk check results, in the order sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UrlResult'
+                  count:
+                    type: integer
+                    example: 2
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
     post:
+      operationId: postUrlBulk
       tags:
         - URL
       summary: Check multiple URLs
@@ -287,6 +761,7 @@ paths:
 
   /phone/check:
     get:
+      operationId: getPhoneCheck
       tags:
         - Phone
       summary: Check a phone number
@@ -311,6 +786,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
     post:
+      operationId: postPhoneCheck
       tags:
         - Phone
       summary: Check a phone number
@@ -341,7 +817,47 @@ paths:
           $ref: '#/components/responses/Unauthorized'
 
   /phone/bulk:
+    get:
+      operationId: getPhoneBulk
+      tags:
+        - Phone
+      summary: Check multiple phone numbers (query string form)
+      description: |
+        The same as the POST form, with the values in the query string as
+        `?phone_numbers[]=...&phone_numbers[]=...`. Prefer POST for anything but a
+        handful of values: a long query string is easy to truncate.
+      parameters:
+        - name: phone_numbers[]
+          in: query
+          required: true
+          explode: true
+          schema:
+            type: array
+            maxItems: 100
+            items:
+              type: string
+          example: ["+14155551234", "+442071838750"]
+      responses:
+        '200':
+          description: Bulk check results, in the order sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PhoneResult'
+                  count:
+                    type: integer
+                    example: 2
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
     post:
+      operationId: postPhoneBulk
       tags:
         - Phone
       summary: Check multiple phone numbers
@@ -385,6 +901,7 @@ paths:
 
   /email/check:
     get:
+      operationId: getEmailCheck
       tags:
         - Email
       summary: Check an email address
@@ -410,6 +927,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
     post:
+      operationId: postEmailCheck
       tags:
         - Email
       summary: Check an email address
@@ -441,7 +959,47 @@ paths:
           $ref: '#/components/responses/Unauthorized'
 
   /email/bulk:
+    get:
+      operationId: getEmailBulk
+      tags:
+        - Email
+      summary: Check multiple email addresses (query string form)
+      description: |
+        The same as the POST form, with the values in the query string as
+        `?emails[]=...&emails[]=...`. Prefer POST for anything but a
+        handful of values: a long query string is easy to truncate.
+      parameters:
+        - name: emails[]
+          in: query
+          required: true
+          explode: true
+          schema:
+            type: array
+            maxItems: 100
+            items:
+              type: string
+          example: ["user@example.com", "sender@suspicious-site.com"]
+      responses:
+        '200':
+          description: Bulk check results, in the order sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/EmailResult'
+                  count:
+                    type: integer
+                    example: 2
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
     post:
+      operationId: postEmailBulk
       tags:
         - Email
       summary: Check multiple email addresses
@@ -486,6 +1044,7 @@ paths:
 
   /user/me:
     get:
+      operationId: getUserMe
       tags:
         - User
       summary: Get current user
@@ -500,6 +1059,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
     put:
+      operationId: putUserMe
       tags:
         - User
       summary: Update current user
@@ -527,29 +1087,771 @@ paths:
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
 
+  /source/domains:
+    post:
+      operationId: postSourceDomains
+      tags:
+        - Trusted Sources
+      summary: Upsert domains and their verdicts
+      description: |
+        Push your own verdicts in. The submission upserts: it creates the record
+        when we have never seen the value, and replaces the verdict on the record
+        when we have. Our upstream checks do not run.
+
+        Needs a service key flagged as a trusted source. A user key is refused.
+
+        One bad entry does not fail the request. Every entry gets its own result,
+        and the response is 200 as long as the request itself was well formed.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [domains]
+              properties:
+                domains:
+                  type: array
+                  minItems: 1
+                  maxItems: 1000
+                  description: |
+                    Bare values, or objects. A bare value takes the request-level
+                    classification and confidence.
+                  items:
+                    oneOf:
+                      - type: string
+                        example: evil.example
+                      - $ref: '#/components/schemas/SourceEntry'
+                classification:
+                  type: string
+                  enum: [phishing, suspicious, clean]
+                  description: Applied to every entry that states none of its own
+                  example: phishing
+                confidence:
+                  type: number
+                  format: float
+                  minimum: 0
+                  maximum: 1
+                  description: Applied to every entry that states none of its own. Defaults to 1.0.
+                  example: 0.99
+      responses:
+        '200':
+          description: The submission was processed. Check each entry's status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SourceUpsertResponse'
+        '400':
+          description: The array is missing, empty, or holds more than 1000 entries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Maximum 1000 entries per request
+                  received:
+                    type: integer
+                    example: 1500
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: The key is not flagged as a trusted source
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Trusted source access required
+                  hint:
+                    type: string
+                    example: This endpoint needs a service key marked as a trusted source
+
+  /source/urls:
+    post:
+      operationId: postSourceUrls
+      tags:
+        - Trusted Sources
+      summary: Upsert URLs and their verdicts
+      description: |
+        Push your own verdicts in. The submission upserts: it creates the record
+        when we have never seen the value, and replaces the verdict on the record
+        when we have. Our upstream checks do not run.
+
+        Needs a service key flagged as a trusted source. A user key is refused.
+
+        One bad entry does not fail the request. Every entry gets its own result,
+        and the response is 200 as long as the request itself was well formed.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [urls]
+              properties:
+                urls:
+                  type: array
+                  minItems: 1
+                  maxItems: 1000
+                  description: |
+                    Bare values, or objects. A bare value takes the request-level
+                    classification and confidence.
+                  items:
+                    oneOf:
+                      - type: string
+                        example: https://evil.example/login
+                      - $ref: '#/components/schemas/SourceEntry'
+                classification:
+                  type: string
+                  enum: [phishing, suspicious, clean]
+                  description: Applied to every entry that states none of its own
+                  example: phishing
+                confidence:
+                  type: number
+                  format: float
+                  minimum: 0
+                  maximum: 1
+                  description: Applied to every entry that states none of its own. Defaults to 1.0.
+                  example: 0.99
+      responses:
+        '200':
+          description: The submission was processed. Check each entry's status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SourceUpsertResponse'
+        '400':
+          description: The array is missing, empty, or holds more than 1000 entries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Maximum 1000 entries per request
+                  received:
+                    type: integer
+                    example: 1500
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: The key is not flagged as a trusted source
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Trusted source access required
+                  hint:
+                    type: string
+                    example: This endpoint needs a service key marked as a trusted source
+
+  /source/emails:
+    post:
+      operationId: postSourceEmails
+      tags:
+        - Trusted Sources
+      summary: Upsert email addresses and their verdicts
+      description: |
+        Push your own verdicts in. The submission upserts: it creates the record
+        when we have never seen the value, and replaces the verdict on the record
+        when we have. Our upstream checks do not run.
+
+        Needs a service key flagged as a trusted source. A user key is refused.
+
+        One bad entry does not fail the request. Every entry gets its own result,
+        and the response is 200 as long as the request itself was well formed.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [emails]
+              properties:
+                emails:
+                  type: array
+                  minItems: 1
+                  maxItems: 1000
+                  description: |
+                    Bare values, or objects. A bare value takes the request-level
+                    classification and confidence.
+                  items:
+                    oneOf:
+                      - type: string
+                        example: sender@evil.example
+                      - $ref: '#/components/schemas/SourceEntry'
+                classification:
+                  type: string
+                  enum: [phishing, suspicious, clean]
+                  description: Applied to every entry that states none of its own
+                  example: phishing
+                confidence:
+                  type: number
+                  format: float
+                  minimum: 0
+                  maximum: 1
+                  description: Applied to every entry that states none of its own. Defaults to 1.0.
+                  example: 0.99
+      responses:
+        '200':
+          description: The submission was processed. Check each entry's status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SourceUpsertResponse'
+        '400':
+          description: The array is missing, empty, or holds more than 1000 entries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Maximum 1000 entries per request
+                  received:
+                    type: integer
+                    example: 1500
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: The key is not flagged as a trusted source
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Trusted source access required
+                  hint:
+                    type: string
+                    example: This endpoint needs a service key marked as a trusted source
+
+  /source/phone_numbers:
+    post:
+      operationId: postSourcePhoneNumbers
+      tags:
+        - Trusted Sources
+      summary: Upsert phone numbers and their verdicts
+      description: |
+        Push your own verdicts in. The submission upserts: it creates the record
+        when we have never seen the value, and replaces the verdict on the record
+        when we have. Our upstream checks do not run.
+
+        Needs a service key flagged as a trusted source. A user key is refused.
+
+        One bad entry does not fail the request. Every entry gets its own result,
+        and the response is 200 as long as the request itself was well formed.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone_numbers]
+              properties:
+                phone_numbers:
+                  type: array
+                  minItems: 1
+                  maxItems: 1000
+                  description: |
+                    Bare values, or objects. A bare value takes the request-level
+                    classification and confidence.
+                  items:
+                    oneOf:
+                      - type: string
+                        example: "+14155551234"
+                      - $ref: '#/components/schemas/SourceEntry'
+                classification:
+                  type: string
+                  enum: [phishing, suspicious, clean]
+                  description: Applied to every entry that states none of its own
+                  example: phishing
+                confidence:
+                  type: number
+                  format: float
+                  minimum: 0
+                  maximum: 1
+                  description: Applied to every entry that states none of its own. Defaults to 1.0.
+                  example: 0.99
+      responses:
+        '200':
+          description: The submission was processed. Check each entry's status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SourceUpsertResponse'
+        '400':
+          description: The array is missing, empty, or holds more than 1000 entries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Maximum 1000 entries per request
+                  received:
+                    type: integer
+                    example: 1500
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: The key is not flagged as a trusted source
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Trusted source access required
+                  hint:
+                    type: string
+                    example: This endpoint needs a service key marked as a trusted source
+
+  /webhooks:
+    get:
+      operationId: getWebhooks
+      tags:
+        - Webhooks
+      summary: List your webhooks
+      description: Needs a service key.
+      responses:
+        '200':
+          description: The webhooks registered for your service
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  webhooks:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Webhook'
+                  count:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      operationId: postWebhooks
+      tags:
+        - Webhooks
+      summary: Register a webhook
+      description: |
+        Needs a service key. The signing secret is returned once, on creation, and
+        never again.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [url]
+              properties:
+                url:
+                  type: string
+                  format: uri
+                  example: https://example.com/hooks/phish
+                events:
+                  type: array
+                  description: Defaults to every event when omitted
+                  items:
+                    type: string
+                    enum: [user.created, user.role_changed, domain.verdict, url.verdict]
+      responses:
+        '201':
+          description: The webhook was registered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  webhook:
+                    $ref: '#/components/schemas/Webhook'
+                  secret:
+                    type: string
+                    description: Signing secret. Shown only here, so store it now.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Validation failed
+                  details:
+                    type: array
+                    items:
+                      type: string
+
+  /webhooks/{id}:
+    delete:
+      operationId: deleteWebhooksById
+      tags:
+        - Webhooks
+      summary: Remove a webhook
+      description: Needs a service key. Only your own service's webhooks can be removed.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Public identifier (swh_...) or UUID
+          example: swh_4k8xJm2pN9qW
+      responses:
+        '200':
+          description: The webhook was removed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /identity/authenticate:
+    post:
+      operationId: postIdentityAuthenticate
+      tags:
+        - Identity
+      summary: Verify a user's credentials
+      description: |
+        Needs a service key. Returns one answer for every kind of failure, so a
+        caller cannot tell an unknown email from a wrong password or a locked
+        account.
+
+        Gated by the `identity_api_enabled` feature flag.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+      responses:
+        '200':
+          description: The credentials are valid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  authenticated:
+                    type: boolean
+                    example: true
+                  pd_id:
+                    type: string
+                    example: PDU5A1B2C3D
+                  public_id:
+                    type: string
+                    example: usr_4k8xJm2pN9qW
+                  email:
+                    type: string
+                    format: email
+                  access_level:
+                    type: string
+                    enum: [user, trusted, admin, superadmin, owner]
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          description: The credentials are not valid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  authenticated:
+                    type: boolean
+                    example: false
+        '503':
+          $ref: '#/components/responses/IdentityApiDisabled'
+
+  /identity/users:
+    post:
+      operationId: postIdentityUsers
+      tags:
+        - Identity
+      summary: Create a user
+      description: Needs a service key. Gated by the `identity_api_enabled` feature flag.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+                first_name:
+                  type: string
+                last_name:
+                  type: string
+                password:
+                  type: string
+                  format: password
+                password_confirmation:
+                  type: string
+                  format: password
+                skip_confirmation:
+                  type: boolean
+                  description: Marks the email as already verified
+      responses:
+        '201':
+          description: The user was created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityUser'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          description: The email already exists, or validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          $ref: '#/components/responses/IdentityApiDisabled'
+
+  /identity/users/by_email:
+    get:
+      operationId: getIdentityUsersByEmail
+      tags:
+        - Identity
+      summary: Find a user by email
+      description: Needs a service key. Gated by the `identity_api_enabled` feature flag.
+      parameters:
+        - name: email
+          in: query
+          required: true
+          schema:
+            type: string
+            format: email
+      responses:
+        '200':
+          description: The user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityUser'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/IdentityApiDisabled'
+
+  /identity/users/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: A pd_id (PDU...), a public identifier (usr_...), or a UUID
+        example: PDU5A1B2C3D
+    get:
+      operationId: getIdentityUsersById
+      tags:
+        - Identity
+      summary: Get a user
+      description: Needs a service key. Gated by the `identity_api_enabled` feature flag.
+      responses:
+        '200':
+          description: The user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityUser'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/IdentityApiDisabled'
+    patch:
+      operationId: patchIdentityUsersById
+      tags:
+        - Identity
+      summary: Update a user
+      description: |
+        An alias of the PUT form. Rails routes both verbs to the same action.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                first_name:
+                  type: string
+                last_name:
+                  type: string
+      responses:
+        '200':
+          description: The updated user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityUser'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          $ref: '#/components/responses/IdentityApiDisabled'
+    put:
+      operationId: putIdentityUsersById
+      tags:
+        - Identity
+      summary: Update a user
+      description: Needs a service key. Gated by the `identity_api_enabled` feature flag.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                first_name:
+                  type: string
+                last_name:
+                  type: string
+      responses:
+        '200':
+          description: The updated user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityUser'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          $ref: '#/components/responses/IdentityApiDisabled'
+
+  /admin/domain/bulk_import:
+    post:
+      operationId: postAdminDomainBulkImport
+      tags:
+        - Admin
+      summary: Queue domains for checking
+      description: |
+        Seeds domain records and queues a check for each one that needs it. Unlike
+        the trusted source endpoints, this states no verdict: our own checks decide.
+        Needs an admin user key.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [domains]
+              properties:
+                domains:
+                  type: array
+                  minItems: 1
+                  maxItems: 5000
+                  items:
+                    type: string
+      responses:
+        '202':
+          description: The domains were queued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accepted:
+                    type: integer
+                    example: 250
+                  job_id:
+                    type: string
+                  message:
+                    type: string
+                    example: Domains queued for processing
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
 components:
   securitySchemes:
     BearerAuth:
       type: http
       scheme: bearer
-      description: API key with pdat_ prefix
+      description: |
+        Any API key. A user key carries the pdat_ prefix; a service key has no
+        prefix. Which endpoints the key opens depends on its kind.
     ApiKeyHeader:
       type: apiKey
       in: header
       name: X-API-Key
-      description: API key with pdat_ prefix
+      description: |
+        Any API key. A user key carries the pdat_ prefix; a service key has no
+        prefix. Which endpoints the key opens depends on its kind.
 
   schemas:
     DomainResult:
       type: object
       properties:
+        id:
+          type: string
+          description: Unique identifier for the domain record
+          example: dom_4k8xJm2pN9qW
         domain:
           type: string
           description: The normalized domain
           example: suspicious-site.com
         verdict:
           type: string
-          enum: [clean, suspicious, phishing, unknown]
+          enum: [clean, suspicious, phishing, unknown, protected]
           description: The verdict for this domain
           example: phishing
         confidence:
@@ -560,6 +1862,21 @@ components:
           nullable: true
           description: Confidence score (0-1)
           example: 0.94
+        scam_category:
+          type: string
+          nullable: true
+          description: Scam taxonomy category, once the record has been classified
+          example: credential_theft
+        scam_subcategory:
+          type: string
+          nullable: true
+          description: Scam taxonomy subcategory
+          example: fake_login_page
+        verdict_id:
+          type: string
+          nullable: true
+          description: Public identifier of the verdict record
+          example: vrd_7fQ2xR4tL1mZ
         last_checked:
           type: string
           format: date-time
@@ -573,13 +1890,22 @@ components:
     UrlResult:
       type: object
       properties:
+        id:
+          type: string
+          description: Unique identifier for the URL record
+          example: url_4k8xJm2pN9qW
         url:
           type: string
           description: The normalized URL
           example: https://suspicious-site.com/login
+        domain:
+          type: string
+          nullable: true
+          description: The host portion of the URL
+          example: suspicious-site.com
         verdict:
           type: string
-          enum: [clean, suspicious, phishing, unknown]
+          enum: [clean, suspicious, phishing, unknown, protected]
           description: The verdict for this URL
           example: phishing
         confidence:
@@ -590,6 +1916,21 @@ components:
           nullable: true
           description: Confidence score (0-1)
           example: 0.87
+        scam_category:
+          type: string
+          nullable: true
+          description: Scam taxonomy category, once the record has been classified
+          example: credential_theft
+        scam_subcategory:
+          type: string
+          nullable: true
+          description: Scam taxonomy subcategory
+          example: fake_login_page
+        verdict_id:
+          type: string
+          nullable: true
+          description: Public identifier of the verdict record
+          example: vrd_7fQ2xR4tL1mZ
         last_checked:
           type: string
           format: date-time
@@ -613,7 +1954,7 @@ components:
           example: "+14155551234"
         verdict:
           type: string
-          enum: [clean, suspicious, phishing, unknown]
+          enum: [clean, suspicious, phishing, unknown, protected]
           description: The verdict for this phone number
           example: clean
         confidence:
@@ -640,6 +1981,21 @@ components:
           nullable: true
           description: Phone carrier name
           example: Verizon
+        scam_category:
+          type: string
+          nullable: true
+          description: Scam taxonomy category, once the record has been classified
+          example: credential_theft
+        scam_subcategory:
+          type: string
+          nullable: true
+          description: Scam taxonomy subcategory
+          example: fake_login_page
+        verdict_id:
+          type: string
+          nullable: true
+          description: Public identifier of the verdict record
+          example: vrd_7fQ2xR4tL1mZ
         last_checked:
           type: string
           format: date-time
@@ -668,7 +2024,7 @@ components:
           example: example.com
         verdict:
           type: string
-          enum: [clean, suspicious, phishing, unknown]
+          enum: [clean, suspicious, phishing, unknown, protected]
           description: The verdict for this email
           example: clean
         confidence:
@@ -707,6 +2063,21 @@ components:
           nullable: true
           description: Email reputation score (0-1)
           example: 0.85
+        scam_category:
+          type: string
+          nullable: true
+          description: Scam taxonomy category, once the record has been classified
+          example: credential_theft
+        scam_subcategory:
+          type: string
+          nullable: true
+          description: Scam taxonomy subcategory
+          example: fake_login_page
+        verdict_id:
+          type: string
+          nullable: true
+          description: Public identifier of the verdict record
+          example: vrd_7fQ2xR4tL1mZ
         last_checked:
           type: string
           format: date-time
@@ -745,6 +2116,272 @@ components:
           type: string
           format: date-time
 
+    WhoisResult:
+      type: object
+      properties:
+        domain:
+          type: string
+          example: suspicious-site.com
+        registrar:
+          type: string
+          nullable: true
+          example: NameCheap, Inc.
+        registrar_url:
+          type: string
+          nullable: true
+        registered_at:
+          type: string
+          format: date-time
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: When the registry record was last updated
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+        domain_age_days:
+          type: integer
+          nullable: true
+          description: Days since registration. A very new domain is a common phishing signal.
+          example: 3
+        days_until_expiry:
+          type: integer
+          nullable: true
+        nameservers:
+          type: array
+          nullable: true
+          items:
+            type: string
+        status:
+          type: array
+          nullable: true
+          description: EPP status codes from the registry
+          items:
+            type: string
+        dnssec:
+          type: boolean
+          nullable: true
+        source:
+          type: string
+          nullable: true
+          description: Which lookup answered, RDAP or WHOIS
+          example: rdap
+        queried_at:
+          type: string
+          format: date-time
+
+    Protection:
+      type: object
+      properties:
+        id:
+          type: string
+          example: prt_4k8xJm2pN9qW
+        domain:
+          type: string
+          example: example.com
+        reason:
+          type: string
+          nullable: true
+          example: Customer owned domain
+        protected_by:
+          type: string
+          description: Public identifier of the user who added the protection
+          example: usr_4k8xJm2pN9qW
+        created_at:
+          type: string
+          format: date-time
+
+    Webhook:
+      type: object
+      properties:
+        id:
+          type: string
+          example: swh_4k8xJm2pN9qW
+        url:
+          type: string
+          format: uri
+          example: https://example.com/hooks/phish
+        events:
+          type: array
+          items:
+            type: string
+            enum: [user.created, user.role_changed, domain.verdict, url.verdict]
+        active:
+          type: boolean
+          description: False once the webhook has been removed
+          example: true
+        created_at:
+          type: string
+          format: date-time
+
+    SourceEntry:
+      type: object
+      description: |
+        One value a trusted source is classifying. The value goes under the key
+        that matches the endpoint (domain, url, email or phone_number), or under
+        the generic key `value`.
+      properties:
+        domain:
+          type: string
+          example: evil.example
+        url:
+          type: string
+          example: https://evil.example/login
+        email:
+          type: string
+          format: email
+          example: sender@evil.example
+        phone_number:
+          type: string
+          description: E.164 format
+          example: "+14155551234"
+        value:
+          type: string
+          description: Generic alternative to the type-specific key above
+        classification:
+          type: string
+          enum: [phishing, suspicious, clean]
+          description: |
+            Overrides the request-level classification. `unknown` and `protected`
+            are refused: the first carries no information, and the second is an
+            operator decision rather than a source's.
+          example: phishing
+        confidence:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: Defaults to 1.0
+          example: 0.99
+        metadata:
+          type: object
+          additionalProperties: true
+          description: Free-form context stored on the verdict. At most 4KB of JSON.
+          example:
+            feed: daily
+            first_seen: "2026-09-01"
+
+    SourceResult:
+      type: object
+      description: What happened to one submitted entry.
+      properties:
+        value:
+          type: string
+          description: The normalized value
+          example: evil.example
+        status:
+          type: string
+          enum: [created, updated, invalid, rejected]
+          description: |
+            `created` means the value was new to us. `updated` means we already
+            held it and its verdict now says what you sent. `invalid` means the
+            value, classification, confidence or metadata was malformed.
+            `rejected` means the value is on our protected list, so nothing was
+            written.
+          example: created
+        id:
+          type: string
+          nullable: true
+          description: Public identifier of the record. Absent on invalid and rejected entries.
+          example: dom_4k8xJm2pN9qW
+        classification:
+          type: string
+          nullable: true
+          enum: [phishing, suspicious, clean]
+          example: phishing
+        confidence:
+          type: number
+          format: float
+          nullable: true
+          example: 0.99
+        verdict_id:
+          type: string
+          nullable: true
+          example: vrd_7fQ2xR4tL1mZ
+        reason:
+          type: string
+          nullable: true
+          description: Why the entry was refused. Present on invalid and rejected entries.
+          example: "Invalid domain format"
+        protection_id:
+          type: string
+          nullable: true
+          description: The protection that refused this entry. Present on rejected entries.
+          example: prt_4k8xJm2pN9qW
+
+    SourceUpsertResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          description: One result per submitted entry, in the order sent
+          items:
+            $ref: '#/components/schemas/SourceResult'
+        counts:
+          type: object
+          description: Entries per status. A status with no entries is left out.
+          additionalProperties:
+            type: integer
+          example:
+            created: 1
+            updated: 1
+        count:
+          type: integer
+          description: Total entries processed
+          example: 2
+
+    IdentityUser:
+      type: object
+      properties:
+        pd_id:
+          type: string
+          example: PDU5A1B2C3D
+        public_id:
+          type: string
+          example: usr_4k8xJm2pN9qW
+        email:
+          type: string
+          format: email
+        first_name:
+          type: string
+          nullable: true
+        last_name:
+          type: string
+          nullable: true
+        full_name:
+          type: string
+          nullable: true
+        username:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [active, suspended, deactivated]
+        access_level:
+          type: string
+          enum: [user, trusted, admin, superadmin, owner]
+        staff:
+          type: boolean
+        pd_dev:
+          type: boolean
+        email_verified:
+          type: boolean
+        has_password:
+          type: boolean
+        locked_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
     Error:
       type: object
       properties:
@@ -771,6 +2408,69 @@ components:
             $ref: '#/components/schemas/Error'
           example:
             error: "Invalid or missing API key"
+
+    Forbidden:
+      description: Authenticated, but this key or user may not use this endpoint
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Admin access required"
+
+    NotFound:
+      description: The resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Resource not found"
+
+    TooManyRequests:
+      description: |
+        Rate limit exceeded. The `Retry-After` header says how long to wait.
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Rate limit exceeded
+              retry_after:
+                type: integer
+                nullable: true
+
+    ServiceUnavailable:
+      description: An upstream lookup failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    IdentityApiDisabled:
+      description: The identity_api_enabled feature flag is off
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Identity API is not enabled"
+
+    NotImplemented:
+      description: This endpoint is not implemented
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Use /oauth/token for OAuth 2.0 token exchange"
 
     UnprocessableEntity:
       description: Unprocessable entity - validation failed
