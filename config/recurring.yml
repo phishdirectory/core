@@ -28,6 +28,13 @@ unverified_cleanup:
   class: CleanupUnverifiedAccountsJob
   schedule: every 6 hours
 
+# API request log retention. These two tables take one row per API call and
+# had no pruning at all, so they grew without limit.
+api_request_prune:
+  class: ApiRequestPruneJob
+  queue: maintenance
+  schedule: every day at 4:15am
+
 # Heartbeat for monitoring
 heartbeat:
   class: HeartbeatJob
