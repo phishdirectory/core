@@ -1,5 +1,27 @@
 # frozen_string_literal: true
 
+# Must be loaded before the application so nothing escapes instrumentation.
+# Coverage is opt-in: the suite is fast and this keeps the default run clean.
+if ENV["COVERAGE"]
+  require "simplecov"
+  SimpleCov.start "rails" do
+    enable_coverage :branch
+    add_filter "/test/"
+    add_filter "/config/"
+
+    add_group "Services", "app/services"
+    add_group "Jobs", "app/jobs"
+
+    # A ratchet, not a target. Set just below where the suite actually sits
+    # (32.8% line, 14.9% branch as of writing) so it catches regressions
+    # without blocking work. Raise it as coverage grows.
+    #
+    # The number is low because the service layer, the report pipeline and
+    # most controllers had no tests at all before this series of changes.
+    minimum_coverage line: 30, branch: 13
+  end
+end
+
 ENV["RAILS_ENV"] ||= "test"
 require_relative "../config/environment"
 require "rails/test_help"

@@ -56,11 +56,20 @@ module RateLimitable
   # @yield Block to execute if within rate limits
   # @return [Object] Result of the block
   #
+  # Claims quota before making the call, not after it.
+  #
+  # This used to read every counter, make the request, then increment. Two
+  # workers could both read a value below the limit, both call the vendor, and
+  # both then increment, so the real rate exceeded the configured one whenever
+  # more than one worker was checking at once. Against VirusTotal's four
+  # requests a minute that is easy to hit.
+  #
+  # Reserving first means a request that is then abandoned still costs quota,
+  # which is the safe direction to be wrong in: we would rather under-use an
+  # allowance than get the key banned.
   def with_rate_limit(action: :default)
-    check_rate_limits!(action: action)
-    result = yield
-    increment_counters(action: action)
-    result
+    reserve_rate_limit!(action: action)
+    yield
   end
 
   # Check if request would be allowed without consuming quota
@@ -114,38 +123,42 @@ module RateLimitable
 
   private
 
-  def check_rate_limits!(action: :default)
+  # Takes one slot from every configured window, atomically, and hands back
+  # anything it already took if a later window turns out to be exhausted.
+  def reserve_rate_limit!(action: :default)
+    claimed = []
+
     _rate_limits.each do |name, config|
-      key = cache_key(name, action)
-      current = Rails.cache.read(key).to_i
+      count = claim_slot(cache_key(name, action), config[:period])
 
-      if current >= config[:requests]
-        # Estimate retry_after based on period since cache TTL APIs are internal
-        retry_after = config[:period]
-
+      if count > config[:requests]
+        release(claimed)
         raise RateLimitExceeded.new(
           limit_name: name,
-          retry_after: retry_after,
+          retry_after: config[:period],
           limit: config[:requests],
           remaining: 0
         )
       end
+
+      claimed << cache_key(name, action)
     end
   end
 
-  def increment_counters(action: :default)
-    _rate_limits.each do |name, config|
-      key = cache_key(name, action)
-      current = Rails.cache.read(key).to_i
-
-      if current.zero?
-        # First request in window - set with expiration
-        Rails.cache.write(key, 1, expires_in: config[:period])
-      else
-        # Increment existing counter
-        Rails.cache.increment(key)
-      end
+  # A single atomic increment. The previous read-then-write left a window in
+  # which two callers both saw zero and both wrote 1, and re-created an expired
+  # key through `increment` without a TTL, which could pin a service as rate
+  # limited indefinitely.
+  def claim_slot(key, period)
+    Rails.cache.increment(key, 1, expires_in: period) || begin
+      # Some stores return nil when the key is absent rather than creating it.
+      Rails.cache.write(key, 1, expires_in: period, unless_exist: true)
+      Rails.cache.increment(key, 0, expires_in: period).to_i.nonzero? || 1
     end
+  end
+
+  def release(keys)
+    keys.each { |key| Rails.cache.decrement(key, 1) }
   end
 
   def cache_key(limit_name, action)
