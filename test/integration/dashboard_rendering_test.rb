@@ -92,4 +92,48 @@ class DashboardRenderingTest < ActionDispatch::IntegrationTest
       assert_response :success, "#{path} did not render"
     end
   end
+
+  # ===========================================
+  # Long lists are paged
+  # ===========================================
+
+  test "the api key list pages rather than growing without bound" do
+    25.times { |i| @user.user_api_keys.create!(name: "Key #{i}") }
+
+    get dashboard_api_keys_path
+
+    assert_response :success
+    assert_select "nav[aria-label=Pagination]"
+    assert_select "tbody tr", 20
+  end
+
+  test "the session list pages too" do
+    25.times { |i| User::Session.create_for_user(@user, ip: "10.0.0.#{i}", device_info: "B#{i}") }
+
+    get dashboard_sessions_path
+
+    assert_response :success
+    assert_select "nav[aria-label=Pagination]"
+  end
+
+  test "a short list shows no pager" do
+    @user.user_api_keys.create!(name: "Only key")
+
+    get dashboard_api_keys_path
+
+    assert_response :success
+    assert_select "nav[aria-label=Pagination]", 0
+  end
+
+  # ===========================================
+  # Narrow screens can reach the navigation
+  # ===========================================
+
+  test "the sidebar has an off-canvas toggle" do
+    get dashboard_root_path
+
+    assert_response :success
+    assert_select "[data-controller=sidebar]"
+    assert_select "[data-sidebar-target=toggle][aria-label=?]", "Open navigation"
+  end
 end

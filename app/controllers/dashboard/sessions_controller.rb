@@ -3,7 +3,9 @@
 module Dashboard
   class SessionsController < BaseController
     def index
-      @sessions = current_user.user_sessions.order(created_at: :desc)
+      @sessions = current_user.user_sessions
+                              .order(created_at: :desc)
+                              .page(params[:page]).per(20)
       @current_session = current_session
     end
 
