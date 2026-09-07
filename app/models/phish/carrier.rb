@@ -11,7 +11,7 @@ class Phish::Carrier < ApplicationRecord
   has_many :phone_numbers, class_name: "Phish::PhoneNumber", foreign_key: :carrier_id, dependent: :nullify
 
   # Validations
-  validates :name, presence: true, uniqueness: true
+  validates :name, presence: true, uniqueness: { conditions: -> { kept } }
 
   CARRIER_TYPES = %w[mobile voip landline toll_free unknown].freeze
   validates :carrier_type, inclusion: { in: CARRIER_TYPES }, allow_nil: true

@@ -42,6 +42,7 @@ class Report::Submission < ApplicationRecord
   # Validations
   validates :case_id, uniqueness: {
     scope: :abuse_contact_id,
+    conditions: -> { kept },
     message: "already has a submission to this contact"
   }
 

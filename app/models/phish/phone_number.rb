@@ -15,7 +15,7 @@ class Phish::PhoneNumber < ApplicationRecord
   belongs_to :marked_clean_by, class_name: "User", optional: true
 
   # Validations
-  validates :phone_number, presence: true, uniqueness: true
+  validates :phone_number, presence: true, uniqueness: { conditions: -> { kept } }
   validates :phone_number, format: {
     with: /\A\+[1-9]\d{1,14}\z/,
     message: "must be in E.164 format (e.g., +14155551234)"

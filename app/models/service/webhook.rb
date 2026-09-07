@@ -17,7 +17,7 @@ class Service::Webhook < ApplicationRecord
   before_validation :generate_secret, on: :create
 
   # Validations
-  validates :url, presence: true, uniqueness: true
+  validates :url, presence: true, uniqueness: { conditions: -> { kept } }
   validates :url, format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]), message: "must be a valid HTTP/HTTPS URL" }
   validates :secret, presence: true
 

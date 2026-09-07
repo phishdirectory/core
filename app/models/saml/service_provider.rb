@@ -20,7 +20,7 @@ module Saml
 
     # Validations
     validates :name, presence: true
-    validates :entity_id, presence: true, uniqueness: true
+    validates :entity_id, presence: true, uniqueness: { conditions: -> { kept } }
     validates :assertion_consumer_service_url, presence: true
     validates :name_id_format, presence: true
 
