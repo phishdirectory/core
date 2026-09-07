@@ -11,6 +11,9 @@ module Api
       # parameter the action reads.
       wrap_parameters false
 
+      # How stale users.last_api_activity_at may get before we write it again.
+      API_ACTIVITY_THROTTLE = 5.minutes
+
       before_action :authenticate_request!
       before_action :require_user_agent!
       around_action :log_api_request
@@ -149,9 +152,12 @@ module Api
         return unless loggable_authenticatable
 
         duration_ms = ((Time.current - start_time) * 1000).round
+        status = response_code || response.status
 
-        # Track user's last API activity
-        @current_user&.touch_api_activity!
+        # Track the user's last API activity, but not on every single request:
+        # that is an extra UPDATE per call and the value is only read at day
+        # granularity.
+        touch_api_activity_throttled
 
         ApiRequest.create!(
           authenticatable: loggable_authenticatable,
@@ -161,15 +167,54 @@ module Api
           ip_address: request.remote_ip,
           user_agent: request.user_agent,
           request_headers: filtered_request_headers.to_json,
-          request_body: truncated_request_body,
-          response_code: response_code || response.status,
-          response_body: truncated_response_body,
+          request_body: loggable_body(status) { truncated_request_body },
+          response_code: status,
+          response_body: loggable_body(status) { truncated_response_body },
           duration_ms: duration_ms,
           requested_at: start_time
         )
       rescue StandardError => e
         # Don't fail the request if logging fails
         Rails.logger.error("[ApiRequestLog] Failed to log request: #{e.message}")
+      end
+
+      # Bodies are only worth keeping when something went wrong. Storing up to
+      # 20KB of body on every successful call was the largest contributor to
+      # the size of this table, and the rows were never read.
+      def loggable_body(status)
+        return nil if status.to_i < 400
+
+        redact_sensitive_values(yield)
+      end
+
+      # config.filter_parameters governs the Rails logger, not this manual
+      # write, so bodies reached the database unfiltered. That put plaintext
+      # passwords from /identity/authenticate and freshly minted webhook
+      # secrets into api_requests, where the admin UI rendered them verbatim.
+      def redact_sensitive_values(body)
+        return nil if body.blank?
+
+        parsed = JSON.parse(body)
+        parameter_filter.filter(parsed).to_json
+      rescue JSON::ParserError
+        # Not JSON, so we cannot tell a secret from any other substring.
+        # Dropping it is the only safe option.
+        "[unparseable body omitted]"
+      end
+
+      def parameter_filter
+        @parameter_filter ||= ActiveSupport::ParameterFilter.new(
+          Rails.application.config.filter_parameters
+        )
+      end
+
+      def touch_api_activity_throttled
+        return unless @current_user
+
+        last_seen = @current_user.last_api_activity_at
+        return if last_seen.present? && last_seen > API_ACTIVITY_THROTTLE.ago
+
+        @current_user.touch_api_activity!
       end
 
       # DEPRECATED: Use around_action :log_api_request instead
@@ -203,9 +248,13 @@ module Api
       def truncated_request_body
         return nil if request.body.blank?
 
+        # Rewind first. Parameter parsing has usually already read the stream
+        # to EOF, so reading without rewinding returned an empty string and the
+        # body was silently never captured.
+        request.body.rewind
         body = request.body.read
         request.body.rewind
-        body.truncate(10_000)
+        body&.truncate(10_000)
       rescue StandardError
         nil
       end
