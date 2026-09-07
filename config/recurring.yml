@@ -83,6 +83,12 @@ reddit_sync:
   queue: maintenance
   schedule: every 6 hours at minute 45
 
+# IOK indicators - sync the phish-report/IOK rule corpus daily
+iok_sync:
+  class: IokSyncJob
+  queue: maintenance
+  schedule: every day at 5:20am
+
 # PhishDestroy - sync destroylist every 6 hours
 phishdestroy_sync:
   class: PhishdestroySyncJob
