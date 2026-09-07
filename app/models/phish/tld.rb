@@ -11,7 +11,7 @@ class Phish::Tld < ApplicationRecord
   has_many :domains, class_name: "Phish::Domain", foreign_key: :tld_id, dependent: :nullify
 
   # Validations
-  validates :name, presence: true, uniqueness: true
+  validates :name, presence: true, uniqueness: { conditions: -> { kept } }
   validates :name, format: {
     with: /\A[a-z0-9]+([\-\.][a-z0-9]+)*\z/,
     message: "must be a valid TLD format (lowercase)"

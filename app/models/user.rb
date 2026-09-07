@@ -51,7 +51,7 @@ class User < ApplicationRecord
   # Validations
   validates :first_name, presence: true
   validates :last_name, presence: true
-  validates :email, presence: true, uniqueness: { case_sensitive: false }
+  validates :email, presence: true, uniqueness: { case_sensitive: false, conditions: -> { kept } }
   validates_email_format_of :email
   validates :email, 'valid_email_2/email': {
     disposable: true,
