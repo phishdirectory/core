@@ -2,12 +2,18 @@
 <%# Include this partial in any layout where you want Command-K available %>
 
 <% if user_signed_in? %>
+<div data-controller="command-palette"
+     data-command-palette-is-admin-value="<%= current_user.admin? %>"
+     data-command-palette-search-url-value="<%= current_user.admin? ? admin_quick_search_path : "" %>">
 <%# Embed navigation data directly - no API call needed for initial load %>
-<script type="application/json" id="command-k-data" nonce="<%= content_security_policy_nonce %>">
+<script type="application/json" data-command-palette-data nonce="<%= content_security_policy_nonce %>">
 {
   "navigation": [
     { "id": "nav-dashboard", "name": "Dashboard", "section": "Navigation", "url": "<%= dashboard_root_path %>", "keywords": "home main" },
-    { "id": "nav-check", "name": "Check Domain/URL", "section": "Navigation", "url": "<%= dashboard_domain_check_path %>", "keywords": "scan phishing verify check" },
+    { "id": "nav-check-domain", "name": "Check Domain", "section": "Navigation", "url": "<%= dashboard_domain_check_path %>", "keywords": "scan phishing verify check domain" },
+    { "id": "nav-check-url", "name": "Check URL", "section": "Navigation", "url": "<%= dashboard_url_check_path %>", "keywords": "scan phishing verify check url link" },
+    { "id": "nav-check-email", "name": "Check Email", "section": "Navigation", "url": "<%= dashboard_email_check_path %>", "keywords": "scan fraud verify check email address" },
+    { "id": "nav-check-phone", "name": "Check Phone", "section": "Navigation", "url": "<%= dashboard_phone_check_path %>", "keywords": "scan scam verify check phone number" },
     { "id": "nav-api-keys", "name": "API Keys", "section": "Navigation", "url": "<%= dashboard_api_keys_path %>", "keywords": "keys tokens auth" },
     { "id": "nav-profile", "name": "Profile Settings", "section": "Navigation", "url": "<%= dashboard_profile_path %>", "keywords": "account settings user" },
     { "id": "nav-sessions", "name": "Active Sessions", "section": "Navigation", "url": "<%= dashboard_sessions_path %>", "keywords": "devices login" },
@@ -39,21 +45,38 @@
 }
 </script>
 
-<div id="command-k-modal" class="fixed inset-0 z-[100] hidden">
+<%# Touch users cannot press Cmd-K, so the palette needs a visible way in. %>
+<button type="button"
+        data-action="command-palette#toggle"
+        class="md:hidden fixed bottom-5 right-5 z-[90] w-12 h-12 rounded-full bg-accent text-surface-0 shadow-lg flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-surface-0"
+        aria-label="Open quick search">
+  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+  </svg>
+</button>
+
+<div data-command-palette-target="modal"
+     class="fixed inset-0 z-[100] hidden"
+     role="dialog"
+     aria-modal="true"
+     aria-label="Quick search"
+     aria-hidden="true">
   <%# Backdrop %>
-  <div id="command-k-backdrop" class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" data-action="click->command-palette#close"></div>
 
   <%# Modal %>
-  <div class="absolute inset-0 flex items-start justify-center pt-[15vh] px-4">
-    <div id="command-k-container" class="w-full max-w-xl bg-surface-100 rounded-lg shadow-2xl overflow-hidden transform scale-95 opacity-0 transition-all duration-150">
+  <div class="absolute inset-0 flex items-start justify-center pt-[15vh] px-4 pointer-events-none">
+    <div data-command-palette-target="container" class="pointer-events-auto w-full max-w-xl bg-surface-100 rounded-lg shadow-2xl overflow-hidden transform scale-95 opacity-0 transition-all duration-150">
       <%# Search Input %>
       <div class="flex items-center gap-3 px-4 py-3 border-b border-surface-200/50">
         <svg class="w-4 h-4 text-surface-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
         </svg>
         <input
-          id="command-k-input"
+          data-command-palette-target="input"
+          data-action="keydown->command-palette#navigate input->command-palette#search"
           type="text"
+          aria-label="Search"
           placeholder="Search..."
           class="flex-1 bg-transparent text-surface-900 placeholder-surface-500 text-sm outline-none"
           autocomplete="off"
@@ -63,12 +86,12 @@
       </div>
 
       <%# Results %>
-      <div id="command-k-results" class="max-h-[50vh] overflow-y-auto">
-        <div id="command-k-loading" class="hidden px-4 py-8 text-center">
+      <div class="max-h-[50vh] overflow-y-auto" role="listbox" aria-label="Search results">
+        <div data-command-palette-target="loading" class="hidden px-4 py-8 text-center">
           <div class="inline-block w-4 h-4 border-2 border-surface-300 border-t-accent rounded-full animate-spin"></div>
         </div>
-        <div id="command-k-content"></div>
-        <div id="command-k-empty" class="hidden px-4 py-8 text-center text-surface-500 text-sm">No results found</div>
+        <div data-command-palette-target="content"></div>
+        <div data-command-palette-target="empty" class="hidden px-4 py-8 text-center text-surface-500 text-sm">No results found</div>
       </div>
 
       <%# Footer %>
@@ -91,265 +114,5 @@
   </div>
 </div>
 
-<script nonce="<%= content_security_policy_nonce %>">
-(function() {
-  var modal = document.getElementById('command-k-modal');
-  if (!modal) return;
-
-  var backdrop = document.getElementById('command-k-backdrop');
-  var container = document.getElementById('command-k-container');
-  var input = document.getElementById('command-k-input');
-  var content = document.getElementById('command-k-content');
-  var empty = document.getElementById('command-k-empty');
-  var loadingEl = document.getElementById('command-k-loading');
-
-  // Load embedded data
-  var dataEl = document.getElementById('command-k-data');
-  var data = JSON.parse(dataEl.textContent);
-  var navigation = data.navigation || [];
-  var trustedNavigation = data.trusted_navigation || [];
-  var adminNavigation = data.admin_navigation || [];
-  var isAdmin = data.is_admin;
-  var isTrusted = data.is_trusted;
-  var allItems = navigation.concat(trustedNavigation).concat(adminNavigation);
-
-  var selectedIndex = 0;
-  var filteredItems = allItems;
-  var searchTimeout = null;
-
-  var badgeColors = {
-    emerald: 'bg-success/10 text-success',
-    amber: 'bg-warning/10 text-warning',
-    red: 'bg-danger/10 text-danger',
-    cyan: 'bg-accent/10 text-accent',
-    purple: 'bg-purple-500/10 text-purple-400',
-    slate: 'bg-surface-300 text-surface-600'
-  };
-
-  function openModal() {
-    modal.classList.remove('hidden');
-    setTimeout(function() {
-      container.classList.remove('scale-95', 'opacity-0');
-      container.classList.add('scale-100', 'opacity-100');
-      input.focus();
-      input.value = '';
-      filteredItems = allItems;
-      selectedIndex = 0;
-      renderItems(allItems);
-    }, 10);
-  }
-
-  function closeModal() {
-    container.classList.remove('scale-100', 'opacity-100');
-    container.classList.add('scale-95', 'opacity-0');
-    setTimeout(function() {
-      modal.classList.add('hidden');
-    }, 150);
-  }
-
-  function escapeText(str) { return str ? String(str) : ''; }
-
-  function createSectionHeader(name) {
-    var h = document.createElement('div');
-    h.className = 'px-4 py-2 text-[10px] font-semibold text-surface-500 uppercase tracking-wider bg-surface-200/50 sticky top-0';
-    h.textContent = name;
-    return h;
-  }
-
-  function createItem(item, index) {
-    var el = document.createElement('div');
-
-    // Base classes
-    var baseClasses = 'command-k-item flex items-center gap-3 py-2.5 cursor-pointer transition-colors';
-
-    // Add role-specific styling
-    if (item.role === 'admin') {
-      el.className = baseClasses + ' pl-3 pr-4 border-l-2 border-purple-500';
-    } else if (item.role === 'trusted') {
-      el.className = baseClasses + ' pl-3 pr-4 border-l-2 border-cyan-500';
-    } else {
-      el.className = baseClasses + ' px-4';
-    }
-
-    el.dataset.index = index;
-    el.dataset.url = item.url || '#';
-    if (item.method) el.dataset.method = item.method;
-
-    // Add role badge for admin/trusted items
-    if (item.role === 'admin' || item.role === 'trusted') {
-      var roleBadge = document.createElement('span');
-      if (item.role === 'admin') {
-        roleBadge.className = 'px-1.5 py-0.5 text-[10px] rounded font-medium bg-purple-500/20 text-purple-400';
-        roleBadge.textContent = 'Admin';
-      } else {
-        roleBadge.className = 'px-1.5 py-0.5 text-[10px] rounded font-medium bg-cyan-500/20 text-cyan-400';
-        roleBadge.textContent = 'Trusted';
-      }
-      el.appendChild(roleBadge);
-    }
-
-    var textDiv = document.createElement('div');
-    textDiv.className = 'flex-1 min-w-0';
-
-    var nameDiv = document.createElement('div');
-    nameDiv.className = 'text-sm font-medium text-surface-800';
-    nameDiv.textContent = escapeText(item.name);
-    textDiv.appendChild(nameDiv);
-
-    if (item.subtitle) {
-      var subDiv = document.createElement('div');
-      subDiv.className = 'text-xs text-surface-500 truncate';
-      subDiv.textContent = escapeText(item.subtitle);
-      textDiv.appendChild(subDiv);
-    }
-
-    el.appendChild(textDiv);
-
-    if (item.badge) {
-      var badge = document.createElement('span');
-      badge.className = 'px-1.5 py-0.5 text-[10px] rounded font-medium ' + (badgeColors[item.badge_color] || badgeColors.slate);
-      badge.textContent = escapeText(item.badge);
-      el.appendChild(badge);
-    }
-
-    el.addEventListener('mouseenter', function() { selectedIndex = index; updateSelection(); });
-    el.addEventListener('click', function() { selectedIndex = index; selectItem(); });
-
-    return el;
-  }
-
-  function renderItems(items) {
-    filteredItems = items;
-    while (content.firstChild) content.removeChild(content.firstChild);
-    loadingEl.classList.add('hidden');
-
-    if (items.length === 0) {
-      content.classList.add('hidden');
-      empty.classList.remove('hidden');
-      return;
-    }
-
-    empty.classList.add('hidden');
-    content.classList.remove('hidden');
-
-    var currentSection = null;
-    items.forEach(function(item, i) {
-      var section = item.section || 'Results';
-      if (section !== currentSection) {
-        content.appendChild(createSectionHeader(section));
-        currentSection = section;
-      }
-      content.appendChild(createItem(item, i));
-    });
-
-    updateSelection();
-  }
-
-  function updateSelection() {
-    var items = content.querySelectorAll('.command-k-item');
-    items.forEach(function(item, i) {
-      if (i === selectedIndex) {
-        item.classList.add('bg-surface-200');
-        item.scrollIntoView({ block: 'nearest' });
-      } else {
-        item.classList.remove('bg-surface-200');
-      }
-    });
-  }
-
-  function selectItem() {
-    if (filteredItems.length === 0 || !filteredItems[selectedIndex]) return;
-    var item = filteredItems[selectedIndex];
-    if (item.method === 'delete') {
-      var form = document.createElement('form');
-      form.method = 'post';
-      form.action = item.url;
-      var m = document.createElement('input'); m.type = 'hidden'; m.name = '_method'; m.value = 'delete';
-      var t = document.createElement('input'); t.type = 'hidden'; t.name = 'authenticity_token';
-      t.value = document.querySelector('meta[name="csrf-token"]').content;
-      form.appendChild(m); form.appendChild(t);
-      document.body.appendChild(form);
-      form.submit();
-    } else {
-      window.location.href = item.url;
-    }
-  }
-
-  function filterLocal(query) {
-    if (!query) return allItems;
-    var q = query.toLowerCase();
-    return allItems.filter(function(item) {
-      var text = (item.name + ' ' + (item.subtitle || '') + ' ' + (item.keywords || '')).toLowerCase();
-      return text.indexOf(q) !== -1;
-    });
-  }
-
-  function search(query) {
-    if (!query) {
-      renderItems(allItems);
-      return;
-    }
-
-    // First filter local navigation
-    var localResults = filterLocal(query);
-
-    // Only search API for admin users when query looks like an ID or email
-    var shouldSearchAPI = isAdmin && (
-      query.indexOf('@') !== -1 ||
-      query.match(/^(usr_|svc_|dom_|url_|PDU)/i) ||
-      query.length >= 3
-    );
-
-    if (!shouldSearchAPI) {
-      renderItems(localResults);
-      return;
-    }
-
-    loadingEl.classList.remove('hidden');
-    content.classList.add('hidden');
-
-    fetch('/admin/quick_search?q=' + encodeURIComponent(query), { headers: { 'Accept': 'application/json' } })
-      .then(function(res) { return res.json(); })
-      .then(function(data) {
-        var apiResults = data.results || [];
-        renderItems(localResults.concat(apiResults));
-      })
-      .catch(function() {
-        renderItems(localResults);
-      });
-  }
-
-  // Global keyboard shortcuts
-  document.addEventListener('keydown', function(e) {
-    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-      e.preventDefault();
-      modal.classList.contains('hidden') ? openModal() : closeModal();
-    }
-    if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
-      e.preventDefault();
-      closeModal();
-    }
-  });
-
-  // Input-specific keyboard handling (arrow keys, enter)
-  input.addEventListener('keydown', function(e) {
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      if (selectedIndex < filteredItems.length - 1) { selectedIndex++; updateSelection(); }
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      if (selectedIndex > 0) { selectedIndex--; updateSelection(); }
-    } else if (e.key === 'Enter') {
-      e.preventDefault();
-      selectItem();
-    }
-  });
-
-  backdrop.addEventListener('click', closeModal);
-  input.addEventListener('input', function(e) {
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(function() { search(e.target.value.trim()); }, 150);
-  });
-})();
-</script>
+</div>
 <% end %>

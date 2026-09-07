@@ -1,0 +1,37 @@
+<%#
+  Previous / next pager.
+
+  The admin views each hand-roll this markup; the dashboard had none at all,
+  so API keys and sessions were unbounded lists that only ever grew.
+
+  Accepts:
+    collection: a Kaminari-paginated relation
+    page_url:   ->(page_number) { path }
+%>
+<% if collection.respond_to?(:total_pages) && collection.total_pages > 1 %>
+  <nav class="px-5 py-4 border-t border-surface-200/50 flex items-center justify-between gap-4" aria-label="Pagination">
+    <div class="w-28">
+      <% if collection.current_page > 1 %>
+        <%= link_to page_url.call(collection.current_page - 1),
+              rel: "prev",
+              class: "inline-flex px-3 py-1.5 text-xs font-medium text-surface-600 bg-surface-200 rounded-md hover:bg-surface-300 transition-colors" do %>
+          &larr; Previous
+        <% end %>
+      <% end %>
+    </div>
+
+    <span class="text-xs text-surface-500 tabular-nums">
+      Page <%= collection.current_page %> of <%= collection.total_pages %>
+    </span>
+
+    <div class="w-28 text-right">
+      <% if collection.current_page < collection.total_pages %>
+        <%= link_to page_url.call(collection.current_page + 1),
+              rel: "next",
+              class: "inline-flex px-3 py-1.5 text-xs font-medium text-surface-600 bg-surface-200 rounded-md hover:bg-surface-300 transition-colors" do %>
+          Next &rarr;
+        <% end %>
+      <% end %>
+    </div>
+  </nav>
+<% end %>

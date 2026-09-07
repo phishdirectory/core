@@ -1,0 +1,28 @@
+<%#
+  Empty state for a list or result panel.
+
+  This block was duplicated near-verbatim five times, and the classifications
+  page had invented a heavier variant that nothing else matched.
+
+  Accepts:
+    title:    headline
+    subtitle: optional supporting line
+    icon:     :inbox (default) | :key | :search | :check
+%>
+<% subtitle = local_assigns[:subtitle] %>
+<% icon = local_assigns.fetch(:icon, :inbox) %>
+<% paths = {
+     inbox:  "M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4",
+     key:    "M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z",
+     search: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z",
+     check:  "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+   } %>
+<div class="px-4 py-10 text-center">
+  <svg class="w-10 h-10 mx-auto text-surface-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="<%= paths.fetch(icon, paths[:inbox]) %>"/>
+  </svg>
+  <p class="text-sm font-medium text-surface-700"><%= title %></p>
+  <% if subtitle.present? %>
+    <p class="text-xs text-surface-500 mt-1"><%= subtitle %></p>
+  <% end %>
+</div>

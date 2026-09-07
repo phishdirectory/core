@@ -1,0 +1,21 @@
+<%#
+  Panel with a titled header.
+
+  This shell was copy-pasted more than fifteen times across the dashboard,
+  which is why some card headers had a bottom border and some did not.
+
+  Accepts:
+    title: header text
+    meta:  optional right-aligned text in the header
+    block: card body
+%>
+<% meta = local_assigns[:meta] %>
+<div class="bg-surface-100 rounded-lg overflow-hidden">
+  <div class="px-5 py-4 border-b border-surface-200/50 flex items-center justify-between gap-4">
+    <h2 class="text-sm font-semibold text-surface-900"><%= title %></h2>
+    <% if meta.present? %>
+      <span class="font-mono text-xs text-surface-500 truncate"><%= meta %></span>
+    <% end %>
+  </div>
+  <%= yield %>
+</div>

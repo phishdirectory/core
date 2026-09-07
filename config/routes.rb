@@ -111,17 +111,19 @@ Rails.application.routes.draw do
   namespace :dashboard do
     root to: "dashboard#index"
 
-    # Domain checking
-    get "check", to: "domain_checks#new", as: :domain_check
-    post "check", to: "domain_checks#create"
+    # Lookups. One controller handles every type; the paths and helper names
+    # are unchanged so existing links keep working.
+    get  "check",       to: "checks#new",    as: :domain_check, defaults: { type: "domain" }
+    post "check",       to: "checks#create",                    defaults: { type: "domain" }
 
-    # Phone number checking
-    get "check_phone", to: "phone_checks#new", as: :phone_check
-    post "check_phone", to: "phone_checks#create"
+    get  "check_url",   to: "checks#new",    as: :url_check,    defaults: { type: "url" }
+    post "check_url",   to: "checks#create",                    defaults: { type: "url" }
 
-    # Email checking
-    get "check_email", to: "email_checks#new", as: :email_check
-    post "check_email", to: "email_checks#create"
+    get  "check_phone", to: "checks#new",    as: :phone_check,  defaults: { type: "phone" }
+    post "check_phone", to: "checks#create",                    defaults: { type: "phone" }
+
+    get  "check_email", to: "checks#new",    as: :email_check,  defaults: { type: "email" }
+    post "check_email", to: "checks#create",                    defaults: { type: "email" }
 
     resources :api_keys, only: [ :index, :create, :destroy ] do
       member do
