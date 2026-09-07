@@ -13,8 +13,7 @@ module Report
     end
 
     def create_case!
-      return nil unless should_create_case?
-      return nil if existing_open_case?
+      return nil if decline_reason
 
       Report::Case.transaction do
         # Create verdict snapshot for historical reference
@@ -52,25 +51,35 @@ module Report
       raise
     end
 
-    private
+    # Why create_case! would decline, or nil when it would go ahead.
+    #
+    # The background jobs only ever needed a yes or a no. The public XARF tool
+    # has to tell the person in front of it why nothing happened, and
+    # "create_case! returned nil" is not something anyone can act on.
+    #
+    # @return [Symbol, nil] :not_phishing, :low_confidence, :reporting_disabled
+    #   or :existing_case
+    def decline_reason
+      return :not_phishing unless verdict&.classification == "phishing"
+      return :low_confidence unless verdict.confidence_score.to_f >= confidence_threshold
+      return :reporting_disabled unless Flipper.enabled?(:auto_reporting)
+      return :existing_case if existing_case
 
-    def should_create_case?
-      return false unless verdict&.classification == "phishing"
-      return false unless verdict.confidence_score >= confidence_threshold
-      return false unless Flipper.enabled?(:auto_reporting)
-
-      true
+      nil
     end
 
-    def confidence_threshold
-      Rails.application.credentials.dig(:reporting, :confidence_threshold) || 0.8
-    end
-
-    def existing_open_case?
-      Report::Case.active.exists?(
+    # The open case already covering this domain or URL, if there is one.
+    def existing_case
+      Report::Case.active.find_by(
         reportable_type: reportable.class.name,
         reportable_id: reportable.id
       )
+    end
+
+    private
+
+    def confidence_threshold
+      Rails.application.credentials.dig(:reporting, :confidence_threshold) || 0.8
     end
 
     def domain_name

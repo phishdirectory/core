@@ -83,6 +83,16 @@ Rails.application.routes.draw do
   end
 
   # ===========================================
+  # Public XARF Utility
+  # ===========================================
+  # Generating a report is open to anyone. Sending it is not: submit requires
+  # a signed-in user, because it puts mail in someone else's inbox.
+  get  "xarf",          to: "xarf#new",      as: :xarf
+  post "xarf",          to: "xarf#create"
+  get  "xarf/download", to: "xarf#download", as: :xarf_download
+  post "xarf/submit",   to: "xarf#submit",   as: :xarf_submit
+
+  # ===========================================
   # Documentation
   # ===========================================
   # Mount rswag BEFORE the catch-all docs/:page route

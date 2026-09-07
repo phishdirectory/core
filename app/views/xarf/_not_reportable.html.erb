@@ -1,0 +1,52 @@
+<%#
+  Why there is no report.
+
+  "Not reportable" covers several different facts, and collapsing them would
+  tell someone their real phishing site is fine when what actually happened is
+  that our sources were unreachable. Each status gets its own explanation.
+
+  Accepts:
+    result: Xarf::PublicReportService::Result with a non-reportable status
+%>
+<%
+  tone, heading = case result.status
+  when :lookup_failed
+    [ :warning, "The check could not be completed" ]
+  when :clean, :protected
+    [ :success, "This looks legitimate" ]
+  when :unknown
+    [ :info, "Nothing on this yet" ]
+  else
+    [ :warning, "We cannot check that" ]
+  end
+
+  colors = {
+    warning: "bg-warning/10 border-warning/30 text-warning",
+    success: "bg-success/10 border-success/30 text-success",
+    info:    "bg-info/10 border-info/30 text-info"
+  }
+%>
+
+<%= render "shared/card", title: "Your report", meta: result.value do %>
+  <div class="p-5">
+    <% if result.note.present? %>
+      <p class="text-xs text-surface-500 bg-surface-200/60 rounded-md px-3 py-2 mb-5"><%= result.note %></p>
+    <% end %>
+
+    <div class="border rounded-md p-4 <%= colors.fetch(tone) %>">
+      <p class="text-sm font-medium text-surface-800"><%= heading %></p>
+      <p class="text-xs text-surface-600 mt-1">
+        <%= result.message %>
+      </p>
+    </div>
+
+    <% if result.status == :unknown %>
+      <p class="text-xs text-surface-500 mt-4">
+        A site can be live before any feed has caught it. If you are sure this is
+        phishing, send the details to
+        <a href="mailto:abuse@phish.directory" class="text-accent hover:underline">abuse@phish.directory</a>
+        and we will look at it by hand.
+      </p>
+    <% end %>
+  </div>
+<% end %>

@@ -117,6 +117,27 @@ class Rack::Attack
     req.ip if credential.blank?
   end
 
+  ### Public XARF Utility ###
+  #
+  # /xarf is unauthenticated, and every report it generates runs a real check
+  # against VirusTotal, URLScan and the rest. Those have their own upstream
+  # quotas, so an unthrottled public form is a way to drain them. These limits
+  # are generous for a person reporting a phishing site and useless as a
+  # quota drain. Loading the empty form is a plain page view and is not counted.
+  def self.xarf_lookup?(req)
+    return false unless req.path == "/xarf" || req.path.start_with?("/xarf/")
+
+    req.post? || req.path == "/xarf/download"
+  end
+
+  throttle("xarf/ip", limit: 10, period: 1.minute) do |req|
+    req.ip if xarf_lookup?(req)
+  end
+
+  throttle("xarf/ip/hourly", limit: 60, period: 1.hour) do |req|
+    req.ip if xarf_lookup?(req)
+  end
+
   ### Signup Throttling ###
   throttle("signups/ip", limit: 5, period: 1.hour) do |req|
     req.ip if req.path == "/signup" && req.post?
