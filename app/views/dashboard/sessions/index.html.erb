@@ -67,7 +67,7 @@
                   <% if session == @current_session %>
                     <span class="text-xs text-surface-500">Current session</span>
                   <% elsif session.active? %>
-                    <%= button_to "Terminate", dashboard_session_path(session), method: :delete, class: "px-2.5 py-1.5 text-xs font-medium text-danger bg-danger/10 rounded-md hover:bg-danger/20 transition-colors cursor-pointer", data: { confirm: "This will sign out this device. Continue?" } %>
+                    <%= button_to "Terminate", dashboard_session_path(session), method: :delete, class: "px-2.5 py-1.5 text-xs font-medium text-danger bg-danger/10 rounded-md hover:bg-danger/20 transition-colors cursor-pointer", data: { turbo_confirm: "This will sign out this device. Continue?" } %>
                   <% else %>
                     <span class="text-xs text-surface-500">-</span>
                   <% end %>

@@ -1,0 +1,46 @@
+<%#
+  Shared flash rendering.
+
+  Each layout used to inline its own copy and each handled a different subset
+  of keys. None of them handled :success, which the classification controller
+  sets on its two most important actions, so completing a classification
+  showed the user nothing at all.
+
+  Accepts:
+    fixed: render as a floating toast rather than inline (marketing layout)
+%>
+<% fixed = local_assigns.fetch(:fixed, false) %>
+
+<%
+  styles = {
+    "notice"  => { classes: "bg-success/10 text-success", icon: :check },
+    "success" => { classes: "bg-success/10 text-success", icon: :check },
+    "alert"   => { classes: "bg-danger/10 text-danger",   icon: :warning },
+    "error"   => { classes: "bg-danger/10 text-danger",   icon: :warning }
+  }
+
+  # :api_key carries the one-time key reveal, which the API keys page renders
+  # in its own banner. It is data, not a message.
+  messages = flash.to_hash.except("api_key").select { |key, value| styles.key?(key) && value.present? }
+
+  # When a key has just been created the reveal banner already says so.
+  messages = messages.except("notice") if flash[:api_key].present?
+%>
+
+<% if messages.any? %>
+  <div class="<%= fixed ? "fixed top-4 right-4 z-50 space-y-2" : "px-8 pt-4" %>" role="status" aria-live="polite">
+    <% messages.each do |key, message| %>
+      <% style = styles[key] %>
+      <div class="<%= style[:classes] %> px-4 py-3 rounded-lg text-sm font-medium flex items-center gap-2 <%= fixed ? "shadow-lg" : "mb-4" %> animate-slide-down">
+        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+          <% if style[:icon] == :check %>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          <% else %>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          <% end %>
+        </svg>
+        <span><%= message %></span>
+      </div>
+    <% end %>
+  </div>
+<% end %>
