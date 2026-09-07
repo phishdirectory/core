@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_07_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_07_150500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "fuzzystrmatch"
   enable_extension "pg_catalog.plpgsql"
@@ -721,6 +721,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_120000) do
     t.boolean "sign_assertions", default: true
     t.text "single_logout_service_url"
     t.datetime "updated_at", null: false
+    t.boolean "want_authn_requests_signed", default: false, null: false
     t.index ["discarded_at"], name: "index_saml_service_providers_on_discarded_at"
     t.index ["enabled"], name: "index_saml_service_providers_on_enabled"
     t.index ["entity_id"], name: "index_saml_sps_on_entity_id_kept", unique: true, where: "(discarded_at IS NULL)"

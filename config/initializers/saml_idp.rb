@@ -66,15 +66,25 @@ SamlIdp.configure do |config|
   config.technical_contact.email_address = "security@phish.directory"
 
   # Attribute service - dynamically look up service provider configs
+  #
+  # acs_url is deliberately the stored URL rather than the one the AuthnRequest
+  # carries, so a caller cannot redirect an assertion somewhere else.
+  #
+  # sign_authn_request drives whether saml_idp checks the request signature.
+  # It needs both cert and fingerprint to be present before it will check, so
+  # a provider that wants signed requests must also have a certificate on file.
   config.service_provider.finder = lambda { |issuer_or_entity_id|
     sp = Saml::ServiceProvider.enabled.find_by(entity_id: issuer_or_entity_id)
 
     if sp&.usable?
       {
         acs_url: sp.assertion_consumer_service_url,
+        assertion_consumer_logout_service_url: sp.single_logout_service_url,
         cert: sp.certificate,
-        fingerprint: nil,
+        fingerprint: sp.certificate_fingerprint,
         metadata_url: sp.metadata_url,
+        sign_authn_request: sp.want_authn_requests_signed?,
+        validate_signature: sp.want_authn_requests_signed?,
         response_hosts: [ URI.parse(sp.assertion_consumer_service_url).host ]
       }
     end
