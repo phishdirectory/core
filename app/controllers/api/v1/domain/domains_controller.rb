@@ -20,16 +20,16 @@ module Api
             return render json: { error: "Invalid domain format" }, status: :bad_request
           end
 
-          # Find or create the domain record (create_or_find_by handles race conditions)
-          phish_domain = Phish::Domain.create_or_find_by!(domain: normalized_domain)
+          # Find or create the domain record (handles the concurrent-create race)
+          phish_domain = Phish::Domain.find_or_create_by_natural_key!(domain: normalized_domain)
 
           # Track that this domain was queried
           phish_domain.touch_last_seen!
 
-          # Check if we need to refresh the verdict
-          if phish_domain.needs_recheck?
-            # Queue background check
-            # PhishDomainCheckJob.perform_later(phish_domain.id)
+          # Queue a background check when we have no verdict yet, or the one we
+          # have has gone stale.
+          if phish_domain.needs_check?(Phish::Domain::ACTIVE_QUERY_THRESHOLD)
+            PhishDomainCheckJob.enqueue_once(phish_domain.id, key: phish_domain.id)
           end
 
           render json: serialize_domain(phish_domain)
@@ -62,10 +62,10 @@ module Api
           # Find existing domains
           existing = Phish::Domain.where(domain: normalized_domains).index_by(&:domain)
 
-          # Create missing domains (create_or_find_by! handles race conditions)
+          # Create missing domains (handles the concurrent-create race)
           missing_domains = normalized_domains - existing.keys
           missing_domains.each do |domain|
-            existing[domain] = Phish::Domain.create_or_find_by!(domain: domain)
+            existing[domain] = Phish::Domain.find_or_create_by_natural_key!(domain: domain)
           end
 
           # Update last_seen_at for all domains in bulk
@@ -73,6 +73,13 @@ module Api
 
           # Reload all domains with verdict eager loading to avoid N+1
           phish_domains = Phish::Domain.includes(:verdict).where(domain: normalized_domains).index_by(&:domain)
+
+          # Queue background checks for anything missing or stale, same as #check
+          phish_domains.each_value do |phish_domain|
+            next unless phish_domain.needs_check?(Phish::Domain::ACTIVE_QUERY_THRESHOLD)
+
+            PhishDomainCheckJob.enqueue_once(phish_domain.id, key: phish_domain.id)
+          end
 
           # Serialize in original order
           results = normalized_domains.map { |d| serialize_domain(phish_domains[d]) }

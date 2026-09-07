@@ -20,6 +20,11 @@ class Phish::Domain < ApplicationRecord
     message: "must be a valid domain format"
   }
 
+  # How stale a verdict may be before an API caller asking about this domain
+  # triggers a fresh check. Shorter than the 24 hour default used by the
+  # background sweep, because someone is actively asking right now.
+  ACTIVE_QUERY_THRESHOLD = 4.hours
+
   # Normalizations
   normalizes :domain, with: ->(domain) { domain.strip.downcase }
 
@@ -70,12 +75,6 @@ class Phish::Domain < ApplicationRecord
 
   def needs_check?(threshold = 24.hours)
     !checked? || stale?(threshold)
-  end
-
-  # Returns true if domain has been checked before but verdict may need refreshing.
-  # Uses a shorter threshold than needs_check? since this is for actively-queried domains.
-  def needs_recheck?(threshold = 4.hours)
-    checked? && stale?(threshold)
   end
 
   # ===========================================

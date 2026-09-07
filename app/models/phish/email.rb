@@ -129,7 +129,7 @@ class Phish::Email < ApplicationRecord
   class << self
     def find_or_create_for_check(email_string)
       normalized = email_string.to_s.strip.downcase
-      create_or_find_by!(email: normalized)
+      find_or_create_by_natural_key!(email: normalized)
     end
 
     def normalize_email(email_string)
