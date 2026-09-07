@@ -44,7 +44,11 @@ module Api
       private
 
       def webhook_params
-        params.permit(:url)
+        permitted = params.permit(:url, events: [])
+        # Default to every event so an existing integration that does not know
+        # about subscriptions keeps behaving the same way.
+        permitted[:events] = Service::Webhook::EVENTS if permitted[:events].blank?
+        permitted
       end
 
       def find_webhook(id)
@@ -61,6 +65,7 @@ module Api
         {
           id: webhook.public_id,
           url: webhook.url,
+          events: webhook.events,
           # There is no active column. A webhook is active until it is
           # soft deleted, which is what destroy does.
           active: webhook.kept?,

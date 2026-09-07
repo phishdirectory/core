@@ -22,6 +22,10 @@ Rails.application.configure do
   config.consider_all_requests_local = true
   config.cache_store = :null_store
 
+  # The webhook address policy resolves hostnames before delivering. Tests
+  # must not depend on DNS; WebhookAddressPolicy is unit tested directly.
+  config.x.webhooks.resolve_addresses = false
+
   # Render exception templates for rescuable exceptions and raise for other exceptions.
   config.action_dispatch.show_exceptions = :rescuable
 

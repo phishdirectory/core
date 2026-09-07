@@ -37,6 +37,11 @@ module PhishDirectory
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
 
+    # Webhook delivery resolves each target hostname before calling it, so a
+    # name that is public at registration time cannot later point inside the
+    # network. Disabled in test so the suite does not depend on DNS.
+    config.x.webhooks.resolve_addresses = true
+
     # Hybrid app: UI for admin/auth + API at /api/*
     # NOT api_only - we need sessions, cookies, flash for admin UI and auth
     # API controllers inherit from ActionController::API for lightweight responses
