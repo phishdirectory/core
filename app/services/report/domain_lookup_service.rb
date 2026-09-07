@@ -5,7 +5,6 @@ module Report
   # Uses RDAP (preferred) with WHOIS fallback
   class DomainLookupService < BaseService
     CACHE_TTL = 24.hours
-    DNS_TIMEOUT = 5
 
     # RDAP bootstrap servers by TLD
     # See: https://data.iana.org/rdap/dns.json
@@ -38,10 +37,11 @@ module Report
       result = lookup_rdap(domain) || lookup_whois(domain)
 
       if result
-        # The hosting provider is found from the addresses the domain serves
-        # from, not from the registration record, so resolve them here.
-        result[:a_records] = resolve_addresses(domain, Resolv::DNS::Resource::IN::A)
-        result[:aaaa_records] = resolve_addresses(domain, Resolv::DNS::Resource::IN::AAAA)
+        # The hosting provider is named by the zone, not by the registration
+        # record, so sweep it here.
+        result[:dns_records] = DnsSweepService.new(logger: logger).sweep(domain)
+        result[:a_records] = Array(result[:dns_records]["A"])
+        result[:aaaa_records] = Array(result[:dns_records]["AAAA"])
         save_lookup(domain, result)
       else
         log_info("No lookup data found for #{domain}")
@@ -53,32 +53,6 @@ module Report
 
     def normalize_domain(domain)
       domain.to_s.downcase.strip.sub(/^www\./, "")
-    end
-
-    # Resolve the addresses the domain currently serves from.
-    #
-    # Report::AbuseContact.find_for_ip matches these against the ranges a
-    # hosting provider publishes, which is how a report reaches the provider
-    # that actually serves the phishing page. Both families are resolved:
-    # DigitalOcean and its peers publish IPv6 allocations too, and an
-    # IPv6-only host would otherwise never be matched.
-    #
-    # A domain that does not resolve is still worth reporting on the
-    # registration record alone, so every failure here degrades to no addresses
-    # rather than losing the lookup.
-    #
-    # @param domain [String] normalized domain
-    # @param resource [Class] Resolv::DNS::Resource::IN::A or ::AAAA
-    # @return [Array<String>] addresses, empty when the domain does not resolve
-    def resolve_addresses(domain, resource)
-      Timeout.timeout(DNS_TIMEOUT) do
-        Resolv::DNS.open do |dns|
-          dns.getresources(domain, resource).map { |record| record.address.to_s }
-        end
-      end
-    rescue StandardError => e
-      log_debug("Could not resolve #{resource.name.demodulize} records for #{domain}: #{e.message}")
-      []
     end
 
     def lookup_rdap(domain)
@@ -251,6 +225,7 @@ module Report
         nameservers: result[:nameservers],
         a_records: result[:a_records] || [],
         aaaa_records: result[:aaaa_records] || [],
+        dns_records: result[:dns_records] || {},
         lookup_source: result[:lookup_source],
         looked_up_at: Time.current,
         expires_at: CACHE_TTL.from_now

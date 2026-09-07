@@ -577,6 +577,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_160000) do
     t.datetime "created_at", null: false
     t.datetime "discarded_at"
     t.string "email"
+    t.jsonb "hostname_patterns", default: []
     t.jsonb "ip_ranges", default: []
     t.enum "method", null: false, enum_type: "report_contact_method"
     t.string "name", null: false
@@ -651,6 +652,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_160000) do
     t.jsonb "a_records", default: []
     t.jsonb "aaaa_records", default: []
     t.datetime "created_at", null: false
+    t.jsonb "dns_records", default: {}
     t.string "domain", null: false
     t.datetime "domain_created_at"
     t.datetime "domain_expires_at"

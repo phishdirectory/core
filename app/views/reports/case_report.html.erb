@@ -124,6 +124,72 @@
         </td>
       </tr>
       <% end %>
+      <% if @domain_info.dig("dns_records", "CNAME").present? %>
+      <tr>
+        <th>CNAME</th>
+        <td>
+          <ul>
+            <% @domain_info["dns_records"]["CNAME"].each do |name| %>
+              <li><%= name %></li>
+            <% end %>
+          </ul>
+        </td>
+      </tr>
+      <% end %>
+      <% if @domain_info.dig("dns_records", "PTR").present? %>
+      <tr>
+        <th>Reverse Lookups</th>
+        <td>
+          <ul>
+            <% @domain_info["dns_records"]["PTR"].each do |address, name| %>
+              <li><%= address %> &rarr; <%= name %></li>
+            <% end %>
+          </ul>
+        </td>
+      </tr>
+      <% end %>
+      <% if @domain_info["mail_hosts"].present? %>
+      <tr>
+        <th>Mail Hosts (MX)</th>
+        <td>
+          <ul>
+            <% @domain_info["mail_hosts"].each do |host| %>
+              <li><%= host %></li>
+            <% end %>
+          </ul>
+        </td>
+      </tr>
+      <% end %>
+      <% if @domain_info.dig("dns_records", "TXT").present? %>
+      <tr>
+        <th>TXT</th>
+        <td>
+          <ul>
+            <% @domain_info["dns_records"]["TXT"].each do |txt| %>
+              <li><%= txt.truncate(200) %></li>
+            <% end %>
+          </ul>
+        </td>
+      </tr>
+      <% end %>
+      <% if @domain_info.dig("dns_records", "CAA").present? %>
+      <tr>
+        <th>CAA</th>
+        <td>
+          <ul>
+            <% @domain_info["dns_records"]["CAA"].each do |caa| %>
+              <li><%= caa["tag"] %> <%= caa["value"] %></li>
+            <% end %>
+          </ul>
+        </td>
+      </tr>
+      <% end %>
+      <% if @domain_info.dig("dns_records", "SOA", "mname").present? %>
+      <tr>
+        <th>SOA</th>
+        <td><%= @domain_info["dns_records"]["SOA"]["mname"] %></td>
+      </tr>
+      <% end %>
     </table>
   </section>
   <% end %>

@@ -61,14 +61,25 @@ class Report::DomainLookup < ApplicationRecord
 
   # Update matched contacts based on patterns
   #
-  # Hosting falls back to the addresses the domain resolves to. A phishing site
-  # on a DigitalOcean droplet normally keeps its registrar's nameservers, so
-  # nameserver patterns alone never identify the provider serving the page.
+  # Hosting is matched strongest signal first:
+  #
+  #   1. CNAME and reverse lookups name the platform or machine serving the
+  #      page. A site on platform hosting resolves to a shared anycast address
+  #      that belongs to a CDN, so these are often the only records that name
+  #      the party who can take it down.
+  #   2. The addresses name the network that owns them.
+  #   3. Nameservers name only the DNS operator, which is frequently a
+  #      different company: github.com delegates to Route 53 but is served by
+  #      GitHub, so matching here first would report to the wrong party.
+  #
+  # MX is deliberately absent. It names who carries the mail, not who serves
+  # the page; mail_hosts surfaces it for a human to route by hand.
   def match_contacts!
     self.matched_registrar_contact = Report::AbuseContact.find_for_registrar(registrar_name)
     self.matched_hosting_contact =
-      Report::AbuseContact.find_for_nameservers(nameservers) ||
-      Report::AbuseContact.find_for_ip(resolved_addresses)
+      Report::AbuseContact.find_for_hostnames(serving_hostnames) ||
+      Report::AbuseContact.find_for_ip(resolved_addresses) ||
+      Report::AbuseContact.find_for_hostnames(nameserver_hostnames)
     self.hosting_provider = matched_hosting_contact.name if matched_hosting_contact
     save!
   end
@@ -78,6 +89,39 @@ class Report::DomainLookup < ApplicationRecord
   # @return [Array<String>]
   def resolved_addresses
     Array(a_records) + Array(aaaa_records)
+  end
+
+  # Hostnames naming the party that serves the page
+  #
+  # @return [Array<String>]
+  def serving_hostnames
+    Report::DnsSweepService.serving_hostnames(dns_records || {})
+  end
+
+  # Hostnames naming the DNS operator, from the zone and from the registry
+  #
+  # @return [Array<String>]
+  def nameserver_hostnames
+    registry = Array(nameservers).map { |ns| ns.to_s.downcase.chomp(".") }
+
+    (Report::DnsSweepService.nameserver_hostnames(dns_records || {}) + registry)
+      .compact_blank.uniq
+  end
+
+  # Every hostname the zone points at, registry nameservers included
+  #
+  # @return [Array<String>]
+  def resolved_hostnames
+    (serving_hostnames + nameserver_hostnames).uniq
+  end
+
+  # The mail hosts for the domain, for routing the mail side of a report by hand
+  #
+  # @return [Array<String>]
+  def mail_hosts
+    Array((dns_records || {})["MX"]).filter_map do |mx|
+      (mx.is_a?(Hash) ? mx["exchange"] : mx).to_s.downcase.chomp(".").presence
+    end
   end
 
   # Get all matched contacts
@@ -98,6 +142,8 @@ class Report::DomainLookup < ApplicationRecord
       nameservers: nameservers,
       a_records: a_records,
       aaaa_records: aaaa_records,
+      dns_records: dns_records,
+      mail_hosts: mail_hosts,
       hosting_provider: hosting_provider,
       domain_created_at: domain_created_at&.iso8601,
       domain_expires_at: domain_expires_at&.iso8601,
