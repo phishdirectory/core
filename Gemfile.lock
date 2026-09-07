@@ -477,6 +477,7 @@ GEM
       bigdecimal
       concurrent-ruby (~> 1.0, >= 1.0.2)
       logger
+    simplecov (1.2.0)
     simpleidn (0.3.0)
     solid_cable (4.0.2)
       actioncable (>= 7.2)
@@ -638,6 +639,7 @@ DEPENDENCIES
   saml_idp (~> 0.16)
   sentry-rails
   sentry-ruby
+  simplecov
   solid_cable
   solid_cache
   solid_queue

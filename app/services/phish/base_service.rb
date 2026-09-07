@@ -28,6 +28,13 @@ module Phish
     DEFAULT_TIMEOUT = 30
     DEFAULT_OPEN_TIMEOUT = 10
 
+    # Built once. OpenSSL 3 turns on CRL checking by default and the
+    # distribution points are frequently unreachable, which turns a working
+    # certificate into a connection failure. Peer verification stays on.
+    def self.certificate_store
+      @certificate_store ||= OpenSSL::X509::Store.new.tap(&:set_default_paths)
+    end
+
     attr_reader :logger
 
     def initialize(logger: Rails.logger)
@@ -68,6 +75,13 @@ module Phish
         # Response middleware
         conn.response :json, content_type: /\bjson$/
         conn.response :raise_error
+
+        # Certificate verification is configured per connection here rather
+        # than by patching Net::HTTP globally, which is what
+        # config/initializers/ssl_crl_fix.rb used to do for every HTTPS call in
+        # the process, Postmark and Active Storage included.
+        conn.ssl.verify = true
+        conn.ssl.cert_store = self.class.certificate_store
 
         # Adapter (must be last)
         conn.adapter Faraday.default_adapter

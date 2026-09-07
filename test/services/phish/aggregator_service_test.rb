@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "test_helper"
+require "benchmark"
 
 class Phish::AggregatorServiceTest < ActiveSupport::TestCase
   # Stands in for a detection service. The aggregator only ever calls
@@ -52,11 +53,11 @@ class Phish::AggregatorServiceTest < ActiveSupport::TestCase
   # Scoring
   # ===========================================
 
-  test "an authoritative source detecting phishing overrides the weighted vote" do
+  test "an authoritative source overrides the weighted vote when uncontested" do
     result = aggregator(
       verdict_from("fish_fish", "phishing", 0.99),
-      verdict_from("virustotal", "clean", 0.9),
-      verdict_from("walshy", "clean", 0.9)
+      verdict_from("virustotal", "suspicious", 0.6),
+      verdict_from("walshy", "phishing", 0.4)
     ).check_domain("bad.com")
 
     assert_equal "phishing", result[:verdict]
@@ -211,5 +212,111 @@ class Phish::AggregatorServiceTest < ActiveSupport::TestCase
 
     assert_equal "phishing", result[:verdict]
     assert_equal 1, result[:details][:failed_services].size
+  end
+
+  # ===========================================
+  # Concurrency
+  # ===========================================
+
+  # Stands in for a slow vendor.
+  class SlowService < FakeService
+    def initialize(name, delay:, **kwargs)
+      super(name, **kwargs)
+      @delay = delay
+    end
+
+    def check_domain(value)
+      sleep @delay
+      super
+    end
+    alias_method :check_url, :check_domain
+  end
+
+  test "services are called concurrently, not one after another" do
+    slow = 3.times.map do |i|
+      SlowService.new(
+        "slow#{i}",
+        delay: 0.3,
+        result: { service: "slow#{i}", verdict: "clean", confidence: 0.9, details: {} }
+      )
+    end
+
+    elapsed = Benchmark.realtime { aggregator(*slow).check_domain("slow.com") }
+
+    assert_operator elapsed, :<, 0.75,
+                    "three 0.3s services should overlap, not sum to 0.9s"
+  end
+
+  test "every concurrent result is still collected" do
+    slow = 3.times.map do |i|
+      SlowService.new(
+        "slow#{i}",
+        delay: 0.05,
+        result: { service: "slow#{i}", verdict: "phishing", confidence: 0.9, details: {} }
+      )
+    end
+
+    result = aggregator(*slow).check_domain("slow.com")
+
+    assert_equal "phishing", result[:verdict]
+    assert_equal 3, result[:details][:services_checked]
+  end
+
+  test "a failure in one concurrent call does not lose the others" do
+    result = aggregator(
+      SlowService.new("slow", delay: 0.05,
+                      result: { service: "slow", verdict: "clean", confidence: 0.9, details: {} }),
+      failing("boom", NoMethodError.new("bang"))
+    ).check_domain("mixed.com")
+
+    assert_equal "clean", result[:verdict]
+    assert_equal 1, result[:details][:failed_services].size
+  end
+
+  # ===========================================
+  # Authoritative sources need corroboration
+  # ===========================================
+
+  test "a lone authoritative hit that others contradict does not decide alone" do
+    result = aggregator(
+      verdict_from("fish_fish", "phishing", 0.99),
+      verdict_from("virustotal", "clean", 0.95),
+      verdict_from("google_safe_browsing", "clean", 0.95),
+      verdict_from("walshy", "clean", 0.95)
+    ).check_domain("contested.com")
+
+    assert_nil result[:details][:authoritative_source],
+               "one stale list entry should not override every other source"
+    assert_equal "clean", result[:verdict]
+  end
+
+  test "two authoritative sources agreeing still decide immediately" do
+    result = aggregator(
+      verdict_from("fish_fish", "phishing", 0.99),
+      verdict_from("sinking_yachts", "phishing", 0.95),
+      verdict_from("virustotal", "clean", 0.95)
+    ).check_domain("corroborated.com")
+
+    assert_equal "phishing", result[:verdict]
+    assert_equal "fish_fish", result[:details][:authoritative_source]
+  end
+
+  test "a lone authoritative hit nobody contradicts still decides" do
+    result = aggregator(
+      verdict_from("fish_fish", "phishing", 0.99),
+      verdict_from("virustotal", "suspicious", 0.5)
+    ).check_domain("uncontested.com")
+
+    assert_equal "phishing", result[:verdict]
+    assert_equal "fish_fish", result[:details][:authoritative_source]
+  end
+
+  test "a weak clean signal does not count as contradiction" do
+    result = aggregator(
+      verdict_from("fish_fish", "phishing", 0.99),
+      verdict_from("virustotal", "clean", 0.1)
+    ).check_domain("weak.com")
+
+    assert_equal "phishing", result[:verdict]
   end
 end
