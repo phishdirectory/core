@@ -91,6 +91,58 @@ class Phish::IokServiceTest < ActiveSupport::TestCase
   end
 
   # ===========================================
+  # Severity
+  # ===========================================
+
+  test "a suspicious indicator reports suspicious, not phishing" do
+    create_indicator(severity: Iok::Severity::SUSPICIOUS)
+    stub_page("<html><body>kit-marker</body></html>")
+
+    result = service.check_url("https://evil.test/")
+
+    assert_equal "suspicious", result[:verdict]
+    assert_equal 0.5, result[:confidence]
+    assert_equal Iok::Severity::SUSPICIOUS, result[:details][:severity]
+  end
+
+  # webflow-website-creator upstream matches every Webflow site there is, so an
+  # identification rule must never put a verdict behind a page on its own.
+  test "an informational indicator records the match but casts no verdict" do
+    create_indicator(severity: Iok::Severity::INFORMATIONAL)
+    stub_page("<html><body>kit-marker</body></html>")
+
+    result = service.check_url("https://evil.test/")
+
+    assert_equal "unknown", result[:verdict]
+    assert_equal 0.0, result[:confidence]
+    assert_equal [ "example-kit" ], result[:details][:matched_indicators].map { |m| m[:slug] }
+    assert_match(/carry no verdict/, result[:details][:reason])
+  end
+
+  test "the most severe matching indicator decides the verdict" do
+    create_indicator(slug: "builder-kit", severity: Iok::Severity::INFORMATIONAL)
+    create_indicator(
+      slug: "real-kit",
+      severity: Iok::Severity::MALICIOUS,
+      detection: { "marker" => { "html|contains" => "kit-marker" }, "condition" => "marker" }
+    )
+    stub_page("<html><body>kit-marker</body></html>")
+
+    result = service.check_url("https://evil.test/")
+
+    assert_equal "phishing", result[:verdict]
+    assert_equal 2, result[:details][:matched_indicators].size
+  end
+
+  test "an admin override beats the derived severity" do
+    create_indicator(severity: Iok::Severity::MALICIOUS,
+                     severity_override: Iok::Severity::INFORMATIONAL)
+    stub_page("<html><body>kit-marker</body></html>")
+
+    assert_equal "unknown", service.check_url("https://evil.test/")[:verdict]
+  end
+
+  # ===========================================
   # Domains
   # ===========================================
 

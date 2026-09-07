@@ -7,7 +7,7 @@ module Admin
   # only writes offered here are enabling or disabling a single indicator,
   # which is the lever to pull when one rule starts producing false positives.
   class IokIndicatorsController < BaseController
-    before_action :set_indicator, only: [ :show, :enable, :disable ]
+    before_action :set_indicator, only: [ :show, :enable, :disable, :severity ]
 
     def index
       @indicators = Iok::Indicator.kept.order(:title).page(params[:page])
@@ -32,6 +32,21 @@ module Admin
     def disable
       @indicator.update!(enabled: false)
       redirect_to admin_iok_indicator_path(@indicator), notice: "Indicator disabled."
+    end
+
+    # Corrects what a match means for one rule. Written to severity_override so
+    # the next sync, which recomputes severity from the rule's own metadata,
+    # does not undo it. Blank clears the correction.
+    def severity
+      value = params[:severity].presence
+
+      if value && !Iok::Severity.valid?(value)
+        return redirect_to admin_iok_indicator_path(@indicator), alert: "Unknown severity."
+      end
+
+      @indicator.update!(severity_override: value)
+      redirect_to admin_iok_indicator_path(@indicator),
+                  notice: value ? "Severity set to #{value}." : "Severity reset to the rule's own."
     end
 
     # The recurring schedule runs daily; this is for pulling a new rule in

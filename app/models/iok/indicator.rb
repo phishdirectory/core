@@ -20,6 +20,8 @@ class Iok::Indicator < ApplicationRecord
   validates :title, presence: true
   validates :content_digest, presence: true
   validates :source, inclusion: { in: SOURCES }
+  validates :severity, inclusion: { in: Iok::Severity::ALL }
+  validates :severity_override, inclusion: { in: Iok::Severity::ALL }, allow_nil: true
   validate :detection_compiles
 
   normalizes :slug, with: ->(slug) { slug.to_s.strip.downcase }
@@ -27,6 +29,23 @@ class Iok::Indicator < ApplicationRecord
   scope :enabled, -> { where(enabled: true) }
   scope :upstream, -> { where(source: "upstream") }
   scope :local, -> { where(source: "local") }
+  scope :overridden, -> { where.not(severity_override: nil) }
+
+  # What a match means, honouring an admin's correction over the value derived
+  # from the rule's own metadata.
+  def effective_severity
+    severity_override.presence || severity
+  end
+
+  def severity_overridden?
+    severity_override.present?
+  end
+
+  # An identification rule (which website builder a page uses, say) matching
+  # tells us nothing about whether the page is malicious.
+  def informational?
+    effective_severity == Iok::Severity::INFORMATIONAL
+  end
   scope :tagged, ->(tag) { where("tags @> ?", [ tag ].to_json) }
   scope :recently_synced, -> { order(synced_at: :desc) }
 
@@ -56,6 +75,7 @@ class Iok::Indicator < ApplicationRecord
       title: title,
       tags: tags,
       source: source,
+      severity: effective_severity,
       reference_urls: reference_urls
     }
   end

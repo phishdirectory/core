@@ -167,13 +167,19 @@ module Iok
         return nil
       end
 
+      level = parsed["level"].to_s.presence
+      tags = Array(parsed["tags"]).map(&:to_s)
+
       {
         slug: slug.downcase,
         title: parsed["title"].to_s.presence || slug,
         description: parsed["description"].to_s.presence,
-        level: parsed["level"].to_s.presence,
+        level: level,
+        # Recomputed on every sync, because a rule can be retagged upstream. An
+        # admin's correction lives in severity_override and is left alone.
+        severity: Iok::Severity.derive(level: level, tags: tags),
         reference_urls: Array(parsed["references"]).map(&:to_s),
-        tags: Array(parsed["tags"]).map(&:to_s),
+        tags: tags,
         # The column is NOT NULL, so a rule with no detection block at all has
         # to reach validation as an empty mapping rather than as nil.
         detection: parsed["detection"].is_a?(Hash) ? parsed["detection"] : {},

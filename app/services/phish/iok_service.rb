@@ -15,9 +15,23 @@ module Phish
   # "clean", which would put a vote against every other service behind a page
   # nobody has fingerprinted yet.
   class IokService < BaseService
-    # A rule match is a fingerprint of a specific kit, not a reputation score,
-    # so the confidence is high and flat rather than scaled by hit count.
-    MATCH_CONFIDENCE = 0.9
+    # What each kind of rule match reports. A kit fingerprint is evidence of a
+    # specific kit rather than a reputation score, so its confidence is high and
+    # flat rather than scaled by hit count.
+    #
+    # An identification rule matching (which website builder a page uses, which
+    # landing page template it was cloned from) says nothing about intent, so it
+    # is recorded in the details and contributes no verdict at all. Without that
+    # distinction a rule like `webflow-website-creator` would report every
+    # Webflow site on the internet as phishing.
+    OUTCOMES = {
+      Iok::Severity::MALICIOUS => { verdict: "phishing", confidence: 0.9 },
+      Iok::Severity::SUSPICIOUS => { verdict: "suspicious", confidence: 0.5 },
+      Iok::Severity::INFORMATIONAL => { verdict: "unknown", confidence: 0.0 }
+    }.freeze
+
+    # Kept for callers that referred to the old flat confidence.
+    MATCH_CONFIDENCE = OUTCOMES.dig(Iok::Severity::MALICIOUS, :confidence)
 
     # Self-imposed, since the requests go to the sites being checked rather
     # than to one vendor. Keeps a bulk check from turning into a burst of
@@ -65,24 +79,40 @@ module Phish
       raise ServiceError, "#{service_name} could not fetch #{url}: #{e.message}"
     end
 
+    # The most severe rule that matched decides the verdict. A page carrying
+    # both a kit fingerprint and a website-builder identifier is a kit.
     def build_verdict(rules, snapshot, url)
       matches = rules.matches(snapshot)
 
       return no_match_result(rules, snapshot, url) if matches.empty?
 
-      log_info("Matched #{matches.size} indicator(s) for #{url}: #{matches.map(&:slug).join(', ')}")
+      severity = Iok::Severity.highest(matches.map(&:effective_severity))
+      outcome = OUTCOMES.fetch(severity)
+
+      log_info(
+        "Matched #{matches.size} indicator(s) for #{url} at severity #{severity}: " \
+        "#{matches.map(&:slug).join(', ')}"
+      )
 
       build_result(
-        verdict: "phishing",
-        confidence: MATCH_CONFIDENCE,
+        verdict: outcome[:verdict],
+        confidence: outcome[:confidence],
         details: {
           url: url,
           source: "iok",
+          severity: severity,
           indicators_evaluated: rules.size,
           matched_indicators: matches.map(&:to_match_summary),
-          page: snapshot.summary
+          page: snapshot.summary,
+          reason: reason_for(severity, matches)
         }
       )
+    end
+
+    def reason_for(severity, matches)
+      return "Matched #{matches.size} IOK indicator(s)" unless severity == Iok::Severity::INFORMATIONAL
+
+      "Matched only informational IOK indicator(s), which carry no verdict"
     end
 
     def no_match_result(rules, snapshot, url)

@@ -1,0 +1,73 @@
+title: Polyhedra Network Drainer Kit
+description: |
+  Detects wallet drainers impersonating Polyhedra Network, zkBridge, Proof
+  Cloud and Legend Game. The pages advertise a $ZK or $ZKJ airdrop and open a
+  wallet connect dialog that drains whatever is approved.
+
+  Adapted from the rule published at
+  https://iok.dev/rules/polyhedra-network-drainer-kit_dqqf8jooj9q8 with two
+  changes, both to keep it from reporting the real Polyhedra site:
+
+  1. The published rule is `pageTitles or domainName or htmlPage`, so a single
+     branch fires it. Both the brand title and the brand hostname match the
+     legitimate site, and the asset filenames are build-hashed files the kit
+     copied from that site, so they are present on both. Here a brand signal
+     has to be joined by drainer content, and only the typosquat hostnames
+     stand alone.
+  2. An officialDomain exclusion, which is the idiom the upstream corpus uses
+     for exactly this problem.
+
+  The level below deliberately overrides the kit tags. This rule was rewritten
+  here rather than transcribed, so it reports suspicious until it has some
+  production history behind it. Raise it by removing the level.
+level: potentially_malicious
+references:
+  - https://urlscan.io/result/529d2b4b-7edc-4b5f-8e01-d29614469a05/
+  - https://iok.dev/rules/polyhedra-network-drainer-kit_dqqf8jooj9q8
+
+detection:
+
+  officialDomain:
+    hostname|endswith:
+      - "polyhedra.network"
+      - "zkbridge.com"
+
+  brandTitle:
+    title|contains:
+      - "Polyhedra Network"
+      - "zkBridge"
+      - "Proof Cloud"
+      - "Legend Game"
+
+  brandDomain:
+    hostname|contains:
+      - "polyhedra"
+      - "zkbridge"
+
+  # Misspellings and hyphenations of the brand. Nothing legitimate resolves
+  # here, so these are enough on their own.
+  typosquatDomain:
+    hostname|contains:
+      - "polyhebra"
+      - "zk-poly"
+
+  airdropContent:
+    html|contains:
+      - "$ZKJ Allocation"
+      - "$ZKJ Distribution"
+      - "$ZKJ Tokenomics"
+      - "$ZK Tokenomics"
+      - "$ZK Airdrop"
+      - "$ZKJ Airdrop"
+      - "zk-token-BnLFrFec.png"
+      - "logo-AKXFtGGI.svg"
+
+  condition: >
+    not officialDomain and
+    (typosquatDomain or (airdropContent and (brandTitle or brandDomain)))
+
+tags:
+  - kit
+  - crypto_drainer
+  - target.polyhedra
+  - cryptocurrency

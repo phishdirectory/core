@@ -75,11 +75,25 @@ corpus against it.
 - `Iok::Rule` / `Iok::Condition`: the Sigma matcher and its condition parser
 - `Iok::PageSnapshot`: fetches a URL into the fields a rule matches on
 - `Iok::RuleSet`: compiles the enabled indicators once per process
-- Admin: `/admin/iok_indicators` (browse, disable a noisy rule, sync now)
+- `Iok::Severity`: what a match means, derived from the rule's level and tags
+- Local rules we wrote live in `db/iok/local/*.yml`, with `source: "local"`
+- Admin: `/admin/iok_indicators` (browse, disable, change severity, sync now)
 
-A rule match reports `phishing`; nothing matching reports `unknown` with zero
-confidence, never `clean`, because the corpus only covers kits somebody has
-written a rule for.
+Nothing matching reports `unknown` with zero confidence, never `clean`, because
+the corpus only covers kits somebody has written a rule for.
+
+Not every rule is a phishing verdict, so severity decides what a match reports:
+
+| Severity | Verdict | Confidence | Example |
+|---|---|---|---|
+| `malicious` | `phishing` | 0.9 | a kit fingerprint, the default |
+| `suspicious` | `suspicious` | 0.5 | `cloaking`, `anti-analysis`, `cloning` |
+| `informational` | none | 0.0 | `website_builder`, `template_service` |
+
+`webflow-website-creator` matches every Webflow site there is, so an
+identification rule must never produce a verdict on its own. Severity is
+recomputed on every sync; an admin correction lives in `severity_override` and
+survives.
 
 **Job Queue Priorities** (`config/solid_queue.yml`):
 1. `critical` - Security incidents, ops alerts
