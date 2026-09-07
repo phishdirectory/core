@@ -66,8 +66,8 @@ module ActionDispatch
       session = sign_in_as(user)
       # Set session cookie for integration tests
       post login_path, params: { email: user.email }
-      user.send_magic_link
-      get magic_link_login_path(token: user.magic_link_token)
+      token = user.generate_magic_link_token
+      get magic_link_login_path(token: token)
       session
     end
   end

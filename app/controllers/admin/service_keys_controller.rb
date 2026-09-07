@@ -11,7 +11,9 @@ module Admin
 
     def create
       @key = @service.generate_key!(notes: params[:notes])
-      redirect_to admin_service_path(@service), notice: "API key created: #{@key.api_key}"
+      # The plaintext is never stored, so this is the only time it can be shown.
+      redirect_to admin_service_path(@service),
+                  notice: "API key created. Copy it now, it cannot be shown again: #{@key.plaintext_key}"
     rescue ActiveRecord::RecordInvalid => e
       redirect_to admin_service_path(@service), alert: "Failed to create key: #{e.message}"
     end

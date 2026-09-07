@@ -76,7 +76,7 @@ class AuthController < ApplicationController
 
   # GET /auth/magic_link/:token
   def magic_link_login
-    user = User.find_by(magic_link_token: params[:token])
+    user = User.find_by_magic_link_token(params[:token])
 
     if user.nil?
       redirect_to login_path, alert: "Invalid or expired magic link."

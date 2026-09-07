@@ -64,9 +64,45 @@ class User < ApplicationRecord
     message: "must be in the format PDU{digit}{7 alphanumeric characters}"
   }
 
-  validates :magic_link_token, uniqueness: true, allow_nil: true
-  validates :confirmation_token, uniqueness: true, allow_nil: true
-  validates :password_reset_token, uniqueness: true, allow_nil: true
+  validates :magic_link_token_digest, uniqueness: true, allow_nil: true
+  validates :confirmation_token_digest, uniqueness: true, allow_nil: true
+  validates :password_reset_token_digest, uniqueness: true, allow_nil: true
+
+  # The raw tokens are never stored. They exist only on the instance that
+  # generates them, long enough to be handed to the mailer.
+  attr_accessor :magic_link_token, :confirmation_token, :password_reset_token
+
+  class << self
+    def generate_token
+      SecureRandom.urlsafe_base64(32)
+    end
+
+    def digest_token(raw_token)
+      Digest::SHA256.hexdigest(raw_token.to_s)
+    end
+
+    # Look a user up by a raw token from a URL. The digest is what is indexed,
+    # so this is still a single indexed lookup.
+    def find_by_magic_link_token(raw_token)
+      find_by_token(:magic_link_token_digest, raw_token)
+    end
+
+    def find_by_password_reset_token(raw_token)
+      find_by_token(:password_reset_token_digest, raw_token)
+    end
+
+    def find_by_confirmation_token(raw_token)
+      find_by_token(:confirmation_token_digest, raw_token)
+    end
+
+    private
+
+    def find_by_token(column, raw_token)
+      return nil if raw_token.blank?
+
+      find_by(column => digest_token(raw_token))
+    end
+  end
 
   # Password validation - only when password is being set
   validates :password, length: { minimum: 8 },
@@ -186,15 +222,17 @@ class User < ApplicationRecord
   # ===========================================
 
   def generate_magic_link_token
-    self.magic_link_token = SecureRandom.urlsafe_base64(32)
+    self.magic_link_token = self.class.generate_token
+    self.magic_link_token_digest = self.class.digest_token(magic_link_token)
     self.magic_link_expires_at = 15.minutes.from_now
     self.magic_link_token_sent_at = Time.current
     self.magic_link_used_at = nil
     save!
+    magic_link_token
   end
 
   def magic_link_valid?
-    magic_link_token.present? &&
+    magic_link_token_digest.present? &&
       magic_link_expires_at.present? &&
       magic_link_expires_at > Time.current &&
       magic_link_used_at.nil?
@@ -209,8 +247,8 @@ class User < ApplicationRecord
   end
 
   def send_magic_link
-    generate_magic_link_token
-    MagicLinkJob.perform_later(self)
+    token = generate_magic_link_token
+    MagicLinkJob.perform_later(self, token)
   end
 
   # ===========================================
@@ -226,13 +264,15 @@ class User < ApplicationRecord
   # ===========================================
 
   def generate_confirmation_token
-    self.confirmation_token = SecureRandom.urlsafe_base64(32)
+    self.confirmation_token = self.class.generate_token
+    self.confirmation_token_digest = self.class.digest_token(confirmation_token)
     self.confirmation_sent_at = Time.current
     save!
+    confirmation_token
   end
 
   def confirmation_token_valid?
-    confirmation_token.present? &&
+    confirmation_token_digest.present? &&
       confirmation_sent_at.present? &&
       confirmation_sent_at > 24.hours.ago &&
       confirmed_at.nil?
@@ -241,7 +281,7 @@ class User < ApplicationRecord
   def confirm!
     update!(
       confirmed_at: Time.current,
-      confirmation_token: nil,
+      confirmation_token_digest: nil,
       email_verified: true,
       email_verified_at: Time.current
     )
@@ -252,8 +292,8 @@ class User < ApplicationRecord
   end
 
   def send_confirmation_email
-    generate_confirmation_token
-    EmailConfirmationJob.perform_later(self)
+    token = generate_confirmation_token
+    EmailConfirmationJob.perform_later(self, token)
   end
 
   # ===========================================
@@ -261,14 +301,16 @@ class User < ApplicationRecord
   # ===========================================
 
   def generate_password_reset_token
-    self.password_reset_token = SecureRandom.urlsafe_base64(32)
+    self.password_reset_token = self.class.generate_token
+    self.password_reset_token_digest = self.class.digest_token(password_reset_token)
     self.password_reset_sent_at = Time.current
     self.password_reset_expires_at = 2.hours.from_now
     save!
+    password_reset_token
   end
 
   def password_reset_token_valid?
-    password_reset_token.present? &&
+    password_reset_token_digest.present? &&
       password_reset_expires_at.present? &&
       password_reset_expires_at > Time.current
   end
@@ -278,15 +320,15 @@ class User < ApplicationRecord
 
     self.password = new_password
     self.password_confirmation = new_password_confirmation
-    self.password_reset_token = nil
+    self.password_reset_token_digest = nil
     self.password_reset_sent_at = nil
     self.password_reset_expires_at = nil
     save
   end
 
   def send_password_reset
-    generate_password_reset_token
-    PasswordResetJob.perform_later(self)
+    token = generate_password_reset_token
+    PasswordResetJob.perform_later(self, token)
   end
 
   # ===========================================

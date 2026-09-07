@@ -31,7 +31,7 @@ module Auth
 
     # GET /auth/password/reset/:token
     def edit
-      @user = User.find_by(password_reset_token: params[:token])
+      @user = User.find_by_password_reset_token(params[:token])
 
       if @user.nil? || !@user.password_reset_token_valid?
         redirect_to forgot_password_path, alert: "This password reset link is invalid or has expired."
@@ -40,7 +40,7 @@ module Auth
 
     # PATCH /auth/password/reset/:token
     def update
-      @user = User.find_by(password_reset_token: params[:token])
+      @user = User.find_by_password_reset_token(params[:token])
 
       if @user.nil? || !@user.password_reset_token_valid?
         redirect_to forgot_password_path, alert: "This password reset link is invalid or has expired."

@@ -43,7 +43,7 @@ class ApiAuthenticationTest < ActionDispatch::IntegrationTest
     key = service.service_keys.create!(status: :active)
 
     post api_v1_auth_authenticate_path,
-         headers: api_headers(api_key: key.api_key)
+         headers: api_headers(api_key: key.plaintext_key)
 
     assert_response :success
     json = JSON.parse(response.body)
@@ -56,7 +56,7 @@ class ApiAuthenticationTest < ActionDispatch::IntegrationTest
     key = service.service_keys.create!(status: :revoked)
 
     post api_v1_auth_authenticate_path,
-         headers: api_headers(api_key: key.api_key)
+         headers: api_headers(api_key: key.plaintext_key)
 
     assert_response :unauthorized
   end
