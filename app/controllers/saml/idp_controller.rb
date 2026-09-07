@@ -4,10 +4,23 @@ module Saml
   class IdpController < ApplicationController
     include SamlIdp::Controller
 
+    # Fallback when a service provider does not name its own context class.
+    DEFAULT_AUTHN_CONTEXT = "urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport"
+
+    # The parameters that make up a redirect-binding request. All of them have
+    # to survive the trip through the login page, because the signature covers
+    # SAMLRequest, RelayState and SigAlg together.
+    SAML_REQUEST_PARAMS = %w[SAMLRequest RelayState SigAlg Signature].freeze
+
+    ASSERTION_LIFETIME = 1.hour
+
+    helper_method :saml_relay_state
+
     skip_before_action :verify_authenticity_token, only: [ :create, :logout ]
     before_action :require_saml_enabled
-    before_action :validate_saml_request, only: [ :new, :create ]
+    before_action :decode_saml_request, only: [ :new, :create ]
     before_action :find_service_provider, only: [ :new, :create ]
+    before_action :validate_saml_request, only: [ :new, :create ]
 
     # GET /saml/metadata
     # Returns IdP metadata XML for service providers to configure
@@ -21,6 +34,7 @@ module Saml
       if user_signed_in? && current_user.can_authenticate?
         # User is authenticated, generate assertion
         @saml_response = encode_response(current_user)
+        log_authentication(status: "success")
         render :create
       else
         # Store SAML request for after authentication
@@ -58,10 +72,7 @@ module Saml
       # Find the user session and invalidate it
       sign_out if user_signed_in?
 
-      # Generate logout response
-      logout_response = encode_logout_response(logout_request.id)
-
-      render xml: logout_response
+      render xml: encode_logout_response(logout_request)
     end
 
     private
@@ -72,84 +83,116 @@ module Saml
       render plain: "SAML IdP is not enabled", status: :service_unavailable
     end
 
-    def validate_saml_request
-      return if saml_request.present? || session[:saml_request_params].present?
+    # Turns the encoded request into a SamlIdp::Request. Nothing downstream
+    # works until this runs: saml_idp's default saml_request is an empty stub
+    # whose issuer is nil, so skipping the decode means the service provider
+    # can never be found.
+    def decode_saml_request
+      raw_request = saml_param("SAMLRequest")
 
-      render plain: "Missing SAML request", status: :bad_request
+      if raw_request.blank?
+        render plain: "Missing SAML request", status: :bad_request
+        return
+      end
+
+      decode_request(
+        raw_request,
+        saml_param("Signature"),
+        saml_param("SigAlg"),
+        saml_param("RelayState")
+      )
+
+      return if saml_request.authn_request?
+
+      render plain: "Invalid SAML request", status: :bad_request
+    rescue StandardError => e
+      Rails.logger.warn("SAML: could not decode AuthnRequest: #{e.class}: #{e.message}")
+      render plain: "Invalid SAML request", status: :bad_request
     end
 
     def find_service_provider
-      # Get entity ID from request
-      entity_id = saml_request&.issuer || session.dig(:saml_request_params, :issuer)
+      entity_id = saml_request.issuer
 
       @service_provider = Saml::ServiceProvider.enabled.find_by(entity_id: entity_id)
 
       return if @service_provider&.usable?
 
-      log_authentication(status: "failure", error_message: "Unknown or disabled service provider: #{entity_id}")
+      Rails.logger.warn("SAML: unknown or disabled service provider: #{entity_id.inspect}")
       render plain: "Unknown or disabled service provider", status: :forbidden
     end
 
+    # saml_idp checks the issuer, the request shape, the signature when the
+    # provider requires one, and that the destination host is one we accept.
+    # The previous version only checked that a request was present, so an
+    # unsigned request was never rejected.
+    def validate_saml_request
+      return if valid_saml_request?
+
+      reasons = saml_request.errors.join(", ")
+      log_authentication(status: "failure", error_message: "Rejected SAML request: #{reasons}")
+      Rails.logger.warn("SAML: rejected AuthnRequest from #{saml_request.issuer.inspect}: #{reasons}")
+      render plain: "Invalid SAML request", status: :forbidden
+    end
+
+    # Reads a request parameter, falling back to the copy stored before the
+    # login redirect.
+    def saml_param(key)
+      value = params[key]
+      return value if value.present?
+
+      session.dig(:saml_request_params, key)
+    end
+
+    # The provider expects its RelayState echoed back. After a login redirect it
+    # only exists in the session, so the view cannot read it off params.
+    def saml_relay_state
+      saml_param("RelayState")
+    end
+
     def store_saml_request
-      # Store request parameters for after authentication
-      session[:saml_request_params] = {
-        SAMLRequest: params[:SAMLRequest],
-        RelayState: params[:RelayState],
-        issuer: saml_request&.issuer
-      }
-      session[:saml_return_to] = saml_auth_path
+      session[:saml_request_params] = SAML_REQUEST_PARAMS.index_with { |key| params[key] }.compact
+      # AuthController reads return_to. The old code wrote saml_return_to, which
+      # nothing has ever read, so signing in dropped the user on the dashboard
+      # and abandoned the SAML flow.
+      session[:return_to] = saml_return_path
+    end
+
+    def saml_return_path
+      saml_auth_path(session.fetch(:saml_request_params, {}).symbolize_keys)
     end
 
     def encode_response(user)
-      # Override saml_idp's encode_response to use our service provider config
-      encode_saml_response(
+      encode_authn_response(
         user,
+        issuer_uri: SamlIdp.config.base_saml_location,
         audience_uri: @service_provider.entity_id,
         acs_url: @service_provider.assertion_consumer_service_url,
-        name_id: @service_provider.name_id_for(user),
-        name_id_format: @service_provider.name_id_format,
-        signed_assertion: @service_provider.sign_assertions?,
+        algorithm: :sha256,
+        authn_context_classref: @service_provider.authn_context_class_ref.presence || DEFAULT_AUTHN_CONTEXT,
+        expiry: ASSERTION_LIFETIME.to_i,
+        session_expiry: ASSERTION_LIFETIME.to_i,
+        name_id_formats: @service_provider.name_id_formats,
+        attributes: @service_provider.saml_attributes_for(user),
         signed_message: @service_provider.sign_assertions?,
-        encryption: @service_provider.encrypt_assertions? ? {
-          cert: OpenSSL::X509::Certificate.new(@service_provider.certificate),
-          block_encryption: "aes256-cbc",
-          key_transport: "rsa-oaep-mgf1p"
-        } : nil,
-        attributes: @service_provider.attributes_for(user)
+        signed_assertion: @service_provider.sign_assertions?,
+        encryption: encryption_options
       )
     end
 
-    def encode_saml_response(user, options = {})
-      # Build SAML response using saml_idp
-      response = SamlIdp::SamlResponse.new(
-        reference_id: SecureRandom.uuid,
-        response_id: SecureRandom.uuid,
-        issuer_uri: SamlIdp.config.base_saml_location,
-        principal: user,
-        audience_uri: options[:audience_uri],
-        saml_request_id: saml_request&.request_id,
-        saml_acs_url: options[:acs_url],
-        algorithm: :sha256,
-        authn_context_classref: @service_provider.authn_context_class_ref ||
-          "urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport",
-        expiry: 3600,
-        encryption: options[:encryption],
-        session_expiry: 1.hour.from_now,
-        name_id_format: options[:name_id_format]
-      )
+    def encryption_options
+      return nil unless @service_provider.encrypt_assertions?
+      return nil if @service_provider.certificate.blank?
 
-      # Add custom attributes
-      if options[:attributes].present?
-        options[:attributes].each do |name, value|
-          response.add_attribute(name, value) if value.present?
-        end
-      end
-
-      response.build
+      {
+        cert: OpenSSL::X509::Certificate.new(@service_provider.certificate),
+        block_encryption: "aes256-cbc",
+        key_transport: "rsa-oaep-mgf1p"
+      }
     end
 
     def log_authentication(status:, error_message: nil)
       return unless @service_provider
+      return unless current_user
 
       @service_provider.log_authentication(
         user: current_user,
@@ -161,31 +204,34 @@ module Saml
       )
     end
 
-    # Helper to get the SAML auth path
-    def saml_auth_path
-      saml_auth_url(
-        SAMLRequest: session.dig(:saml_request_params, :SAMLRequest),
-        RelayState: session.dig(:saml_request_params, :RelayState)
-      )
-    end
-
     def saml_logout_request
-      return nil unless params[:SAMLRequest]
+      return nil if params[:SAMLRequest].blank?
 
-      SamlIdp::LogoutRequestBuilder.new(
+      request = SamlIdp::Request.from_deflated_request(
         params[:SAMLRequest],
-        SamlIdp.config
+        saml_request: params[:SAMLRequest],
+        signature: params[:Signature],
+        sig_algorithm: params[:SigAlg],
+        relay_state: params[:RelayState]
       )
+
+      return nil unless request.logout_request?
+      return nil unless request.valid?
+
+      request
     rescue StandardError
       nil
     end
 
-    def encode_logout_response(request_id)
+    # Destination is the provider's own logout endpoint, which saml_idp reads
+    # back off the decoded request through the service provider finder.
+    def encode_logout_response(logout_request)
       SamlIdp::LogoutResponseBuilder.new(
         SecureRandom.uuid,
         SamlIdp.config.base_saml_location,
-        request_id,
-        algorithm: :sha256
+        logout_request.logout_url,
+        logout_request.request_id,
+        :sha256
       ).signed
     end
   end

@@ -10,9 +10,11 @@
   </noscript>
 
   <form method="post" action="<%= @service_provider.assertion_consumer_service_url %>">
-    <input type="hidden" name="SAMLResponse" value="<%= Base64.strict_encode64(@saml_response) %>">
-    <% if params[:RelayState].present? %>
-      <input type="hidden" name="RelayState" value="<%= params[:RelayState] %>">
+    <%# saml_idp already returns a base64 string, so encoding again produced a
+        SAMLResponse no service provider could read. %>
+    <input type="hidden" name="SAMLResponse" value="<%= @saml_response %>">
+    <% if saml_relay_state.present? %>
+      <input type="hidden" name="RelayState" value="<%= saml_relay_state %>">
     <% end %>
 
     <noscript>
