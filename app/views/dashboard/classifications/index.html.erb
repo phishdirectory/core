@@ -73,4 +73,63 @@
       </div>
     <% end %>
   </div>
+
+  <%# The controller has always loaded these two and the page has never shown
+      them, so a trusted user could not see what was waiting or what they had
+      already done. %>
+  <% if @queue.present? %>
+    <div class="mt-6">
+      <%= render "shared/card", title: "Next in the queue", meta: "#{@queue.size} shown" do %>
+        <ul class="divide-y divide-surface-200/50">
+          <% @queue.each do |item| %>
+            <% item_type = item.is_a?(Phish::Domain) ? "domain" : "url" %>
+            <li>
+              <%= link_to dashboard_classification_path(type: item_type, id: item.public_id),
+                    class: "flex items-center justify-between gap-4 px-5 py-3 hover:bg-surface-200/40 transition-colors" do %>
+                <span class="font-mono text-sm text-surface-800 truncate">
+                  <%= item_type == "domain" ? item.domain : item.url %>
+                </span>
+                <span class="flex items-center gap-2 shrink-0">
+                  <%= render "shared/badge", label: item_type.upcase, tone: :neutral %>
+                  <% if item.verdict&.classification %>
+                    <%= render "shared/badge",
+                          label: item.verdict.classification.titleize,
+                          tone: verdict_tone(item.verdict.classification) %>
+                  <% end %>
+                </span>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="mt-6">
+    <%= render "shared/card", title: "Your recent classifications" do %>
+      <% if @my_recent_classifications.present? %>
+        <ul class="divide-y divide-surface-200/50">
+          <% @my_recent_classifications.each do |classification| %>
+            <li class="flex items-center justify-between gap-4 px-5 py-3">
+              <span class="font-mono text-sm text-surface-800 truncate">
+                <% target = classification.classifiable %>
+                <%= target.is_a?(Phish::Domain) ? target.domain : target&.url %>
+              </span>
+              <span class="flex items-center gap-3 shrink-0">
+                <%= render "shared/badge", label: classification.category_name, tone: :accent %>
+                <span class="text-xs text-surface-500 whitespace-nowrap">
+                  <%= time_ago_in_words(classification.created_at) %> ago
+                </span>
+              </span>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <%= render "shared/empty_state",
+              title: "You have not classified anything yet",
+              subtitle: "Items you classify will be listed here.",
+              icon: :check %>
+      <% end %>
+    <% end %>
+  </div>
 </div>
