@@ -169,7 +169,10 @@ module Phish
     # Normalize URL
     def normalize_url(url)
       url = url.to_s.strip
-      url = "https://#{url}" unless url.match?(%r{\Ahttps?://})
+      # Schemes are case insensitive. Matching only lowercase here meant
+      # "HTTP://evil.com" was treated as scheme-less and got a second scheme
+      # prefixed, so every upstream service received "https://HTTP://evil.com".
+      url = "https://#{url}" unless url.match?(%r{\Ahttps?://}i)
       uri = URI.parse(url)
       uri.host = uri.host&.downcase
       uri.to_s
