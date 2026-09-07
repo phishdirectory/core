@@ -289,6 +289,27 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_120000) do
     t.index ["sluggable_type", "sluggable_id"], name: "index_friendly_id_slugs_on_sluggable_type_and_sluggable_id"
   end
 
+  create_table "iok_indicators", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "content_digest", null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.jsonb "detection", default: {}, null: false
+    t.datetime "discarded_at"
+    t.boolean "enabled", default: true, null: false
+    t.string "level"
+    t.jsonb "reference_urls", default: [], null: false
+    t.string "slug", null: false
+    t.string "source_url"
+    t.datetime "synced_at"
+    t.jsonb "tags", default: [], null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["discarded_at"], name: "index_iok_indicators_on_discarded_at"
+    t.index ["enabled"], name: "index_iok_indicators_on_enabled"
+    t.index ["slug"], name: "index_iok_indicators_on_slug_kept", unique: true, where: "(discarded_at IS NULL)"
+    t.index ["tags"], name: "index_iok_indicators_on_tags", using: :gin
+  end
+
   create_table "lockbox_audits", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "context"
     t.datetime "created_at"

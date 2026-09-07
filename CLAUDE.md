@@ -66,6 +66,21 @@ end
 - Individual services extend BaseService: `GoogleSafeBrowsingService`, `VirustotalService`, etc.
 - `AggregatorService`: Orchestrates all services, weighted scoring, authoritative source logic
 
+**IOK Detection** (`app/services/iok/`):
+Local phishing kit fingerprinting. Unlike the other services, `Phish::IokService`
+calls no vendor API: it fetches the page itself and evaluates the synced rule
+corpus against it.
+- `Iok::Indicator`: one synced rule, written by `IokSyncJob` (daily)
+- `Iok::SyncService`: pulls `indicators/*.yml` from `phish-report/IOK`
+- `Iok::Rule` / `Iok::Condition`: the Sigma matcher and its condition parser
+- `Iok::PageSnapshot`: fetches a URL into the fields a rule matches on
+- `Iok::RuleSet`: compiles the enabled indicators once per process
+- Admin: `/admin/iok_indicators` (browse, disable a noisy rule, sync now)
+
+A rule match reports `phishing`; nothing matching reports `unknown` with zero
+confidence, never `clean`, because the corpus only covers kits somebody has
+written a rule for.
+
 **Job Queue Priorities** (`config/solid_queue.yml`):
 1. `critical` - Security incidents, ops alerts
 2. `webhooks` - External notifications

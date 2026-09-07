@@ -260,6 +260,15 @@ Services can register webhooks to receive real-time notifications:
 
 Verify webhook signatures using the secret provided during registration.
 
+## Third Party Data
+
+Phishing kit detection uses the [IOK](https://github.com/phish-report/IOK)
+("Indicators of Kit") rule corpus by [Phish Report](https://phish.report/),
+made available under the
+[Open Database License (ODbL) v1.0](https://opendatacommons.org/licenses/odbl/1-0/).
+`IokSyncJob` syncs the rules daily and each stored rule keeps a link back to its
+upstream file. Rule format: [IOK rule reference](https://phish.report/docs/iok-rule-reference).
+
 ## Threat Intelligence Sharing
 
 We share detected phishing indicators via [AlienVault OTX](https://otx.alienvault.com/pulse/6785dccb041b628fde283705). Subscribe to our pulse to receive real-time threat data.

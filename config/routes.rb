@@ -208,6 +208,17 @@ Rails.application.routes.draw do
     resources :verdicts, only: [ :index, :show, :edit, :update ]
     resources :protections, only: [ :index, :show, :new, :create, :destroy ]
 
+    # IOK detection rules, synced from phish-report/IOK
+    resources :iok_indicators, only: [ :index, :show ] do
+      member do
+        post :enable
+        post :disable
+      end
+      collection do
+        post :sync
+      end
+    end
+
     # Monitoring
     resources :api_requests, only: [ :index, :show ]
     resources :webhook_deliveries, only: [ :index, :show ] do
