@@ -14,7 +14,7 @@ class Phish::Email < ApplicationRecord
   belongs_to :marked_clean_by, class_name: "User", optional: true
 
   # Validations
-  validates :email, presence: true, uniqueness: true
+  validates :email, presence: true, uniqueness: { conditions: -> { kept } }
   validates :email, email_format: { message: "must be a valid email format" }
   validates :reputation_score, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 1 }, allow_nil: true
 

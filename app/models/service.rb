@@ -15,7 +15,7 @@ class Service < ApplicationRecord
   has_many :service_key_usages, through: :service_keys, source: :usages
 
   # Validations
-  validates :name, presence: true, uniqueness: true
+  validates :name, presence: true, uniqueness: { conditions: -> { kept } }
 
   # Callbacks
   before_destroy :require_decommissioned

@@ -10,11 +10,12 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_03_000003) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_06_120006) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "fuzzystrmatch"
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_stat_statements"
+  enable_extension "pg_trgm"
   enable_extension "pgcrypto"
 
   # Custom types defined in this database.
@@ -366,7 +367,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_03_000003) do
     t.index ["carrier_type"], name: "index_phish_carriers_on_carrier_type"
     t.index ["country_code"], name: "index_phish_carriers_on_country_code"
     t.index ["discarded_at"], name: "index_phish_carriers_on_discarded_at"
-    t.index ["name"], name: "index_phish_carriers_on_name", unique: true
+    t.index ["name"], name: "index_phish_carriers_on_name_kept", unique: true, where: "(discarded_at IS NULL)"
   end
 
   create_table "phish_domain_registrations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -386,7 +387,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_03_000003) do
     t.datetime "updated_at", null: false
     t.datetime "updated_at_registry"
     t.index ["discarded_at"], name: "index_phish_domain_registrations_on_discarded_at"
-    t.index ["domain"], name: "index_phish_domain_registrations_on_domain", unique: true
+    t.index ["domain"], name: "index_phish_domain_registrations_on_domain_kept", unique: true, where: "(discarded_at IS NULL)"
+    t.index ["domain"], name: "index_phish_domain_regs_on_domain_kept", unique: true, where: "(discarded_at IS NULL)"
     t.index ["expires_at"], name: "index_phish_domain_registrations_on_expires_at"
     t.index ["queried_at"], name: "index_phish_domain_registrations_on_queried_at"
     t.index ["registered_at"], name: "index_phish_domain_registrations_on_registered_at"
@@ -411,7 +413,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_03_000003) do
     t.uuid "verdict_id"
     t.index ["availability_checked_at"], name: "index_phish_domains_on_availability_checked_at"
     t.index ["discarded_at"], name: "index_phish_domains_on_discarded_at"
-    t.index ["domain"], name: "index_phish_domains_on_domain", unique: true
+    t.index ["domain"], name: "index_phish_domains_on_domain_kept", unique: true, where: "(discarded_at IS NULL)"
+    t.index ["domain"], name: "index_phish_domains_on_domain_trgm", opclass: :gin_trgm_ops, using: :gin
     t.index ["last_checked_at"], name: "index_phish_domains_on_last_checked_at"
     t.index ["last_seen_at"], name: "index_phish_domains_on_last_seen_at"
     t.index ["marked_clean_at"], name: "index_phish_domains_on_marked_clean_at"
@@ -443,7 +446,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_03_000003) do
     t.index ["discarded_at"], name: "index_phish_emails_on_discarded_at"
     t.index ["disposable"], name: "index_phish_emails_on_disposable"
     t.index ["domain"], name: "index_phish_emails_on_domain"
-    t.index ["email"], name: "index_phish_emails_on_email", unique: true
+    t.index ["email"], name: "index_phish_emails_on_email_kept", unique: true, where: "(discarded_at IS NULL)"
+    t.index ["email"], name: "index_phish_emails_on_email_trgm", opclass: :gin_trgm_ops, using: :gin
     t.index ["free_provider"], name: "index_phish_emails_on_free_provider"
     t.index ["last_checked_at"], name: "index_phish_emails_on_last_checked_at"
     t.index ["last_seen_at"], name: "index_phish_emails_on_last_seen_at"
@@ -476,7 +480,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_03_000003) do
     t.index ["last_seen_at"], name: "index_phish_phone_numbers_on_last_seen_at"
     t.index ["marked_clean_at"], name: "index_phish_phone_numbers_on_marked_clean_at"
     t.index ["marked_clean_by_id"], name: "index_phish_phone_numbers_on_marked_clean_by_id"
-    t.index ["phone_number"], name: "index_phish_phone_numbers_on_phone_number", unique: true
+    t.index ["phone_number"], name: "index_phish_phone_numbers_on_phone_number_kept", unique: true, where: "(discarded_at IS NULL)"
+    t.index ["phone_number"], name: "index_phish_phone_numbers_on_phone_number_trgm", opclass: :gin_trgm_ops, using: :gin
+    t.index ["phone_number"], name: "index_phish_phones_on_number_kept", unique: true, where: "(discarded_at IS NULL)"
     t.index ["phone_type"], name: "index_phish_phone_numbers_on_phone_type"
     t.index ["scam_category"], name: "index_phish_phone_numbers_on_scam_category"
     t.index ["scam_subcategory"], name: "index_phish_phone_numbers_on_scam_subcategory"
@@ -492,7 +498,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_03_000003) do
     t.text "reason"
     t.datetime "updated_at", null: false
     t.index ["discarded_at"], name: "index_phish_protections_on_discarded_at"
-    t.index ["protectable_type", "protectable_value"], name: "index_protections_on_type_and_value", unique: true
+    t.index ["protectable_type", "protectable_value"], name: "index_protections_on_type_and_value_kept", unique: true, where: "(discarded_at IS NULL)"
     t.index ["protected_by_id"], name: "index_phish_protections_on_protected_by_id"
   end
 
@@ -509,7 +515,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_03_000003) do
     t.index ["cleandns_supported"], name: "index_phish_tlds_on_cleandns_supported"
     t.index ["discarded_at"], name: "index_phish_tlds_on_discarded_at"
     t.index ["domains_count"], name: "index_phish_tlds_on_domains_count"
-    t.index ["name"], name: "index_phish_tlds_on_name", unique: true
+    t.index ["name"], name: "index_phish_tlds_on_name_kept", unique: true, where: "(discarded_at IS NULL)"
   end
 
   create_table "phish_urls", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -531,7 +537,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_03_000003) do
     t.index ["marked_clean_by_id"], name: "index_phish_urls_on_marked_clean_by_id"
     t.index ["scam_category"], name: "index_phish_urls_on_scam_category"
     t.index ["scam_subcategory"], name: "index_phish_urls_on_scam_subcategory"
-    t.index ["url"], name: "index_phish_urls_on_url", unique: true
+    t.index ["url"], name: "index_phish_urls_on_url_kept", unique: true, where: "(discarded_at IS NULL)"
+    t.index ["url"], name: "index_phish_urls_on_url_trgm", opclass: :gin_trgm_ops, using: :gin
     t.index ["verdict_id"], name: "index_phish_urls_on_verdict_id"
   end
 
@@ -563,6 +570,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_03_000003) do
     t.index ["contact_type"], name: "index_report_abuse_contacts_on_contact_type"
     t.index ["discarded_at"], name: "index_report_abuse_contacts_on_discarded_at"
     t.index ["name"], name: "index_report_abuse_contacts_on_name"
+    t.index ["name"], name: "index_report_abuse_contacts_on_name_trgm", opclass: :gin_trgm_ops, using: :gin
   end
 
   create_table "report_case_emails", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -604,10 +612,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_03_000003) do
     t.datetime "updated_at", null: false
     t.uuid "verdict_snapshot_id", null: false
     t.index ["case_number"], name: "index_report_cases_on_case_number", unique: true
+    t.index ["case_number"], name: "index_report_cases_on_case_number_trgm", opclass: :gin_trgm_ops, using: :gin
     t.index ["discarded_at"], name: "index_report_cases_on_discarded_at"
     t.index ["reportable_type", "reportable_id"], name: "index_report_cases_on_reportable_type_and_reportable_id"
     t.index ["requires_manual_review"], name: "index_report_cases_on_requires_manual_review"
     t.index ["status"], name: "index_report_cases_on_status"
+    t.index ["verdict_snapshot_id"], name: "index_report_cases_on_verdict_snapshot_id"
   end
 
   create_table "report_domain_lookups", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -632,6 +642,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_03_000003) do
     t.datetime "updated_at", null: false
     t.index ["domain"], name: "index_report_domain_lookups_on_domain", unique: true
     t.index ["expires_at"], name: "index_report_domain_lookups_on_expires_at"
+    t.index ["matched_hosting_contact_id"], name: "index_report_domain_lookups_on_matched_hosting_contact_id"
+    t.index ["matched_registrar_contact_id"], name: "index_report_domain_lookups_on_matched_registrar_contact_id"
     t.index ["registrar_iana_id"], name: "index_report_domain_lookups_on_registrar_iana_id"
   end
 
@@ -659,7 +671,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_03_000003) do
     t.string "submission_reference"
     t.datetime "updated_at", null: false
     t.index ["abuse_contact_id"], name: "index_report_submissions_on_abuse_contact_id"
-    t.index ["case_id", "abuse_contact_id"], name: "index_report_submissions_on_case_id_and_abuse_contact_id", unique: true
+    t.index ["case_id", "abuse_contact_id"], name: "index_report_submissions_on_case_and_contact_kept", unique: true, where: "(discarded_at IS NULL)"
     t.index ["depends_on_submission_id"], name: "index_report_submissions_on_depends_on_submission_id"
     t.index ["discarded_at"], name: "index_report_submissions_on_discarded_at"
     t.index ["status"], name: "index_report_submissions_on_status"
@@ -711,7 +723,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_03_000003) do
     t.datetime "updated_at", null: false
     t.index ["discarded_at"], name: "index_saml_service_providers_on_discarded_at"
     t.index ["enabled"], name: "index_saml_service_providers_on_enabled"
-    t.index ["entity_id"], name: "index_saml_service_providers_on_entity_id", unique: true
+    t.index ["entity_id"], name: "index_saml_sps_on_entity_id_kept", unique: true, where: "(discarded_at IS NULL)"
     t.index ["service_id"], name: "index_saml_service_providers_on_service_id"
   end
 
@@ -763,29 +775,30 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_03_000003) do
   end
 
   create_table "service_keys", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.string "api_key", null: false
     t.datetime "created_at", null: false
     t.datetime "discarded_at"
-    t.string "hash_key", null: false
+    t.string "key_digest", null: false
+    t.string "key_hint"
     t.text "notes"
     t.uuid "service_id", null: false
     t.enum "status", default: "active", null: false, enum_type: "service_key_status"
     t.datetime "updated_at", null: false
-    t.index ["api_key"], name: "index_service_keys_on_api_key", unique: true
     t.index ["discarded_at"], name: "index_service_keys_on_discarded_at"
+    t.index ["key_digest"], name: "index_service_keys_on_key_digest", unique: true
     t.index ["service_id"], name: "index_service_keys_on_service_id"
   end
 
   create_table "service_webhooks", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "discarded_at"
+    t.string "events", default: [], null: false, array: true
     t.string "secret", null: false
     t.uuid "service_id", null: false
     t.datetime "updated_at", null: false
     t.string "url", null: false
     t.index ["discarded_at"], name: "index_service_webhooks_on_discarded_at"
     t.index ["service_id"], name: "index_service_webhooks_on_service_id"
-    t.index ["url"], name: "index_service_webhooks_on_url", unique: true
+    t.index ["url"], name: "index_service_webhooks_on_url_kept", unique: true, where: "(discarded_at IS NULL)"
   end
 
   create_table "services", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -796,7 +809,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_03_000003) do
     t.enum "status", default: "active", null: false, enum_type: "service_status"
     t.datetime "updated_at", null: false
     t.index ["discarded_at"], name: "index_services_on_discarded_at"
-    t.index ["name"], name: "index_services_on_name", unique: true
+    t.index ["name"], name: "index_services_on_name_kept", unique: true, where: "(discarded_at IS NULL)"
+    t.index ["name"], name: "index_services_on_name_trgm", opclass: :gin_trgm_ops, using: :gin
   end
 
   create_table "sessions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -866,7 +880,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_03_000003) do
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.enum "access_level", default: "user", null: false, enum_type: "access_level"
     t.datetime "confirmation_sent_at"
-    t.string "confirmation_token"
+    t.string "confirmation_token_digest"
     t.datetime "confirmed_at"
     t.datetime "created_at", null: false
     t.datetime "discarded_at"
@@ -878,13 +892,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_03_000003) do
     t.string "last_name", null: false
     t.datetime "locked_at"
     t.datetime "magic_link_expires_at"
-    t.string "magic_link_token"
+    t.string "magic_link_token_digest"
     t.datetime "magic_link_token_sent_at"
     t.datetime "magic_link_used_at"
     t.string "password_digest"
     t.datetime "password_reset_expires_at"
     t.datetime "password_reset_sent_at"
-    t.string "password_reset_token"
+    t.string "password_reset_token_digest"
     t.boolean "pd_dev", default: false, null: false
     t.string "pd_id", null: false
     t.boolean "pretend_is_not_admin", default: false, null: false
@@ -893,15 +907,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_03_000003) do
     t.enum "status", default: "active", null: false, enum_type: "status"
     t.datetime "updated_at", null: false
     t.string "username", null: false
-    t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
+    t.index ["confirmation_token_digest"], name: "index_users_on_confirmation_token_digest", unique: true
     t.index ["discarded_at"], name: "index_users_on_discarded_at"
-    t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["email"], name: "index_users_on_email_kept", unique: true, where: "(discarded_at IS NULL)"
+    t.index ["email"], name: "index_users_on_email_trgm", opclass: :gin_trgm_ops, using: :gin
+    t.index ["first_name"], name: "index_users_on_first_name_trgm", opclass: :gin_trgm_ops, using: :gin
     t.index ["last_api_activity_at"], name: "index_users_on_last_api_activity_at"
+    t.index ["last_name"], name: "index_users_on_last_name_trgm", opclass: :gin_trgm_ops, using: :gin
     t.index ["locked_at"], name: "index_users_on_locked_at"
-    t.index ["magic_link_token"], name: "index_users_on_magic_link_token", unique: true
-    t.index ["password_reset_token"], name: "index_users_on_password_reset_token", unique: true
+    t.index ["magic_link_token_digest"], name: "index_users_on_magic_link_token_digest", unique: true
+    t.index ["password_reset_token_digest"], name: "index_users_on_password_reset_token_digest", unique: true
     t.index ["pd_id"], name: "index_users_on_pd_id", unique: true
-    t.index ["username"], name: "index_users_on_username", unique: true
+    t.index ["pd_id"], name: "index_users_on_pd_id_trgm", opclass: :gin_trgm_ops, using: :gin
+    t.index ["username"], name: "index_users_on_username_kept", unique: true, where: "(discarded_at IS NULL)"
+    t.index ["username"], name: "index_users_on_username_trgm", opclass: :gin_trgm_ops, using: :gin
   end
 
   create_table "verdicts", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -939,6 +958,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_03_000003) do
     t.string "status"
     t.datetime "updated_at", null: false
     t.string "url"
+    t.index ["created_at"], name: "index_webhook_deliveries_on_created_at"
     t.index ["event"], name: "index_webhook_deliveries_on_event"
     t.index ["status"], name: "index_webhook_deliveries_on_status"
   end

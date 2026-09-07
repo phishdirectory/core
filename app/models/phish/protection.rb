@@ -16,7 +16,7 @@ class Phish::Protection < ApplicationRecord
   # Validations
   validates :protectable_type, presence: true, inclusion: { in: PROTECTABLE_TYPES }
   validates :protectable_value, presence: true
-  validates :protectable_value, uniqueness: { scope: :protectable_type, case_sensitive: false }
+  validates :protectable_value, uniqueness: { scope: :protectable_type, case_sensitive: false, conditions: -> { kept } }
 
   # Normalizations
   normalizes :protectable_value, with: ->(value) { value.strip.downcase }

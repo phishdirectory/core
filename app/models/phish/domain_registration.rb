@@ -11,7 +11,7 @@ class Phish::DomainRegistration < ApplicationRecord
   CACHE_TTL = 24.hours
 
   # Validations
-  validates :domain, presence: true, uniqueness: true
+  validates :domain, presence: true, uniqueness: { conditions: -> { kept } }
   validates :domain, format: {
     with: /\A[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,}\z/i,
     message: "must be a valid domain format"

@@ -14,7 +14,7 @@ class Phish::Domain < ApplicationRecord
   belongs_to :tld, class_name: "Phish::Tld", optional: true, counter_cache: :domains_count
 
   # Validations
-  validates :domain, presence: true, uniqueness: true
+  validates :domain, presence: true, uniqueness: { conditions: -> { kept } }
   validates :domain, format: {
     with: /\A[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,}\z/i,
     message: "must be a valid domain format"
