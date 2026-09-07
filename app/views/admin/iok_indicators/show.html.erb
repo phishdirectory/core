@@ -43,10 +43,12 @@
       <h2 class="text-xs font-medium text-surface-500 mb-3">Source</h2>
       <dl class="space-y-2 text-sm">
         <div class="flex justify-between gap-4">
-          <dt class="text-surface-500">Upstream rule</dt>
-          <dd>
-            <% if @indicator.source_url.present? %>
-              <a href="<%= @indicator.source_url %>" class="text-surface-800 underline hover:text-surface-900" rel="noopener" target="_blank">View YAML</a>
+          <dt class="text-surface-500">Origin</dt>
+          <dd class="text-surface-800">
+            <% if @indicator.source == "local" %>
+              <code class="font-mono text-xs">db/iok/local/<%= @indicator.slug %>.yml</code>
+            <% elsif @indicator.source_url.present? %>
+              <a href="<%= @indicator.source_url %>" class="text-surface-800 underline hover:text-surface-900" rel="noopener" target="_blank">phish-report/IOK</a>
             <% else %>
               <span class="text-surface-500">&mdash;</span>
             <% end %>

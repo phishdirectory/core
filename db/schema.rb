@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_07_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_07_150500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "fuzzystrmatch"
   enable_extension "pg_catalog.plpgsql"
@@ -299,6 +299,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_120000) do
     t.string "level"
     t.jsonb "reference_urls", default: [], null: false
     t.string "slug", null: false
+    t.string "source", default: "upstream", null: false
     t.string "source_url"
     t.datetime "synced_at"
     t.jsonb "tags", default: [], null: false
@@ -565,6 +566,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_120000) do
 
   create_table "report_abuse_contacts", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.boolean "accepts_bulk", default: false, null: false
+    t.boolean "accepts_xarf", default: false, null: false
     t.boolean "active", default: true, null: false
     t.text "api_endpoint_ciphertext"
     t.text "api_key_ciphertext"
@@ -624,6 +626,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_120000) do
     t.datetime "first_submitted_at"
     t.datetime "last_activity_at"
     t.text "notes"
+    t.string "public_token"
     t.uuid "reportable_id", null: false
     t.string "reportable_type", null: false
     t.boolean "requires_manual_review", default: false, null: false
@@ -635,6 +638,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_120000) do
     t.index ["case_number"], name: "index_report_cases_on_case_number", unique: true
     t.index ["case_number"], name: "index_report_cases_on_case_number_trgm", opclass: :gin_trgm_ops, using: :gin
     t.index ["discarded_at"], name: "index_report_cases_on_discarded_at"
+    t.index ["public_token"], name: "index_report_cases_on_public_token", unique: true
     t.index ["reportable_type", "reportable_id"], name: "index_report_cases_on_reportable_type_and_reportable_id"
     t.index ["requires_manual_review"], name: "index_report_cases_on_requires_manual_review"
     t.index ["status"], name: "index_report_cases_on_status"
@@ -643,6 +647,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_120000) do
 
   create_table "report_domain_lookups", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.jsonb "a_records", default: []
+    t.jsonb "aaaa_records", default: []
     t.datetime "created_at", null: false
     t.string "domain", null: false
     t.datetime "domain_created_at"
@@ -742,6 +747,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_120000) do
     t.boolean "sign_assertions", default: true
     t.text "single_logout_service_url"
     t.datetime "updated_at", null: false
+    t.boolean "want_authn_requests_signed", default: false, null: false
     t.index ["discarded_at"], name: "index_saml_service_providers_on_discarded_at"
     t.index ["enabled"], name: "index_saml_service_providers_on_enabled"
     t.index ["entity_id"], name: "index_saml_sps_on_entity_id_kept", unique: true, where: "(discarded_at IS NULL)"

@@ -1,0 +1,43 @@
+title: RoLinked Phishing Kit
+description: |
+  Detects the RoLinked kit, which targets Roblox accounts and is handed to
+  victims through Discord. The landing page presents itself as a "Roblox bot"
+  and walks the victim through dragging a bookmarklet onto their bookmarks bar.
+
+  The page is built from an unmodified template: it still carries the
+  template's Lorem Ipsum placeholder text and its stock header slide images,
+  and its `<html>` class attribute holds a long run of repeated `mediaqueries`
+  tokens.
+level: malicious
+references:
+  - https://urlscan.io/result/28237c95-d19b-4591-a37d-bdd127128655/
+  - https://urlscan.io/result/3dc49624-2c49-4ed9-8ad3-b457d01b8ec9/
+  - https://urlscan.io/result/e7a1a20f-86f9-407d-be9b-6b320ce6d659/
+
+detection:
+
+  pageTitle:
+    title: "RoLinked | Roblox Bot"
+
+  # A regular expression rather than the literal attribute, because the number
+  # of repeated tokens varies between deployments of the kit. Ten is well below
+  # the count seen in every sample and far above anything a real page emits.
+  mediaqueriesClass:
+    html|re: '<html lang="en" class="(?: mediaqueries){10,}" style="user-select: none;">'
+
+  images:
+    requests|endswith|all:
+      - "pinnedBookmark.png"
+      - "butt.png"
+      - "header-slide-1.png"
+      - "header-slide-2.png"
+
+  placeholderText:
+    html|contains: "Lorem Ipsum is simply dummy text of the printing and typesetting indus"
+
+  condition: pageTitle and mediaqueriesClass and images and placeholderText
+
+tags:
+  - kit
+  - target.roblox
+  - target.discord

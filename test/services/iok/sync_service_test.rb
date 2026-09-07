@@ -2,6 +2,7 @@
 
 require "test_helper"
 require "rubygems/package"
+require "tmpdir"
 require "stringio"
 require "zlib"
 
@@ -52,8 +53,19 @@ class Iok::SyncServiceTest < ActiveSupport::TestCase
       .to_return(status: 200, body: archive(files), headers: { "Content-Type" => "application/gzip" })
   end
 
-  def sync
-    Iok::SyncService.new.sync
+  # The real db/iok/local rules take part in every sync, so every count below
+  # would move whenever somebody adds one. Each sync therefore runs against a
+  # temporary local directory, empty unless the test passes rules in.
+  def sync(local: {})
+    with_local_rules(local) { Iok::SyncService.new.sync }
+  end
+
+  def with_local_rules(files, &block)
+    Dir.mktmpdir do |dir|
+      files.each { |name, contents| File.write(File.join(dir, name), contents) }
+
+      Iok::SyncService.stub(:local_rule_path, Pathname.new(dir), &block)
+    end
   end
 
   # ===========================================
@@ -213,5 +225,94 @@ class Iok::SyncServiceTest < ActiveSupport::TestCase
 
     assert_raises(NotImplementedError) { service.check_domain("example.com") }
     assert_raises(NotImplementedError) { service.check_url("https://example.com") }
+  end
+
+  # ===========================================
+  # Local rules
+  # ===========================================
+
+  LOCAL_RULE = <<~YAML
+    title: Local Test Kit
+    description: A rule we wrote ourselves.
+    references:
+      - https://urlscan.io/result/local/
+    detection:
+      marker:
+        html|contains: "local-kit-marker"
+      condition: marker
+    tags:
+      - kit
+  YAML
+
+  test "loads rules from the local directory" do
+    stub_archive(indicator_files(60))
+
+    result = sync(local: { "local-test-kit.yml" => LOCAL_RULE })
+
+    assert result[:success]
+    assert_equal 61, result[:created]
+
+    indicator = Iok::Indicator.find_by!(slug: "local-test-kit")
+    assert_equal "local", indicator.source
+    assert_nil indicator.source_url
+  end
+
+  # The bug this whole source column exists to prevent.
+  test "the upstream pass does not discard local rules" do
+    stub_archive(indicator_files(60))
+    sync(local: { "local-test-kit.yml" => LOCAL_RULE })
+
+    result = sync(local: { "local-test-kit.yml" => LOCAL_RULE })
+
+    assert_equal 0, result[:removed]
+    assert_predicate Iok::Indicator.find_by!(slug: "local-test-kit"), :kept?
+  end
+
+  test "the local pass does not discard upstream rules" do
+    stub_archive(indicator_files(60))
+    sync(local: { "local-test-kit.yml" => LOCAL_RULE })
+
+    assert_equal 60, Iok::Indicator.upstream.count
+    assert_equal 1, Iok::Indicator.local.count
+  end
+
+  test "a local rule removed from the directory is discarded" do
+    stub_archive(indicator_files(60))
+    sync(local: { "local-test-kit.yml" => LOCAL_RULE })
+
+    result = sync
+
+    assert_equal 1, result[:removed]
+    assert_equal 60, Iok::Indicator.count
+  end
+
+  # A GitHub outage must not stop a rule we wrote from reaching the database.
+  test "local rules still land when the archive download fails" do
+    stub_request(:get, Iok::SyncService::ARCHIVE_URL).to_return(status: 500, body: "")
+
+    result = sync(local: { "local-test-kit.yml" => LOCAL_RULE })
+
+    assert_not result[:success]
+    assert_equal 1, result[:created]
+    assert_predicate Iok::Indicator.find_by(slug: "local-test-kit"), :present?
+  end
+
+  test "skips a local rule that does not compile" do
+    broken = "title: Broken\ndetection:\n  marker:\n    body|contains: 'x'\n  condition: marker\n"
+    stub_archive(indicator_files(60))
+
+    result = sync(local: { "broken.yml" => broken })
+
+    assert_equal 1, result[:invalid]
+    assert_nil Iok::Indicator.find_by(slug: "broken")
+  end
+
+  test "local rules are matched alongside upstream ones" do
+    stub_archive(indicator_files(60))
+    sync(local: { "local-test-kit.yml" => LOCAL_RULE })
+
+    matches = Iok::RuleSet.current.matches("html" => [ "a local-kit-marker here" ])
+
+    assert_equal [ "local-test-kit" ], matches.map(&:slug)
   end
 end
