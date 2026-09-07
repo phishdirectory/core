@@ -66,6 +66,9 @@ virustotal:
 urlscan:
   api_key: <your-api-key>
 
+urldna:
+  api_key: <your-api-key>
+
 # Scoring configuration (optional - stored encrypted for security)
 scoring:
   min_confidence: <threshold>

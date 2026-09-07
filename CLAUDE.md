@@ -139,6 +139,8 @@ virustotal:
   api_key: <key>
 urlscan:
   api_key: <key>
+urldna:
+  api_key: <key>
 
 # Optional - scoring weights (see credentials for values)
 scoring:

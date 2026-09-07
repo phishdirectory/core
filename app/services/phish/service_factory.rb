@@ -16,7 +16,8 @@ module Phish
       openphish: "Phish::OpenphishService",
       ipqualityscore: "Phish::IpqualityscoreService",
       pulsedive: "Phish::PulsediveService",
-      checkphish: "Phish::CheckphishService"
+      checkphish: "Phish::CheckphishService",
+      urldna: "Phish::UrldnaService"
     }.freeze
 
     class << self
