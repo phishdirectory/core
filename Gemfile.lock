@@ -398,7 +398,7 @@ GEM
       logger
       prism (>= 1.6.0)
       tsort
-    rdap (1.0.0)
+    rdap (1.0.1)
     rdoc (8.0.0)
       erb
       prism (>= 1.6.0)
